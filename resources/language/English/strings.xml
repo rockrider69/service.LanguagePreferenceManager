@@ -15,23 +15,27 @@
     <string id="30101">Primary Language</string>
     <string id="30102">Secondary Language</string>
     <string id="30103">Third Language</string>  
-	<string id="30104">Audio Preferences</string>  
-	<string id="30105">Subtitle Preferences</string>  
-	<string id="30106">Conditional Subtitle Preferences</string> 
-	<string id="30107">Enable Preference</string> 
-	<string id="30108">Enable Language Preference Manager</string> 	
-	<string id="30109">Pause while evaluating preferences</string>
-	<string id="30110">If audio language is </string>
-	<string id="30111">then display subtitles with language</string>
-	<string id="30112">Delay the evaluation by the following value [ms]</string>
-	<string id="30113">Turn on subtitles if a subtitle prefrence matched</string>
-	<string id="30114">Turn off subtitles if no subtitle prefrence matched</string>
-	<string id="30115">Advanced/Custom settings</string>
-	<string id="30116">Try to set the audio and/or subtitle track from the filename first</string>
-	<string id="30117">Regular expression for filename based preferences</string>
-	<string id="30118">Use custom pref, e.g. eng>ger>fin :</string>
-	<string id="30119">Use custom pref, e.g. eng>ger>fin :</string>
-	<string id="30120">Use custom pref, e.g. jpn:eng>eng:ger :</string>
+    <string id="30104">Audio Preferences</string>  
+    <string id="30105">Subtitle Preferences</string>  
+    <string id="30106">Conditional Subtitle Preferences</string> 
+    <string id="30107">Enable Preference</string> 
+    <string id="30108">Enable Language Preference Manager</string> 	
+    <string id="30109">Pause while evaluating preferences</string>
+    <string id="30110">If audio language is </string>
+    <string id="30111">then display subtitles with language</string>
+    <string id="30112">Delay the evaluation by the following value [ms]</string>
+    <string id="30113">Turn on subtitles if a subtitle prefrence matched</string>
+    <string id="30114">Turn off subtitles if no subtitle prefrence matched</string>
+    <string id="30115">Advanced/Custom settings</string>
+    <string id="30116">Try to set the audio and/or subtitle track from the filename first</string>
+    <string id="30117">Regular expression for filename based preferences</string>
+    <string id="30118">Use custom pref, e.g. eng>ger>fin :</string>
+    <string id="30119">Use custom pref, e.g. eng>ger>fin :</string>
+    <string id="30120">Use custom pref, e.g. jpn:eng>eng:ger :</string>
+    <string id="30121">Primary subtitle is Forced type</string>
+    <string id="30122">Secondary subtitle is Forced type</string>
+    <string id="30123">Third subtitle is Forced type</string>
+    <string id="30124">and with Forced type</string>
 	
 	        
   <!-- Languages  -->
