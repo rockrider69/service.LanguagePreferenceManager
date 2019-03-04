@@ -96,30 +96,36 @@ class settings():
       )]
       self.SubtitlePrefs = [(set(), [
           (languageTranslate(addon.getSetting('SubLang01'), 4, 0) ,
-           languageTranslate(addon.getSetting('SubLang01'), 4, 3)),
+           languageTranslate(addon.getSetting('SubLang01'), 4, 3),
+           addon.getSetting('SubForced01')),
           (languageTranslate(addon.getSetting('SubLang02'), 4, 0) ,
-           languageTranslate(addon.getSetting('SubLang02'), 4, 3)),
+           languageTranslate(addon.getSetting('SubLang02'), 4, 3),
+           addon.getSetting('SubForced02')),
           (languageTranslate(addon.getSetting('SubLang03'), 4, 0) ,
-           languageTranslate(addon.getSetting('SubLang03'), 4, 3))]
+           languageTranslate(addon.getSetting('SubLang03'), 4, 3),
+           addon.getSetting('SubForced03'))]
       )]
       self.CondSubtitlePrefs = [(set(), [
           (
               languageTranslate(addon.getSetting('CondAudioLang01'), 4, 0),
               languageTranslate(addon.getSetting('CondAudioLang01'), 4, 3),
               languageTranslate(addon.getSetting('CondSubLang01'), 4, 0),
-              languageTranslate(addon.getSetting('CondSubLang01'), 4, 3)
+              languageTranslate(addon.getSetting('CondSubLang01'), 4, 3),
+              addon.getSetting('CondSubForced01')
           ),
           (
               languageTranslate(addon.getSetting('CondAudioLang02'), 4, 0),
               languageTranslate(addon.getSetting('CondAudioLang02'), 4, 3),
               languageTranslate(addon.getSetting('CondSubLang02'), 4, 0),
-              languageTranslate(addon.getSetting('CondSubLang02'), 4, 3)
+              languageTranslate(addon.getSetting('CondSubLang02'), 4, 3),
+              addon.getSetting('CondSubForced02')
           ),
           (
               languageTranslate(addon.getSetting('CondAudioLang03'), 4, 0),
               languageTranslate(addon.getSetting('CondAudioLang03'), 4, 3),
               languageTranslate(addon.getSetting('CondSubLang03'), 4, 0),
-              languageTranslate(addon.getSetting('CondSubLang03'), 4, 3)
+              languageTranslate(addon.getSetting('CondSubLang03'), 4, 3),
+              addon.getSetting('CondSubForced03')
           )]
       )]
 
