@@ -31,6 +31,7 @@ class PrefParser:
         self.custom_g_t_pref_delim = r'#'
         self.custom_g_t_delim = r','
         self.custom_condSub_delim = r':'
+        self.custom_condType_delim = r'/'
         
     def parsePrefString(self, pref_string):
         preferences = []
@@ -79,13 +80,30 @@ class PrefParser:
                             self.log(LOG_INFO, 'Custom cond subs prefs parse error: {0}'.format(pref))
                 else:
                     temp_a = (languageTranslate(pref[0], 3, 0), pref[0])
-                    temp_s = (languageTranslate(pref[1], 3, 0), pref[1])
-                    if (temp_a[0] and temp_a[1] and temp_s[0] and temp_s[1]):
-                        lang_prefs.append((temp_a[0], temp_a[1], temp_s[0], temp_s[1]))
+                    tmp_s = pref[1].split(self.custom_condType_delim)
+                    if len(tmp_s) != 2:
+                                self.log(LOG_INFO, 'Custom cond type prefs parse error: {0}'.format(tmp_s))
                     else:
-                        self.log(LOG_INFO, 'Custom cond sub prefs: lang code not found in db!'\
-                                 ' Please report this: {0}:{1}'.format(temp_a, temp_s))
-            # custom audio or subtitle pref                            
+                        temp_s = (languageTranslate(tmp_s[0], 3, 0), tmp_s[0])
+                        temp_t = tmp_s[1]
+                        if (temp_a[0] and temp_a[1] and temp_s[0] and temp_s[1] and temp_t):
+                            lang_prefs.append((temp_a[0], temp_a[1], temp_s[0], temp_s[1], temp_t))
+                        else:
+                            self.log(LOG_INFO, 'Custom cond sub prefs: lang code not found in db!'\
+                                     ' Please report this: {0}:{1}'.format(temp_a, temp_s))
+            # custom sub pref                            
+            elif (pref.find(self.custom_condType_delim) > 0):
+                tmp_pref = pref.split(self.custom_condType_delim)
+                if len(tmp_pref) != 2:
+                            self.log(LOG_INFO, 'Custom sub prefs parse error: {0}'.format(tmp_pref))
+                temp_pref = (languageTranslate(tmp_pref[0], 3, 0), tmp_pref[0])
+                temp_t = tmp_pref[1]
+                if (temp_pref[0] and temp_t):
+                    lang_prefs.append(temp_pref, temp_t)
+                else:
+                    self.log(LOG_INFO, 'Custom sub prefs: lang code {0} not found in db!'\
+                             ' Please report this'.format(pref))
+            # custom audio pref                            
             else:
                 temp_pref = (languageTranslate(pref, 3, 0), pref)
                 if temp_pref[0]:
