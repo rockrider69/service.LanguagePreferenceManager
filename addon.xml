@@ -2,8 +2,8 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="0.0.7"
-	provider-name="ace20022"
+	version="0.0.8"
+	provider-name="ace20022 - mod by djoole"
 	>
 	<requires>
 		<import addon="xbmc.python" version="2.14.0"/>
