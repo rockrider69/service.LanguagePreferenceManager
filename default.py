@@ -57,14 +57,14 @@ class Main:
     def _daemon( self ):
         while (not xbmc.abortRequested):
             xbmc.sleep(500)
-            
+           
 
 class LangPrefMan_Player(xbmc.Player) :
     
     def __init__ (self):
         xbmc.Player.__init__(self)
         
-    def onPlayBackStarted(self):
+    def onAVStarted(self):
         if settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
             log(LOG_DEBUG, 'Playback started')
             self.audio_changed = False
@@ -217,7 +217,7 @@ class LangPrefMan_Player(xbmc.Player) :
 
             log(LOG_INFO,'Subtitle: genre/tag preference {0} met with intersection {1}'.format(g_t, (self.genres_and_tags & g_t)))
             for pref in preferences:
-                name, codes = pref
+                name, codes, forced = pref
                 codes = codes.split(r',')
                 for code in codes:
                     if (code == 'non'):
@@ -225,14 +225,17 @@ class LangPrefMan_Player(xbmc.Player) :
                         continue 
                     if (self.selected_sub and
                         self.selected_sub.has_key('language') and
-                        (code == self.selected_sub['language'] or name == self.selected_sub['language'])):
-                            log(LOG_INFO, 'Selected subtitle language matches preference {0} ({1})'.format(i, name) )
-                            return -1
+                        (code == self.selected_sub['language'] or name == self.selected_sub['language']) and
+                        (((forced == 'true') and ('forced' in self.selected_sub['name'].lower())) or ((forced == 'false') and ('forced' not in self.selected_sub['name'].lower())))):
+                                log(LOG_INFO, 'Selected subtitle language matches preference {0} ({1}) forced {1}'.format(i, name, forced) )
+                                return -1
                     else:
                         for sub in self.subtitles:
+                            log(LOG_DEBUG,'Wanted name={0}, wanted forced={1}, stream sub index={2} lang={3} name={4}, for iteration {5}'.format(name, forced, sub['index'], sub['language'], sub['name'], i))
                             if ((code == sub['language']) or (name == sub['language'])):
-                                log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2})'.format(sub['index'], i, name) )
-                                return sub['index']
+                                if (((forced == 'false') and ('forced' not in sub['name'].lower())) or ((forced == 'true') and ('forced' in sub['name'].lower()))):
+                                    log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2}) forced {3}'.format(sub['index'], i, name, forced) )
+                                    return sub['index']
                         log(LOG_INFO, 'Subtitle: preference {0} ({1}:{2}) not available'.format(i, name, code) )
         return -2
 
@@ -254,21 +257,22 @@ class LangPrefMan_Player(xbmc.Player) :
 
             log(LOG_INFO,'Cond Sub: genre/tag preference {0} met with intersection {1}'.format(g_t, (self.genres_and_tags & g_t)))
             for pref in preferences:
-                audio_name, audio_code, sub_name, sub_code = pref
+                audio_name, audio_code, sub_name, sub_code, forced = pref
                 if (audio_code == 'non'):
                     log(LOG_DEBUG,'continue')
                     continue 
                 if (self.selected_audio_stream and
                     self.selected_audio_stream.has_key('language') and
                     (audio_code == self.selected_audio_stream['language'] or audio_name == self.selected_audio_stream['language'])):
-                        log(LOG_INFO, 'Selected audio language matches conditional preference {0} ({1}:{2})'.format(i, audio_name, sub_name) )
+                        log(LOG_INFO, 'Selected audio language matches conditional preference {0} ({1}:{2}) but force tag is {3}'.format(i, audio_name, sub_name, forced) )
                         if (sub_code == 'non'):
                             return -1
                         else:
                             for sub in self.subtitles:
                                 if ((sub_code == sub['language']) or (sub_name == sub['language'])):
-                                    log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3})'.format(sub['index'], i, audio_name, sub_name) )
-                                    return sub['index']
+                                    if (((forced == 'false') and ('forced' not in sub['name'].lower())) or ((forced == 'true') and ('forced' in sub['name'].lower()))):
+                                        log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format(sub['index'], i, audio_name, sub_name, forced) )
+                                        return sub['index']
                             log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2})'.format(i, audio_name, sub_name) )
         return -2
     
