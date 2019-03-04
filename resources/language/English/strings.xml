@@ -29,9 +29,9 @@
     <string id="30115">Advanced/Custom settings</string>
     <string id="30116">Try to set the audio and/or subtitle track from the filename first</string>
     <string id="30117">Regular expression for filename based preferences</string>
-    <string id="30118">Use custom pref, e.g. eng>ger>fin :</string>
-    <string id="30119">Use custom pref, e.g. eng>ger>fin :</string>
-    <string id="30120">Use custom pref, e.g. jpn:eng>eng:ger :</string>
+    <string id="30118">Use custom pref (e.g. genre1,genre2,tag1#fre>eng|eng>ger>fin>fre) :</string>
+    <string id="30119">Use custom pref (e.g. eng/false>ger/true>fin/false) :</string>
+    <string id="30120">Use custom pref (e.g. eng:eng/true>eng:eng/false) :</string>
     <string id="30121">Primary subtitle is Forced type</string>
     <string id="30122">Secondary subtitle is Forced type</string>
     <string id="30123">Third subtitle is Forced type</string>
