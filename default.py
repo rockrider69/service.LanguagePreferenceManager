@@ -1,3 +1,6 @@
+
+# -*-coding:Latin-1 -*
+
 import os, sys, re
 import xbmc, xbmcaddon
 
@@ -227,10 +230,10 @@ class LangPrefMan_Player(xbmc.Player) :
                         log(LOG_DEBUG,'continue')
                         continue 
                     
-                    for sub in sorted(self.subtitles, key=lambda subElt: ('ext' in subElt['name'].lower())):
+                    for sub in sorted(self.subtitles, key=lambda subElt: (self.isExternalSub(subElt['name']))):
                         log(LOG_DEBUG,'Wanted name={0}, wanted forced={1}, stream sub index={2} lang={3} name={4}, for iteration {5}'.format(name, forced, sub['index'], sub['language'], sub['name'], i))
                         if ((code == sub['language']) or (name == sub['language'])):
-                            if (((forced == 'false') and ('forced' not in sub['name'].lower())) or ((forced == 'true') and ('forced' in sub['name'].lower()))):
+                            if (self.testForcedFlag(forced, sub['name'])):
                                 log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2}) forced {3}'.format(sub['index'], i, name, forced) )
                                 return sub['index']
 
@@ -259,21 +262,33 @@ class LangPrefMan_Player(xbmc.Player) :
                 if (audio_code == 'non'):
                     log(LOG_DEBUG,'continue')
                     continue 
+
                 if (self.selected_audio_stream and
                     self.selected_audio_stream.has_key('language') and
                     (audio_code == self.selected_audio_stream['language'] or audio_name == self.selected_audio_stream['language'])):
-                        log(LOG_INFO, 'Selected audio language matches conditional preference {0} ({1}:{2}) but force tag is {3}'.format(i, audio_name, sub_name, forced) )
+                        log(LOG_INFO, 'Selected audio language matches conditional preference {0} ({1}:{2}), force tag is {3}'.format(i, audio_name, sub_name, forced) )
                         if (sub_code == 'non'):
                             return -1
                         else:
                             for sub in self.subtitles:
                                 if ((sub_code == sub['language']) or (sub_name == sub['language'])):
-                                    if (((forced == 'false') and ('forced' not in sub['name'].lower())) or ((forced == 'true') and ('forced' in sub['name'].lower()))):
+                                    if (self.testForcedFlag(forced, sub['name'])):
                                         log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format(sub['index'], i, audio_name, sub_name, forced) )
                                         return sub['index']
                             log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2})'.format(i, audio_name, sub_name) )
         return -2
     
+    def testForcedFlag(self, forced, subName):
+        test = subName.lower()
+        matches = ["forced", "forcés"]
+        found = any(x in test for x in matches)
+        return ((forced == 'false') and not found) or ((forced == 'true') and found)
+
+    def isExternalSub(self, subName):
+        test = subName.lower()
+        matches = ["ext"]
+        return any(x in test for x in matches)
+
     def getDetails(self):
         activePlayers ='{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}'
         json_query = xbmc.executeJSONRPC(activePlayers)
