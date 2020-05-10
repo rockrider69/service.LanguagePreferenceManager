@@ -102,7 +102,8 @@ class LangPrefMan_Player(xbmc.Player) :
                 if settings.turn_subs_off:
                     log(LOG_INFO, 'Subtitle: disabling subs' )
                     self.showSubtitles(False)
-                    
+
+        #import web_pdb; web_pdb.set_trace()  
         if settings.audio_prefs_on and not fa:
             if settings.custom_audio_prefs_on:
                 trackIndex = self.evalAudioPrefs(settings.custom_audio)
@@ -126,6 +127,11 @@ class LangPrefMan_Player(xbmc.Player) :
                 if settings.turn_subs_off:
                     log(LOG_INFO, 'Subtitle: disabling subs' )
                     self.showSubtitles(False)
+            if trackIndex == -1:
+                log(LOG_INFO, 'Subtitle: Preferred subtitle is selected but might not be enabled' )
+                if settings.turn_subs_on and not self.selected_sub_enabled:
+                    log(LOG_INFO, 'Subtitle: enabling subs because selected sub is not enabled' )
+                    self.showSubtitles(True)
             elif trackIndex >= 0:
                 self.setSubtitleStream(trackIndex)
                 if settings.turn_subs_on:
@@ -142,10 +148,7 @@ class LangPrefMan_Player(xbmc.Player) :
                 log(LOG_INFO, 'Conditional subtitle: disabling subs' )
                 self.showSubtitles(False)
             if trackIndex == -2:
-                log(LOG_INFO, 'Conditional subtitle: None of the preferrences is available' )
-                if settings.turn_subs_off:
-                    log(LOG_DEBUG, 'Subtitle: disabling subs' )
-                    self.showSubtitles(False)
+                log(LOG_INFO, 'Conditional subtitle: No matching preferences found fo current audio stream. Doing nothing.')
             elif trackIndex >= 0:
                 self.setSubtitleStream(trackIndex)
                 if settings.turn_subs_on:
@@ -223,20 +226,15 @@ class LangPrefMan_Player(xbmc.Player) :
                     if (code == 'non'):
                         log(LOG_DEBUG,'continue')
                         continue 
-                    if (self.selected_sub and
-                        self.selected_sub.has_key('language') and
-                        (code == self.selected_sub['language'] or name == self.selected_sub['language']) and
-                        (((forced == 'true') and ('forced' in self.selected_sub['name'].lower())) or ((forced == 'false') and ('forced' not in self.selected_sub['name'].lower())))):
-                                log(LOG_INFO, 'Selected subtitle language matches preference {0} ({1}) forced {1}'.format(i, name, forced) )
-                                return -1
-                    else:
-                        for sub in self.subtitles:
-                            log(LOG_DEBUG,'Wanted name={0}, wanted forced={1}, stream sub index={2} lang={3} name={4}, for iteration {5}'.format(name, forced, sub['index'], sub['language'], sub['name'], i))
-                            if ((code == sub['language']) or (name == sub['language'])):
-                                if (((forced == 'false') and ('forced' not in sub['name'].lower())) or ((forced == 'true') and ('forced' in sub['name'].lower()))):
-                                    log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2}) forced {3}'.format(sub['index'], i, name, forced) )
-                                    return sub['index']
-                        log(LOG_INFO, 'Subtitle: preference {0} ({1}:{2}) not available'.format(i, name, code) )
+                    
+                    for sub in sorted(self.subtitles, key=lambda subElt: ('ext' in subElt['name'].lower())):
+                        log(LOG_DEBUG,'Wanted name={0}, wanted forced={1}, stream sub index={2} lang={3} name={4}, for iteration {5}'.format(name, forced, sub['index'], sub['language'], sub['name'], i))
+                        if ((code == sub['language']) or (name == sub['language'])):
+                            if (((forced == 'false') and ('forced' not in sub['name'].lower())) or ((forced == 'true') and ('forced' in sub['name'].lower()))):
+                                log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2}) forced {3}'.format(sub['index'], i, name, forced) )
+                                return sub['index']
+
+                    log(LOG_INFO, 'Subtitle: preference {0} ({1}:{2}) not available'.format(i, name, code) )
         return -2
 
     def evalCondSubPrefs(self, condsub_prefs):

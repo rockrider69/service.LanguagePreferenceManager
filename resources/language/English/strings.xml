@@ -24,8 +24,8 @@
     <string id="30110">If audio language is </string>
     <string id="30111">then display subtitles with language</string>
     <string id="30112">Delay the evaluation by the following value [ms]</string>
-    <string id="30113">Turn on subtitles if a subtitle prefrence matched</string>
-    <string id="30114">Turn off subtitles if no subtitle prefrence matched</string>
+    <string id="30113">Turn on subtitles if a subtitle preference matched</string>
+    <string id="30114">Turn off subtitles if no subtitle preference matched</string>
     <string id="30115">Advanced/Custom settings</string>
     <string id="30116">Try to set the audio and/or subtitle track from the filename first</string>
     <string id="30117">Regular expression for filename based preferences</string>
