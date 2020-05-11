@@ -280,13 +280,13 @@ class LangPrefMan_Player(xbmc.Player) :
     
     def testForcedFlag(self, forced, subName):
         test = subName.lower()
-        matches = ["forced", "forcés"]
+        matches = [u'forced', u'forcés']
         found = any(x in test for x in matches)
         return ((forced == 'false') and not found) or ((forced == 'true') and found)
 
     def isExternalSub(self, subName):
         test = subName.lower()
-        matches = ["ext"]
+        matches = [u'ext']
         return any(x in test for x in matches)
 
     def getDetails(self):
