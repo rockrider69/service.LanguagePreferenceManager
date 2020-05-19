@@ -1,5 +1,5 @@
-
-# -*-coding:Latin-1 -*
+# -*- coding: utf-8 -*-
+# Your code goes below this line
 
 import os, sys, re
 import xbmc, xbmcaddon
@@ -33,7 +33,11 @@ def log(level, msg):
             l = xbmc.LOGINFO
         elif level == LOG_DEBUG:
             l = xbmc.LOGDEBUG
-        xbmc.log("[Language Preference Manager]: " + str(msg), l)
+        
+        if isinstance(msg, dict):
+        	xbmc.log("[Language Preference Manager]: " + str(msg), l)
+        else:
+        	xbmc.log('[Language Preference Manager]: ' + msg.encode('ascii','replace'), l)
 
 
 class LangPref_Monitor( xbmc.Monitor ):
@@ -231,13 +235,13 @@ class LangPrefMan_Player(xbmc.Player) :
                         continue 
                     
                     for sub in sorted(self.subtitles, key=lambda subElt: (self.isExternalSub(subElt['name']))):
-                        log(LOG_DEBUG,'Wanted name={0}, wanted forced={1}, stream sub index={2} lang={3} name={4}, for iteration {5}'.format(name, forced, sub['index'], sub['language'], sub['name'], i))
+                        log(LOG_DEBUG, u'Wanted name={0}, wanted forced={1}, stream sub index={2} lang={3} name={4}, for iteration {5}'.format(name, forced, sub['index'], sub['language'], sub['name'], i))
                         if ((code == sub['language']) or (name == sub['language'])):
                             if (self.testForcedFlag(forced, sub['name'])):
-                                log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2}) forced {3}'.format(sub['index'], i, name, forced) )
+                                log(LOG_INFO, u'Subtitle language of subtitle {0} matches preference {1} ({2}) forced {3}'.format(sub['index'], i, name, forced) )
                                 return sub['index']
 
-                    log(LOG_INFO, 'Subtitle: preference {0} ({1}:{2}) not available'.format(i, name, code) )
+                    log(LOG_INFO, u'Subtitle: preference {0} ({1}:{2}) not available'.format(i, name, code) )
         return -2
 
     def evalCondSubPrefs(self, condsub_prefs):
@@ -266,16 +270,16 @@ class LangPrefMan_Player(xbmc.Player) :
                 if (self.selected_audio_stream and
                     self.selected_audio_stream.has_key('language') and
                     (audio_code == self.selected_audio_stream['language'] or audio_name == self.selected_audio_stream['language'])):
-                        log(LOG_INFO, 'Selected audio language matches conditional preference {0} ({1}:{2}), force tag is {3}'.format(i, audio_name, sub_name, forced) )
+                        log(LOG_INFO, u'Selected audio language matches conditional preference {0} ({1}:{2}), force tag is {3}'.format(i, audio_name, sub_name, forced) )
                         if (sub_code == 'non'):
                             return -1
                         else:
                             for sub in self.subtitles:
                                 if ((sub_code == sub['language']) or (sub_name == sub['language'])):
                                     if (self.testForcedFlag(forced, sub['name'])):
-                                        log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format(sub['index'], i, audio_name, sub_name, forced) )
+                                        log(LOG_INFO, u'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format(sub['index'], i, audio_name, sub_name, forced) )
                                         return sub['index']
-                            log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2})'.format(i, audio_name, sub_name) )
+                            log(LOG_INFO, u'Conditional subtitle: no match found for preference {0} ({1}:{2})'.format(i, audio_name, sub_name) )
         return -2
     
     def testForcedFlag(self, forced, subName):
