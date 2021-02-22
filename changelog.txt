@@ -1,12 +1,3 @@
---- Version 0.0.8
-
-- Fix compatibility with leia
-- Added support for forced subtitles (ability to choose between normal or forced, in UI and conditional settings
-
---- Version 0.0.7
-
-- ?
-
 --- Version 0.0.6
 
 - Fix compatibility with jarvis and krypton
