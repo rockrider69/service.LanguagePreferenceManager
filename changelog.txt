@@ -1,3 +1,19 @@
+--- Version 0.1.2
+
+- Adding an icon.png
+- Fixing settings.xml CustomAudio, Sub and CondSub : allowempty=true to avoid multiple errors in the kodi log when not used.
+
+--- Version 0.1.0
+
+- Fixing conditional subtitles like "French:None" not working. Not detected and then subtitles were not disabled.
+  (if sub_code is none) is the test to return -1 in default.py... But column 3 of None in langcodes.py is "non" as a string.
+  So I just changed the test in line 268 accordingly, and all is fine now.
+
+--- Version 0.0.7 + Matrix + Python3 + Languages fixed + more Languages fixed by PP
+
+- Fix compatibility with matrix and Python3
+- Fix languages codes in string.po not aligned with KODI language codes (ex. French etc...)
+
 --- Version 0.0.6
 
 - Fix compatibility with jarvis and krypton
