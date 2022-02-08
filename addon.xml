@@ -2,8 +2,8 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="0.0.7+matrix.3"
-	provider-name="ace20022/scott967"
+	version="0.1.2"
+	provider-name="ace20022/scott967/rockrider69"
 	>
 	<requires>
 		<import addon="xbmc.python" version="3.0.0"/>
@@ -17,7 +17,7 @@
 		<description lang="en_GB">Sets the audio and subtitle track according to your language preferences</description>
 		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
 		<platform>all</platform>
-		<news>Updated with changes required for Kodi 19 / Python 3</news>
+		<news>Updated with changes required for Kodi 19 / Python 3 + Fixed Languages labels/tables, ConditionnalSubs to None, Custom settings</news>
 		<assets>
 			<icon>resources/icon.png</icon>
 		</assets>
