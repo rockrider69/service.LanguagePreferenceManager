@@ -265,7 +265,7 @@ class LangPrefMan_Player(xbmc.Player) :
                     'language' in self.selected_audio_stream and
                     (audio_code == self.selected_audio_stream['language'] or audio_name == self.selected_audio_stream['language'])):
                         log(LOG_INFO, 'Selected audio language matches conditional preference {0} ({1}:{2}), force tag is {3}'.format(i, audio_name, sub_name, forced) )
-                        if (sub_code is None):
+                        if (sub_code == "non"):
                             return -1
                         else:
                             for sub in self.subtitles:
