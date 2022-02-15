@@ -267,16 +267,16 @@ class LangPrefMan_Player(xbmc.Player) :
                         log(LOG_INFO, 'Selected audio language matches conditional preference {0} ({1}:{2}), force tag is {3}'.format(i, audio_name, sub_name, forced) )
                         if (sub_code == "non"):
                             if (forced == 'true'):
-                            log(LOG_INFO, 'Subtitle condition is None but forced is true, searching a forced subtitle matching selected audio...')
-                            for sub in self.subtitles:
-                                log(LOG_DEBUG, 'Looping subtitles...')
-                                if ((audio_code == sub['language']) or (audio_name == sub['language'])):
-                                    log(LOG_DEBUG, 'One potential match found...')
-                                    if (self.testForcedFlag(forced, sub['name'])):
-                                        log(LOG_DEBUG, 'One forced match found...')
-                                        log(LOG_INFO, 'Language of subtitle {0} matches audio preference {1} ({2}:{3}) with forced overriding rule {4}'.format(sub['index'], i, audio_name, sub_name, forced) )
-                                        return sub['index']
-                                    log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2}) with forced overriding rule {3}'.format(i, audio_name, sub_name, forced) )
+                                log(LOG_INFO, 'Subtitle condition is None but forced is true, searching a forced subtitle matching selected audio...')
+                                for sub in self.subtitles:
+                                    log(LOG_DEBUG, 'Looping subtitles...')
+                                    if ((audio_code == sub['language']) or (audio_name == sub['language'])):
+                                        log(LOG_DEBUG, 'One potential match found...')
+                                        if (self.testForcedFlag(forced, sub['name'])):
+                                            log(LOG_DEBUG, 'One forced match found...')
+                                            log(LOG_INFO, 'Language of subtitle {0} matches audio preference {1} ({2}:{3}) with forced overriding rule {4}'.format(sub['index'], i, audio_name, sub_name, forced) )
+                                            return sub['index']
+                                        log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2}) with forced overriding rule {3}'.format(i, audio_name, sub_name, forced) )
                             return -1
                         else:
                             for sub in self.subtitles:
