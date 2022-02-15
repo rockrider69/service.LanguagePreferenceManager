@@ -1,3 +1,8 @@
+--- Version 0.1.3
+
+- Conditional subtitle logic adjustement : if "Lang1:None and forced tag set" then disable subtitles
+              but only if no Lang1 forced subtitle is found. Otherwise we activate this one.
+	      
 --- Version 0.1.2
 
 - Adding an icon.png
