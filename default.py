@@ -62,12 +62,14 @@ class Main:
 class LangPrefMan_Player(xbmc.Player) :
     
     def __init__ (self):
+        self.LPM_initial_run_done = False
         xbmc.Player.__init__(self)
         
     def onAVStarted(self):
         if settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
             log(LOG_DEBUG, 'Playback started')
             self.audio_changed = False
+            self.LPM_initial_run_done = False
             # switching an audio track to early leads to a reopen -> start at the beginning
             if settings.delay > 0:
                 log(LOG_DEBUG, "Delaying preferences evaluation by {0} ms".format(settings.delay))
@@ -75,12 +77,28 @@ class LangPrefMan_Player(xbmc.Player) :
             log(LOG_DEBUG, 'Getting video properties')
             self.getDetails()
             self.evalPrefs()
+            self.LPM_initial_run_done = True
 
+    def onAVChange(self):
+        if self.LPM_initial_run_done and settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
+            log(LOG_DEBUG, 'AVChange detected - Checking possible change of audio track...')
+            if settings.delay > 0:
+                log(LOG_DEBUG, "Delaying preferences evaluation by {0} ms".format(settings.delay))
+                xbmc.sleep(settings.delay)
+            previous_audio_index = self.selected_audio_stream['index']
+            previous_audio_language = self.selected_audio_stream['language']
+            log(LOG_DEBUG, 'Getting video properties')
+            self.getDetails()
+            if (self.selected_audio_stream['index'] != previous_audio_index):
+                log(LOG_INFO, 'Audio track changed from {0} to {1}. Reviewing Conditional Subtitles rules...'.format(previous_audio_language, self.selected_audio_stream['language']))
+                self.audio_changed = True
+                self.evalPrefs()
+    
     def evalPrefs(self):
         # recognized filename audio or filename subtitle
         fa = False
         fs = False
-        if settings.useFilename:
+        if settings.useFilename and not self.LPM_initial_run_done:
             audio, sub = self.evalFilenamePrefs()
             if (audio >= 0) and audio < len(self.audiostreams):
                 log(LOG_INFO, 'Filename preference: Match, selecting audio track {0}'.format(audio))
@@ -103,7 +121,7 @@ class LangPrefMan_Player(xbmc.Player) :
                     log(LOG_INFO, 'Subtitle: disabling subs' )
                     self.showSubtitles(False)
                     
-        if settings.audio_prefs_on and not fa:
+        if settings.audio_prefs_on and not fa and not self.LPM_initial_run_done:
             if settings.custom_audio_prefs_on:
                 trackIndex = self.evalAudioPrefs(settings.custom_audio)
             else:
@@ -115,7 +133,7 @@ class LangPrefMan_Player(xbmc.Player) :
                 self.setAudioStream(trackIndex)
                 self.audio_changed = True
             
-        if settings.sub_prefs_on and not fs:
+        if settings.sub_prefs_on and not fs and not self.LPM_initial_run_done:
             if settings.custom_sub_prefs_on:
                 trackIndex = self.evalSubPrefs(settings.custom_subs)
             else:
