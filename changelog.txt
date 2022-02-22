@@ -1,3 +1,7 @@
+--- Version 0.1.4BETA
+
+- Conditional subtitle logic improvement. Rules are re-evaluated and applied on-the-fly if audio track is changed during the playback.
+
 --- Version 0.1.3
 
 - Conditional subtitle logic adjustement : if "Lang1:None and forced tag set" then disable subtitles
