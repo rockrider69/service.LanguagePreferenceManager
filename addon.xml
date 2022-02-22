@@ -17,8 +17,10 @@
 		<description lang="en_GB">Sets the audio and subtitle track according to your language preferences</description>
 		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
 		<platform>all</platform>
-		<news>1.0.3     : Updated with changes required for Kodi 19 / Python 3 + Fixed Languages labels/tables, ConditionnalSubs to None, Custom settings</news>
-		<news>1.0.4BETA : Conditional Subtitles rules are re-assessed on-the-fly when toggling audio tracks </news>
+		<news>
+		1.0.3     : Updated with changes required for Kodi 19 / Python 3 + Fixed Languages labels/tables, ConditionnalSubs to None, Custom settings
+		1.0.4BETA : Conditional Subtitles rules are re-assessed on-the-fly when toggling audio tracks
+		</news>
 		<assets>
 			<icon>resources/icon.png</icon>
 		</assets>
