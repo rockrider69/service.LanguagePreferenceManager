@@ -64,12 +64,16 @@ class LangPrefMan_Player(xbmc.Player) :
     def __init__ (self):
         self.LPM_initial_run_done = False
         xbmc.Player.__init__(self)
-        
+
+    def onPlayBackStarted(self):
+        if settings.service_enabled and settings.at_least_one_pref_on:
+            log(LOG_DEBUG, 'New AV Playback initiated - Resetting LPM Initial Flag')
+            self.LPM_initial_run_done = False
+    
     def onAVStarted(self):
         if settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
             log(LOG_DEBUG, 'Playback started')
             self.audio_changed = False
-            self.LPM_initial_run_done = False
             # switching an audio track to early leads to a reopen -> start at the beginning
             if settings.delay > 0:
                 log(LOG_DEBUG, "Delaying preferences evaluation by {0} ms".format(settings.delay))
