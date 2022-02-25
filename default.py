@@ -86,6 +86,7 @@ class LangPrefMan_Player(xbmc.Player) :
     def onAVChange(self):
         if self.LPM_initial_run_done and settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
             log(LOG_DEBUG, 'AVChange detected - Checking possible change of audio track...')
+            self.audio_changed = False
             if settings.delay > 0:
                 log(LOG_DEBUG, "Delaying preferences evaluation by {0} ms".format(settings.delay))
                 xbmc.sleep(settings.delay)
@@ -95,7 +96,6 @@ class LangPrefMan_Player(xbmc.Player) :
             self.getDetails()
             if (self.selected_audio_stream['index'] != previous_audio_index):
                 log(LOG_INFO, 'Audio track changed from {0} to {1}. Reviewing Conditional Subtitles rules...'.format(previous_audio_language, self.selected_audio_stream['language']))
-                self.audio_changed = True
                 self.evalPrefs()
     
     def evalPrefs(self):
