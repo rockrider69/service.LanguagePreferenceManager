@@ -169,7 +169,7 @@ class LangPrefMan_Player(xbmc.Player) :
                 log(LOG_INFO, 'Conditional subtitle: disabling subs' )
                 self.showSubtitles(False)
             if trackIndex == -2:
-                log(LOG_INFO, 'Conditional subtitle: No matching preferences found fo current audio stream. Doing nothing.')
+                log(LOG_INFO, 'Conditional subtitle: No matching preferences found for current audio stream. Doing nothing.')
             elif trackIndex >= 0:
                 self.setSubtitleStream(trackIndex)
                 if settings.turn_subs_on:
@@ -227,6 +227,7 @@ class LangPrefMan_Player(xbmc.Player) :
                                 log(LOG_INFO, 'Audio language of stream {0} matches preference {1} ({2})'.format(stream['index'], i, name) )
                                 return stream['index']
                         log(LOG_INFO, 'Audio: preference {0} ({1}:{2}) not available'.format(i, name, code) )
+                i += 1
         return -2
                 
     def evalSubPrefs(self, sub_prefs):
@@ -258,6 +259,7 @@ class LangPrefMan_Player(xbmc.Player) :
                                 log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2})'.format(sub['index'], i, name) )
                                 return sub['index']
                         log(LOG_INFO, 'Subtitle: preference {0} ({1}:{2}) not available'.format(i, name, code) )
+                i += 1
         return -2
 
     def evalCondSubPrefs(self, condsub_prefs):
@@ -307,6 +309,7 @@ class LangPrefMan_Player(xbmc.Player) :
                                         log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format(sub['index'], i, audio_name, sub_name, forced) )
                                         return sub['index']
                             log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2})'.format(i, audio_name, sub_name) )
+                i += 1
         return -2
    
     def testForcedFlag(self, forced, subName):
@@ -345,6 +348,12 @@ class LangPrefMan_Player(xbmc.Player) :
             self.audiostreams = json_response['result']['audiostreams']
             self.subtitles = json_response['result']['subtitles']
         log(LOG_DEBUG, json_response )
+        
+        if (not settings.custom_condsub_prefs_on and not settings.custom_audio_prefs_on and not settings.custom_sub_prefs_on):
+            log(LOG_DEBUG, 'No custom prefs used at all, skipping extra Video tags/genres JSON query.')
+            self.genres_and_tags = set()
+            return        
+        
         genre_tags_query_dict = {"jsonrpc": "2.0",
                                  "method": "Player.GetItem",
                                  "params": { "properties":
