@@ -19,7 +19,7 @@
 		<platform>all</platform>
 		<news>1.0.3     : Updated with changes required for Kodi 19 / Python 3 + Fixed Languages labels/tables, ConditionnalSubs to None, Custom settings
 1.0.4BETA : Conditional Subtitles rules are re-assessed on-the-fly when toggling audio tracks
-1.0.5     : Some minor optimisations</news>
+1.0.5     : Some minor optimisation</news>
 		<assets>
 			<icon>resources/icon.png</icon>
 		</assets>
