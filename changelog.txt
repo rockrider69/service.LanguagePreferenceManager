@@ -1,6 +1,7 @@
 --- Version 0.1.5
 
-- Some minor optimisation in Conditional Subtitles evaluation block.
+- Fix preferences rules numbering in log messages.
+- Skip extra genre/tag JSON video query when no custom prefs used at all.
 
 --- Version 0.1.4BETA
 
