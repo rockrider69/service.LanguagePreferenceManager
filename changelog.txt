@@ -1,3 +1,7 @@
+--- Version 0.1.5
+
+- Some minor optimisation in Conditional Subtitles evaluation block.
+
 --- Version 0.1.4BETA
 
 - Conditional subtitle logic improvement. Rules are re-evaluated and applied on-the-fly if audio track is changed during the playback.
