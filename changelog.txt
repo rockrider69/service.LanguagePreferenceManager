@@ -1,3 +1,9 @@
+--- Version 0.1.6BETA
+
+- Fix custom conditional preferences rules not working. (note : if ...>lan:non>... is used then forced tag is assumed on. See v0.1.3)
+- Add a switch to completely ignore 'Signs and Songs' types of subtitle tracks. Default is off.
+- Plus some small typo fixed.
+
 --- Version 0.1.5
 
 - Fix preferences rules numbering in log messages.
