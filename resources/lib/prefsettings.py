@@ -49,6 +49,7 @@ class settings():
                  'subs on: {2}\n' \
                  'cond subs on: {3}\n' \
                  'turn subs on: {4}, turn subs off: {5}\n' \
+                 'signs: {15}\n' \
                  'use file name: {6}, file name regex: {7}\n' \
                  'at least one pref on: {8}\n'\
                  'audio prefs: {9}\n' \
@@ -62,7 +63,7 @@ class settings():
                          self.condsub_prefs_on, self.turn_subs_on, self.turn_subs_off,
                          self.useFilename, self.filenameRegex, self.at_least_one_pref_on,
                          self.AudioPrefs, self.SubtitlePrefs, self.CondSubtitlePrefs,
-                         self.custom_audio, self.custom_subs, self.custom_condsub)
+                         self.custom_audio, self.custom_subs, self.custom_condsub, self.ignore_signs_on)
                  )
       
     def readPrefs(self):
@@ -75,6 +76,7 @@ class settings():
       self.condsub_prefs_on = addon.getSetting('enableCondSub') == 'true'
       self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'
       self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
+      self.ignore_signs_on = addon.getSetting('signs') == 'true'
       self.useFilename = addon.getSetting('useFilename') == 'true'
       self.filenameRegex = addon.getSetting('filenameRegex')
       if self.useFilename:
