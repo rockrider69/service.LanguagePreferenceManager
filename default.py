@@ -255,6 +255,9 @@ class LangPrefMan_Player(xbmc.Player) :
                             return -1
                     else:
                         for sub in self.subtitles:
+                            if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
+                                log(LOG_INFO,'SubPrefs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
+                                continue
                             if ((code == sub['language'] or name == sub['language']) and self.testForcedFlag(forced, sub['name'])):
                                 log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2})'.format(sub['index'], i, name) )
                                 return sub['index']
@@ -304,6 +307,9 @@ class LangPrefMan_Player(xbmc.Player) :
                             return -1
                         else:
                             for sub in self.subtitles:
+                                if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
+                                    log(LOG_INFO,'CondSubs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
+                                    continue
                                 if ((sub_code == sub['language']) or (sub_name == sub['language'])):
                                     if (self.testForcedFlag(forced, sub['name'])):
                                         log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format(sub['index'], i, audio_name, sub_name, forced) )
@@ -311,7 +317,12 @@ class LangPrefMan_Player(xbmc.Player) :
                             log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2})'.format(i, audio_name, sub_name) )
                 i += 1
         return -2
-   
+
+    def isSignsSub(self, subName):
+        test = subName.lower()
+        matches = ['signs']
+        return any(x in test for x in matches)
+    
     def testForcedFlag(self, forced, subName):
         test = subName.lower()
         matches = ['forced', 'forcés']
