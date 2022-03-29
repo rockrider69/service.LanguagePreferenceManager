@@ -51,6 +51,10 @@
 					<default>false</default>
 					<control type="toggle"/>
 				</setting>
+				<setting id="signs" label="30123" type="boolean">
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
 			</group>
 		</category>
 
