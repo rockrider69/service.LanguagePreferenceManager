@@ -81,7 +81,8 @@ class PrefParser:
                     temp_a = (languageTranslate(pref[0], 3, 0), pref[0])
                     temp_s = (languageTranslate(pref[1], 3, 0), pref[1])
                     if (temp_a[0] and temp_a[1] and temp_s[0] and temp_s[1]):
-                        lang_prefs.append((temp_a[0], temp_a[1], temp_s[0], temp_s[1]))
+                        forced_tag = 'false'
+                        lang_prefs.append((temp_a[0], temp_a[1], temp_s[0], temp_s[1], forced_tag))
                     else:
                         self.log(LOG_INFO, 'Custom cond sub prefs: lang code not found in db!'\
                                  ' Please report this: {0}:{1}'.format(temp_a, temp_s))
