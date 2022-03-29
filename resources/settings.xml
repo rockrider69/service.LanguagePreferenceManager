@@ -730,7 +730,7 @@
 					</constraints>
 					<control type="spinner" format="string"/>
 				</setting>
-				<setting id="ConsSubLang03" type="integer" label="30111">
+				<setting id="CondSubLang03" type="integer" label="30111">
 					<default>11</default>
 					<constraints>
 						<options>
