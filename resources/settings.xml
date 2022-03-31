@@ -502,6 +502,7 @@
 							<option label="30244">43</option>
 							<option label="30245">44</option>
 							<option label="30200">45</option>
+							<option label="30300">46</option>
 						</options>
 					</constraints>
 					<control type="spinner" format="string"/>
@@ -616,6 +617,7 @@
 							<option label="30244">43</option>
 							<option label="30245">44</option>
 							<option label="30200">45</option>
+							<option label="30300">46</option>
 						</options>
 					</constraints>
 					<control type="spinner" format="string"/>
@@ -784,6 +786,7 @@
 							<option label="30244">43</option>
 							<option label="30245">44</option>
 							<option label="30200">45</option>
+							<option label="30300">46</option>
 						</options>
 					</constraints>
 					<control type="spinner" format="string"/>
