@@ -2,7 +2,7 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="0.1.5"
+	version="0.1.6"
 	provider-name="ace20022/scott967/rockrider69"
 	>
 	<requires>
@@ -17,9 +17,10 @@
 		<description lang="en_GB">Sets the audio and subtitle track according to your language preferences</description>
 		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
 		<platform>all</platform>
-		<news>1.0.3     : Updated with changes required for Kodi 19 / Python 3 + Fixed Languages labels/tables, ConditionnalSubs to None, Custom settings
-1.0.4BETA : Conditional Subtitles rules are re-assessed on-the-fly when toggling audio tracks
-1.0.5     : Some minor optimisation</news>
+		<news>0.1.3     : Updated with changes required for Kodi 19 / Python 3 + Fixed Languages labels/tables, ConditionnalSubs to None, Custom settings
+0.1.4BETA : Conditional Subtitles rules are re-assessed on-the-fly when toggling audio tracks
+0.1.5     : Some minor optimisation
+0.1.6     : Fix Custom CondSubs not working. Switch to ignore 'Signs' tracks. Add special 'Any' audio language code. Fix some typos</news>
 		<assets>
 			<icon>resources/icon.png</icon>
 		</assets>

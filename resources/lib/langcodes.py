@@ -54,7 +54,8 @@ LANGUAGES      = (
     ("Turkish"                    , "30",       "tr",            "tur",                 "42",                    30243  ),
     ("Ukrainian"                  , "46",       "uk",            "ukr",                 "43",                    30244  ),
     ("Vietnamese"                 , "51",       "vi",            "vie",                 "44",                    30245  ),
-    ("None"                       , "-1",       "",              "non",                 "45",                    30200  ) )
+    ("None"                       , "-1",       "",              "non",                 "45",                    30200  ),
+    ("Any"                        , "-2",       "",              "any",                 "46",                    30300  ) )
 
 def languageTranslate(lang, lang_from, lang_to):
   for x in LANGUAGES:

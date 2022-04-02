@@ -109,6 +109,10 @@ msgctxt "#30122"
 msgid "General"
 msgstr ""
 
+msgctxt "#30123"
+msgid "Ignore all Signs and Songs subtitles tracks"
+msgstr ""
+
 msgctxt "#30201"
 msgid "Albanian"
 msgstr ""
@@ -293,3 +297,6 @@ msgctxt "#30200"
 msgid "None"
 msgstr ""
 
+msgctxt "#30300"
+msgid "Any"
+msgstr ""
