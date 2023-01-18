@@ -1,3 +1,7 @@
+--- Version 0.1.7BETA
+
+- New Keywords Blacklist to ignore chosen subtitles tracks based on name content.
+
 --- Version 0.1.6
 
 - Fix custom conditional preferences rules not working. (note : if ...>lan:non>... is used then forced tag is assumed on. See v0.1.3)

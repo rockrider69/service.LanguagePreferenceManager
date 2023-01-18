@@ -50,6 +50,7 @@ class settings():
                  'cond subs on: {3}\n' \
                  'turn subs on: {4}, turn subs off: {5}\n' \
                  'signs: {15}\n' \
+                 'blacklisted keywords: {16}\n' \
                  'use file name: {6}, file name regex: {7}\n' \
                  'at least one pref on: {8}\n'\
                  'audio prefs: {9}\n' \
@@ -63,7 +64,8 @@ class settings():
                          self.condsub_prefs_on, self.turn_subs_on, self.turn_subs_off,
                          self.useFilename, self.filenameRegex, self.at_least_one_pref_on,
                          self.AudioPrefs, self.SubtitlePrefs, self.CondSubtitlePrefs,
-                         self.custom_audio, self.custom_subs, self.custom_condsub, self.ignore_signs_on)
+                         self.custom_audio, self.custom_subs, self.custom_condsub, self.ignore_signs_on,
+                         ','.join(self.keyword_blacklist))
                  )
       
     def readPrefs(self):
@@ -77,6 +79,12 @@ class settings():
       self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'
       self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
       self.ignore_signs_on = addon.getSetting('signs') == 'true'
+      self.keyword_blacklist_enabled = addon.getSetting('enableKeywordBlacklist') == 'true'
+      self.keyword_blacklist = addon.getSetting('KeywordBlacklist')
+      if self.keyword_blacklist and self.keyword_blacklist_enabled:
+          self.keyword_blacklist = self.keyword_blacklist.lower().split(',')
+      else:
+          self.keyword_blacklist = []
       self.useFilename = addon.getSetting('useFilename') == 'true'
       self.filenameRegex = addon.getSetting('filenameRegex')
       if self.useFilename:

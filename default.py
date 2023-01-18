@@ -232,6 +232,7 @@ class LangPrefMan_Player(xbmc.Player) :
                 
     def evalSubPrefs(self, sub_prefs):
         log(LOG_DEBUG, 'Evaluating subtitle preferences' )
+        log(LOG_DEBUG, 'Subtitle names containing the following keywords are blacklisted: {0}'.format(','.join(settings.keyword_blacklist)))
         i = 0
         for pref in sub_prefs:
             i += 1
@@ -255,6 +256,9 @@ class LangPrefMan_Player(xbmc.Player) :
                             return -1
                     else:
                         for sub in self.subtitles:
+                            if (settings.keyword_blacklist_enabled and any(keyword in sub['name'].lower() for keyword in settings.keyword_blacklist)):
+                                log(LOG_INFO,'SubPrefs : one subtitle track is found matching Keyword Blacklist. Skipping it.')
+                                continue
                             if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
                                 log(LOG_INFO,'SubPrefs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
                                 continue
@@ -267,6 +271,7 @@ class LangPrefMan_Player(xbmc.Player) :
 
     def evalCondSubPrefs(self, condsub_prefs):
         log(LOG_DEBUG, 'Evaluating conditional subtitle preferences' )
+        log(LOG_DEBUG, 'Subtitle names containing the following keywords are blacklisted: {0}'.format(','.join(settings.keyword_blacklist)))
         # if the audio track has been changed wait some time
         if (self.audio_changed and settings.delay > 0):
             log(LOG_DEBUG, "Delaying preferences evaluation by {0} ms".format(4*settings.delay))
@@ -307,6 +312,9 @@ class LangPrefMan_Player(xbmc.Player) :
                             return -1
                         else:
                             for sub in self.subtitles:
+                                if (settings.keyword_blacklist_enabled and any(keyword in sub['name'].lower() for keyword in settings.keyword_blacklist)):
+                                    log(LOG_INFO,'CondSubs : one subtitle track is found matching Keyword Blacklist : {0}. Skipping it.'.format(','.join(settings.keyword_blacklist)))
+                                    continue
                                 if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
                                     log(LOG_INFO,'CondSubs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
                                     continue
