@@ -257,13 +257,13 @@ class LangPrefMan_Player(xbmc.Player) :
                     else:
                         for sub in self.subtitles:
                             if (settings.keyword_blacklist_enabled and any(keyword in sub['name'].lower() for keyword in settings.keyword_blacklist)):
-                                log(LOG_INFO,'SubPrefs : one subtitle track is found matching Keyword Blacklist. Skipping it.')
+                                log(LOG_INFO,'SubPrefs : one subtitle track is found matching Keyword Blacklist : {0}. Skipping it.'.format(','.join(settings.keyword_blacklist)))
                                 continue
                             if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
                                 log(LOG_INFO,'SubPrefs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
                                 continue
                             if ((code == sub['language'] or name == sub['language']) and self.testForcedFlag(forced, sub['name'])):
-                                log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2})'.format(sub['index'], i, name) )
+                                log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2})'.format(sub['index']+1, i, name) )
                                 return sub['index']
                         log(LOG_INFO, 'Subtitle: preference {0} ({1}:{2}) not available'.format(i, name, code) )
                 i += 1
@@ -320,7 +320,7 @@ class LangPrefMan_Player(xbmc.Player) :
                                     continue
                                 if ((sub_code == sub['language']) or (sub_name == sub['language'])):
                                     if (self.testForcedFlag(forced, sub['name'])):
-                                        log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format(sub['index'], i, audio_name, sub_name, forced) )
+                                        log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format(sub['index']+1, i, audio_name, sub_name, forced) )
                                         return sub['index']
                             log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2})'.format(i, audio_name, sub_name) )
                 i += 1
