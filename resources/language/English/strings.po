@@ -113,6 +113,18 @@ msgctxt "#30123"
 msgid "Ignore all Signs and Songs subtitles tracks"
 msgstr ""
 
+msgctxt "#30125"
+msgid "Enable Keyword Blacklist"
+msgstr "
+
+msgctxt "#30126"
+msgid "Enter a comma-separated list of keywords to blacklist in subtitle names"
+msgstr "
+
+msgctxt "#30127"
+msgid "Keyword List:"
+msgstr "
+
 msgctxt "#30201"
 msgid "Albanian"
 msgstr ""
