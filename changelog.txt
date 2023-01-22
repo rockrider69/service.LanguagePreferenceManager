@@ -1,3 +1,7 @@
+--- Version 1.0.0
+
+- Mandatory clean-up to propose as candidate version for Kodi.tv addons repository.
+
 --- Version 0.1.7BETA
 
 - New Keywords Blacklist to ignore chosen subtitles tracks based on name content.
