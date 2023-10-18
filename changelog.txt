@@ -1,3 +1,8 @@
+--- Version 1.0.2
+
+- To identify forced sub tracks : check subtitle stream field "isforced" in addition to just field "name" which can be empty
+- Fix to avoid 10-15sec delay and few lines lost on subtitles showing at the very begining of a video
+
 --- Version 1.0.1
 
 - Initial version for main Kodi.tv addons repository
