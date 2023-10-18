@@ -55,6 +55,7 @@ class LangPrefMan_Player(xbmc.Player) :
             log(LOG_DEBUG, 'Getting video properties')
             self.getDetails()
             self.evalPrefs()
+            self.LPM_initial_run_done = True
 
     def onAVChange(self):
         if self.LPM_initial_run_done and settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
