@@ -73,6 +73,8 @@ class LangPrefMan_Player(xbmc.Player) :
             if (self.selected_audio_stream['index'] != previous_audio_index):
                 log(LOG_INFO, 'Audio track changed from {0} to {1}. Reviewing Conditional Subtitles rules...'.format(previous_audio_language, self.selected_audio_stream['language']))
                 self.evalPrefs()
+                # force short rewind to avoid 10-15sec delay and first few subtitles lines potentially lost
+                self.seekTime(self.getTime()-1)
     
     def evalPrefs(self):
         # recognized filename audio or filename subtitle
