@@ -56,7 +56,7 @@ class LangPrefMan_Player(xbmc.Player) :
             self.getDetails()
             self.evalPrefs()
             # force immediate rewind to avoid 10-15sec delay and first few subtitles lines potentially lost
-            self.seekTime(-1)
+            self.seekTime(0)
             self.LPM_initial_run_done = True
 
     def onAVChange(self):
