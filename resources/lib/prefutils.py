@@ -317,7 +317,12 @@ class LangPrefMan_Player(xbmc.Player) :
         test = subName.lower()
         matches = ['forced', 'forcés']
         found = any(x in test for x in matches)
-        return ((forced == 'false') and not found) or ((forced == 'true') and found) or ((forced == 'true') and subForcedTag) or ((forced == 'false') and not subForcedTag)
+        # Only when looking for forced subs :
+        #   in case the sub name is plain empty or not well documented, 
+        #   check also the sub isforced tag and consider it a match if set
+        if (forced and not found and subForcedTag):
+            found = True
+        return ((forced == 'false') and not found) or ((forced == 'true') and found)
 
     def isExternalSub(self, subName):
         test = subName.lower()

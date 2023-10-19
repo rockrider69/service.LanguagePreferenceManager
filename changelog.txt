@@ -1,7 +1,7 @@
 --- Version 1.0.2
 
-- To identify forced sub tracks : check subtitle stream field "isforced" in addition to just field "name" which can be empty
-- Fix to avoid 10-15sec delay and few lines lost on subtitles showing at the very begining of a video
+- Fix 10sec latency on subs display and possible few lines lost - at video start or when switching audio.
+- Forced sub tracks : check also subtitle field "isforced" in case field "name" is empty or misspelled.
 
 --- Version 1.0.1
 
