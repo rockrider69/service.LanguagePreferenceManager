@@ -96,6 +96,8 @@ class settings():
                                   or self.condsub_prefs_on
                                   or self.useFilename)
       
+      self.CondSubTag = 'false'
+      
       self.AudioPrefs = [(set(), [
           (languageTranslate(addon.getSetting('AudioLang01'), 4, 0) ,
            languageTranslate(addon.getSetting('AudioLang01'), 4, 3)),
@@ -121,21 +123,24 @@ class settings():
               languageTranslate(addon.getSetting('CondAudioLang01'), 4, 3),
               languageTranslate(addon.getSetting('CondSubLang01'), 4, 0),
               languageTranslate(addon.getSetting('CondSubLang01'), 4, 3),
-              addon.getSetting('CondSubForced01')
+              addon.getSetting('CondSubForced01'),
+              self.CondSubTag
           ),
           (
               languageTranslate(addon.getSetting('CondAudioLang02'), 4, 0),
               languageTranslate(addon.getSetting('CondAudioLang02'), 4, 3),
               languageTranslate(addon.getSetting('CondSubLang02'), 4, 0),
               languageTranslate(addon.getSetting('CondSubLang02'), 4, 3),
-              addon.getSetting('CondSubForced02')
+              addon.getSetting('CondSubForced02'),
+              self.CondSubTag
           ),
           (
               languageTranslate(addon.getSetting('CondAudioLang03'), 4, 0),
               languageTranslate(addon.getSetting('CondAudioLang03'), 4, 3),
               languageTranslate(addon.getSetting('CondSubLang03'), 4, 0),
               languageTranslate(addon.getSetting('CondSubLang03'), 4, 3),
-              addon.getSetting('CondSubForced03')
+              addon.getSetting('CondSubForced03'),
+              self.CondSubTag
           )]
       )]
 

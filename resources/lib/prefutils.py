@@ -270,7 +270,7 @@ class LangPrefMan_Player(xbmc.Player) :
 
             log(LOG_INFO,'Cond Sub: genre/tag preference {0} met with intersection {1}'.format(g_t, (self.genres_and_tags & g_t)))
             for pref in preferences:
-                audio_name, audio_code, sub_name, sub_code, forced = pref
+                audio_name, audio_code, sub_name, sub_code, forced, ss_tag = pref
                 if (audio_code is None):
                     log(LOG_DEBUG,'continue')
                     continue 
@@ -294,6 +294,10 @@ class LangPrefMan_Player(xbmc.Player) :
                             return -1
                         else:
                             for sub in self.subtitles:
+                                if ((sub_code == sub['language']) or (sub_name == sub['language'])):
+                                    if (ss_tag == 'true' and self.isSignsSub(sub['name'])):
+                                        log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) SubTag {4}'.format((sub['index']+1), i, audio_name, sub_name, ss_tag) )
+                                        return sub['index']
                                 if (settings.keyword_blacklist_enabled and any(keyword in sub['name'].lower() for keyword in settings.keyword_blacklist)):
                                     log(LOG_INFO,'CondSubs : one subtitle track is found matching Keyword Blacklist : {0}. Skipping it.'.format(','.join(settings.keyword_blacklist)))
                                     continue
@@ -301,7 +305,7 @@ class LangPrefMan_Player(xbmc.Player) :
                                     log(LOG_INFO,'CondSubs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
                                     continue
                                 if ((sub_code == sub['language']) or (sub_name == sub['language'])):
-                                    if (self.testForcedFlag(forced, sub['name'], sub['isforced'])):
+                                    if (ss_tag == 'false' and self.testForcedFlag(forced, sub['name'], sub['isforced'])):
                                         log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format((sub['index']+1), i, audio_name, sub_name, forced) )
                                         return sub['index']
                             log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2})'.format(i, audio_name, sub_name) )
