@@ -57,11 +57,11 @@
 				</setting>
 			</group>
 			<group id="3">
-				<setting id="enableKeywordBlacklist" label="30125" type="boolean">
+				<setting id="enableSubtitleKeywordBlacklist" label="30125" type="boolean">
 					<default>false</default>
 					<control type="toggle" />
 				</setting>
-				<setting label="30126" type="string" id="KeywordBlacklistLabel">
+				<setting label="30126" type="string" id="SubtitleKeywordBlacklistLabel">
 					<default></default>
 					<constraints>
 						<allowempty>true</allowempty>
@@ -71,10 +71,10 @@
 					</control>
 					<enable>false</enable>
 					<dependencies>
-						<dependency type="visible" setting="enableKeywordBlacklist" operator="is">true</dependency>
+						<dependency type="visible" setting="enableSubtitleKeywordBlacklist" operator="is">true</dependency>
 					</dependencies>
 				</setting>
-				<setting label="30127" type="string" id="KeywordBlacklist">
+				<setting label="30127" type="string" id="SubtitleKeywordBlacklist">
 					<default></default>
 					<constraints>
 						<allowempty>true</allowempty>
@@ -83,7 +83,38 @@
 						<heading>30127</heading>
 					</control>
 					<dependencies>
-						<dependency type="visible" setting="enableKeywordBlacklist" operator="is">true</dependency>
+						<dependency type="visible" setting="enableSubtitleKeywordBlacklist" operator="is">true</dependency>
+					</dependencies>
+				</setting>
+			</group>
+			<group id="4">
+				<setting id="enableAudioKeywordBlacklist" label="30128" type="boolean">
+					<default>false</default>
+					<control type="toggle" />
+				</setting>
+				<setting label="30129" type="string" id="AudioKeywordBlacklistLabel">
+					<default></default>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="edit" format="string">
+						<heading>30129</heading>
+					</control>
+					<enable>false</enable>
+					<dependencies>
+						<dependency type="visible" setting="enableAudioKeywordBlacklist" operator="is">true</dependency>
+					</dependencies>
+				</setting>
+				<setting label="30130" type="string" id="AudioKeywordBlacklist">
+					<default></default>
+					<constraints>
+						<allowempty>true</allowempty>
+					</constraints>
+					<control type="edit" format="string">
+						<heading>30130</heading>
+					</control>
+					<dependencies>
+						<dependency type="visible" setting="enableAudioKeywordBlacklist" operator="is">true</dependency>
 					</dependencies>
 				</setting>
 			</group>

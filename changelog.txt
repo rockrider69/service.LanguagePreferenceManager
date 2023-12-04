@@ -1,3 +1,7 @@
+--- Version 1.0.3BETA2
+
+- Keywords Blacklist for Audio tracks. Same principle as for Subtitles, based on track name, skip some (ex. Commentary, ...)
+
 --- Version 1.0.3BETA1
 
 - Option to prioritize 'SignsSongs' tracks via custom conditional sub preferences. Syntax is ...>Eng:Eng-ss>...

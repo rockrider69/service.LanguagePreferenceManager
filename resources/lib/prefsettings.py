@@ -65,7 +65,9 @@ class settings():
                          self.useFilename, self.filenameRegex, self.at_least_one_pref_on,
                          self.AudioPrefs, self.SubtitlePrefs, self.CondSubtitlePrefs,
                          self.custom_audio, self.custom_subs, self.custom_condsub, self.ignore_signs_on,
-                         ','.join(self.keyword_blacklist))
+                         ','.join(self.subtitle_keyword_blacklist),
+                         ','.join(self.audio_keyword_blacklist)
+                        )
                  )
       
     def readPrefs(self):
@@ -79,12 +81,18 @@ class settings():
       self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'
       self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
       self.ignore_signs_on = addon.getSetting('signs') == 'true'
-      self.keyword_blacklist_enabled = addon.getSetting('enableKeywordBlacklist') == 'true'
-      self.keyword_blacklist = addon.getSetting('KeywordBlacklist')
-      if self.keyword_blacklist and self.keyword_blacklist_enabled:
-          self.keyword_blacklist = self.keyword_blacklist.lower().split(',')
+      self.subtitle_keyword_blacklist_enabled = addon.getSetting('enableSubtitleKeywordBlacklist') == 'true'
+      self.subtitle_keyword_blacklist = addon.getSetting('SubtitleKeywordBlacklist')
+      if self.subtitle_keyword_blacklist and self.subtitle_keyword_blacklist_enabled:
+          self.subtitle_keyword_blacklist = self.subtitle_keyword_blacklist.lower().split(',')
       else:
-          self.keyword_blacklist = []
+          self.subtitle_keyword_blacklist = []
+      self.audio_keyword_blacklist_enabled = addon.getSetting('enableAudioKeywordBlacklist') == 'true'
+      self.audio_keyword_blacklist = addon.getSetting('AudioKeywordBlacklist')
+      if self.audio_keyword_blacklist and self.audio_keyword_blacklist_enabled:
+          self.audio_keyword_blacklist = self.audio_keyword_blacklist.lower().split(',')
+      else:
+          self.audio_keyword_blacklist = []
       self.useFilename = addon.getSetting('useFilename') == 'true'
       self.filenameRegex = addon.getSetting('filenameRegex')
       if self.useFilename:
