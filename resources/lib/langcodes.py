@@ -26,7 +26,7 @@ LANGUAGES      = (
     ("Finnish"                    , "31",       "fi",            "fin",                 "14",                    30215  ),
     ("French"                     , "8",        "fr",            "fre",                 "15",                    30216  ),
     ("German"                     , "5",        "de",            "ger,deu",             "16",                    30217  ),
-    ("Greek"                      , "16",       "el",            "ell",                 "17",                    30218  ),
+    ("Greek"                      , "16",       "el",            "ell,gre",             "17",                    30218  ),
     ("Hebrew"                     , "22",       "he",            "heb",                 "18",                    30219  ),
     ("Hindi"                      , "42",       "hi",            "hin",                 "19",                    30220  ),
     ("Hungarian"                  , "15",       "hu",            "hun",                 "20",                    30221  ),
