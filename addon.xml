@@ -2,7 +2,7 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="1.0.3BETA2"
+	version="1.0.3BETA3"
 	provider-name="ace20022/scott967/rockrider69"
 	>
 	<requires>
@@ -29,6 +29,7 @@
 1.0.3BETA1: Option to prioritize 'SignsSongs' tracks via custom conditional sub preferences. Syntax is ...>Eng:Eng-ss>...
 				Overrides general 'Ignore Signs and Songs toggle' or 'Blacklisting Signs via keyword', if ever used.
 1.0.3BETA2: Keywords Blacklist for Audio tracks. Same principle as for Subtitles, based on track name, to skip some (ex. Commentary, ...)
+1.0.3BETA3: Fixed Greek language codes. Fix some typos.
 
 		</news>
 		<assets>
