@@ -151,12 +151,21 @@ class LangPrefMan_Player(xbmc.Player) :
                     self.showSubtitles(True)
 
         # Workaround to an old Kodi bug creating 10-15 sec latency when activating a subtitle track.
-        # Force very short rewind to avoid 10-15sec delay and first few subtitles lines potentially lost
+        # Force a short rewind to avoid 10-15sec delay and first few subtitles lines potentially lost
         #       but if we are very close to beginning, then restart from time 0        
-        if (self.getTime() <= 10):
+        current_time = self.getTime()
+        if (current_time <= 10):
+            # This is a probably an initial start, seek back to 0 is securing subs are displayed immediately
+            log(LOG_DEBUG, 'Forced rewind - Position time is {0} sec. Too close to start, restart from 0.'.format(current_time))
             self.seekTime(0)
+        elif (not self.LPM_initial_run_done):
+            # This is a resume, seek back 10sec to secure the 8sec normal Aud/Vid buffers are flushed
+            # Seek back less while resuming (ex. 1sec) create too many Large Audio Sync errors, with some unwanted restart from 0, or even possible bug freeze
+            log(LOG_DEBUG, 'Forced rewind - Position time was {0} sec. Resume with 10 sec rewind.'.format(current_time))
+            self.seekTime(current_time - 10) 
         else:
-            self.seekTime(self.getTime()-1)
+            # This is an Audio Track change on-the-fly, accept the subs latency to keep snappyness. No seek back at all.
+            log(LOG_DEBUG, 'No Forced rewind - Position time was {0} sec. Audio switch - Subs display slightly delayed.'.format(current_time))
 
     def evalFilenamePrefs(self):
         log(LOG_DEBUG, 'Evaluating filename preferences' )

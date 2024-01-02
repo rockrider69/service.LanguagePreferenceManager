@@ -1,3 +1,7 @@
+--- Version 1.0.3BETA4
+
+- Fix random video/audio freeze at resume due to previous "Fix 10sec latency". Rewrite it and add debug messages.
+
 --- Version 1.0.3BETA3
 
 - Fixed Greek language codes. Fix some typos.
