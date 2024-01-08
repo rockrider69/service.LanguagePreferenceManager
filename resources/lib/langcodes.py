@@ -45,7 +45,7 @@ LANGUAGES      = (
     ("Portuguese (Brazil)"        , "48",       "pb",            "pt-br",               "33",                    30234  ),
     ("Romanian"                   , "13",       "ro",            "rum",                 "34",                    30235  ),
     ("Russian"                    , "27",       "ru",            "rus",                 "35",                    30236  ),
-    ("Serbian"                    , "36",       "sr",            "scc",                 "36",                    30237  ),
+    ("Serbian"                    , "36",       "sr",            "srp,scc",             "36",                    30237  ),
     ("Slovak"                     , "37",       "sk",            "slo",                 "37",                    30238  ),
     ("Slovenian"                  , "1",        "sl",            "slv",                 "38",                    30239  ),
     ("Spanish"                    , "28",       "es",            "spa",                 "39",                    30240  ),
