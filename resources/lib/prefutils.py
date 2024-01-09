@@ -290,54 +290,63 @@ class LangPrefMan_Player(xbmc.Player) :
 
             log(LOG_INFO,'Cond Sub: genre/tag preference {0} met with intersection {1}'.format(g_t, (self.genres_and_tags & g_t)))
             for pref in preferences:
-                audio_name, audio_code, sub_name, sub_code, forced, ss_tag = pref
-                if (audio_code is None):
-                    log(LOG_DEBUG,'continue')
-                    continue 
+                audio_name, audio_codes, sub_name, sub_codes, forced, ss_tag = pref
+                # manage multiple audio and/or subtitle 3-letters codes if present (ex. German = ger,deu)
+                audio_codes = audio_codes.split(r',')
+                sub_codes = sub_codes.split(r',')
+                nbr_sub_codes = len(sub_codes)
 
-                if (self.selected_audio_stream and
-                    'language' in self.selected_audio_stream and
-                    (audio_code == self.selected_audio_stream['language'] or audio_name == self.selected_audio_stream['language'] or audio_code == "any")):
-                        log(LOG_INFO, 'Selected audio language matches conditional preference {0} ({1}:{2}), force tag is {3}'.format(i, audio_name, sub_name, forced) )
-                        if (sub_code == "non"):
-                            if (forced == 'true'):
-                                log(LOG_INFO, 'Subtitle condition is None but forced is true, searching a forced subtitle matching selected audio...')
-                                for sub in self.subtitles:
-                                    log(LOG_DEBUG, 'Looping subtitles...')
-                                    # filter out subtitles to be ignored via Signs&Songs Toggle or matching Keywords Blacklist
-                                    if self.isInBlacklist(sub['name'], 'Subtitle'):
-                                        log(LOG_INFO,'CondSubs : one subtitle track is found matching Keyword Blacklist : {0}. Skipping it.'.format(','.join(settings.subtitle_keyword_blacklist)))
-                                        continue
-                                    if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
-                                        log(LOG_INFO,'CondSubs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
-                                        continue
-                                    if ((audio_code == sub['language']) or (audio_name == sub['language'])):
-                                        log(LOG_DEBUG, 'One potential match found...')
-                                        if (self.testForcedFlag(forced, sub['name'], sub['isforced'])):
-                                            log(LOG_DEBUG, 'One forced match found...')
-                                            log(LOG_INFO, 'Language of subtitle {0} matches audio preference {1} ({2}:{3}) with forced overriding rule {4}'.format((sub['index']+1), i, audio_name, sub_name, forced) )
-                                            return sub['index']
-                                log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2}) with forced overriding rule {3}'.format(i, audio_name, sub_name, forced))
-                            return -1
-                        else:
-                            for sub in self.subtitles:
-                                # take into account -ss tag to prioritize specific Signs&Songs subtitles track
-                                if ((sub_code == sub['language']) or (sub_name == sub['language'])):
-                                    if (ss_tag == 'true' and self.isSignsSub(sub['name'])):
-                                        log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) SubTag {4}'.format((sub['index']+1), i, audio_name, sub_name, ss_tag) )
-                                        return sub['index']
-                                # filter out subtitles to be ignored via Signs&Songs Toggle or matching Keywords Blacklist
-                                if self.isInBlacklist(sub['name'], 'Subtitle'):
-                                    log(LOG_INFO,'CondSubs : one subtitle track is found matching Keyword Blacklist : {0}. Skipping it.'.format(','.join(settings.subtitle_keyword_blacklist)))
-                                    continue
-                                if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
-                                    log(LOG_INFO,'CondSubs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
-                                    continue
-                                if ((sub_code == sub['language']) or (sub_name == sub['language'])):
-                                    if (ss_tag == 'false' and self.testForcedFlag(forced, sub['name'], sub['isforced'])):
-                                        log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format((sub['index']+1), i, audio_name, sub_name, forced) )
-                                        return sub['index']
-                            log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2})'.format(i, audio_name, sub_name) )
+                for audio_code in audio_codes:
+                    if (audio_code is None):
+                        log(LOG_DEBUG,'continue')
+                        continue 
+
+                    if (self.selected_audio_stream and
+                        'language' in self.selected_audio_stream and
+                        (audio_code == self.selected_audio_stream['language'] or audio_name == self.selected_audio_stream['language'] or audio_code == "any")):
+                            log(LOG_INFO, 'Selected audio language matches conditional preference {0} ({1}:{2}), force tag is {3}'.format(i, audio_name, sub_name, forced) )
+                            for sub_code in sub_codes:
+                                if (sub_code == "non"):
+                                    if (forced == 'true'):
+                                        log(LOG_INFO, 'Subtitle condition is None but forced is true, searching a forced subtitle matching selected audio...')
+                                        for sub in self.subtitles:
+                                            log(LOG_DEBUG, 'Looping subtitles...')
+                                            # filter out subtitles to be ignored via Signs&Songs Toggle or matching Keywords Blacklist
+                                            if self.isInBlacklist(sub['name'], 'Subtitle'):
+                                                log(LOG_INFO,'CondSubs : one subtitle track is found matching Keyword Blacklist : {0}. Skipping it.'.format(','.join(settings.subtitle_keyword_blacklist)))
+                                                continue
+                                            if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
+                                                log(LOG_INFO,'CondSubs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
+                                                continue
+                                            if ((audio_code == sub['language']) or (audio_name == sub['language'])):
+                                                log(LOG_DEBUG, 'One potential match found...')
+                                                if (self.testForcedFlag(forced, sub['name'], sub['isforced'])):
+                                                    log(LOG_DEBUG, 'One forced match found...')
+                                                    log(LOG_INFO, 'Language of subtitle {0} matches audio preference {1} ({2}:{3}) with forced overriding rule {4}'.format((sub['index']+1), i, audio_name, sub_name, forced) )
+                                                    return sub['index']
+                                        log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2}) with forced overriding rule {3}'.format(i, audio_name, sub_name, forced))
+                                    return -1
+                                else:
+                                    for sub in self.subtitles:
+                                        # take into account -ss tag to prioritize specific Signs&Songs subtitles track
+                                        if ((sub_code == sub['language']) or (sub_name == sub['language'])):
+                                            if (ss_tag == 'true' and self.isSignsSub(sub['name'])):
+                                                log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) SubTag {4}'.format((sub['index']+1), i, audio_name, sub_name, ss_tag) )
+                                                return sub['index']
+                                        # filter out subtitles to be ignored via Signs&Songs Toggle or matching Keywords Blacklist
+                                        if self.isInBlacklist(sub['name'], 'Subtitle'):
+                                            log(LOG_INFO,'CondSubs : one subtitle track is found matching Keyword Blacklist : {0}. Skipping it.'.format(','.join(settings.subtitle_keyword_blacklist)))
+                                            continue
+                                        if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
+                                            log(LOG_INFO,'CondSubs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
+                                            continue
+                                        if ((sub_code == sub['language']) or (sub_name == sub['language'])):
+                                            if (ss_tag == 'false' and self.testForcedFlag(forced, sub['name'], sub['isforced'])):
+                                                log(LOG_INFO, 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format((sub['index']+1), i, audio_name, sub_name, forced) )
+                                                return sub['index']
+                                    nbr_sub_codes -= 1
+                                    if nbr_sub_codes == 0:
+                                        log(LOG_INFO, 'Conditional subtitle: no match found for preference {0} ({1}:{2})'.format(i, audio_name, sub_name) )
                 i += 1
         return -2
 
