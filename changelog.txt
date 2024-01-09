@@ -1,3 +1,8 @@
+--- Version 1.0.3BETA5
+
+- Fix multiple 3 digit codes per language (ex. German ger,deu). Now OK also for Conditional Subtitles preferences.
+- Fix Serbian language codes, now 'srp,scc' according to last iso639-2/T
+
 --- Version 1.0.3BETA4
 
 - Fix random video/audio freeze at resume due to previous "Fix 10sec latency". Rewrite it and add debug messages.
