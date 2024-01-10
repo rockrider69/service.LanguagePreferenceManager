@@ -152,20 +152,24 @@ class LangPrefMan_Player(xbmc.Player) :
 
         # Workaround to an old Kodi bug creating 10-15 sec latency when activating a subtitle track.
         # Force a short rewind to avoid 10-15sec delay and first few subtitles lines potentially lost
-        #       but if we are very close to beginning, then restart from time 0        
+        #       but if we are very close to beginning, then restart from time 0
+        # Ignore this workaround if fast_subs_display option is disabled (default = 0)
         current_time = self.getTime()
-        if (current_time <= 10):
-            # This is a probably an initial start, seek back to 0 is securing subs are displayed immediately
-            log(LOG_DEBUG, 'Forced rewind - Position time is {0} sec. Too close to start, restart from 0.'.format(current_time))
+        if (settings.fast_subs_display == 0):
+            # Default is no seek back, which sometimes generate restart or freeze on slower systems
+            log(LOG_DEBUG, 'Fast Subs Display disabled - Subs display will be slightly delayed 8-10sec.')
+        elif (current_time <= 10 and settings.fast_subs_display >= 1):
+            # This is an initial start, seek back to 0 is securing subs are displayed immediately
+            log(LOG_DEBUG, 'Fast Subs Display on Start - Position time is {0} sec. Restart from 0.'.format(current_time))
             self.seekTime(0)
-        elif (not self.LPM_initial_run_done):
+        elif (not self.LPM_initial_run_done and settings.fast_subs_display == 2):
             # This is a resume, seek back 10sec to secure the 8sec normal Aud/Vid buffers are flushed
             # Seek back less while resuming (ex. 1sec) create too many Large Audio Sync errors, with some unwanted restart from 0, or even possible bug freeze
-            log(LOG_DEBUG, 'Forced rewind - Position time was {0} sec. Resume with 10 sec rewind.'.format(current_time))
+            log(LOG_DEBUG, 'Fast Subs Display on Resume - Position time is {0} sec. Resume with 10 sec rewind.'.format(current_time))
             self.seekTime(current_time - 10) 
         else:
-            # This is an Audio Track change on-the-fly, accept the subs latency to keep snappyness. No seek back at all.
-            log(LOG_DEBUG, 'No Forced rewind - Position time was {0} sec. Audio switch - Subs display slightly delayed.'.format(current_time))
+            # This is an Audio Track change on-the-fly or a Resume with fast_sub_display on 'Start Only', accept the subs latency to keep snappyness. No seek back at all.
+            log(LOG_DEBUG, 'Position time was {0} sec. Subs display slightly delayed.'.format(current_time))
 
     def evalFilenamePrefs(self):
         log(LOG_DEBUG, 'Evaluating filename preferences' )

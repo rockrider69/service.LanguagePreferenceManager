@@ -50,7 +50,9 @@ class settings():
                  'cond subs on: {3}\n' \
                  'turn subs on: {4}, turn subs off: {5}\n' \
                  'signs: {15}\n' \
-                 'blacklisted keywords: {16}\n' \
+                 'blacklisted keywords (subtitles): {16}\n' \
+                 'blacklisted keywords (audio): {17}\n' \
+                 'fast subtitles display (10sec latency workaround): {18}\n' \
                  'use file name: {6}, file name regex: {7}\n' \
                  'at least one pref on: {8}\n'\
                  'audio prefs: {9}\n' \
@@ -66,7 +68,8 @@ class settings():
                          self.AudioPrefs, self.SubtitlePrefs, self.CondSubtitlePrefs,
                          self.custom_audio, self.custom_subs, self.custom_condsub, self.ignore_signs_on,
                          ','.join(self.subtitle_keyword_blacklist),
-                         ','.join(self.audio_keyword_blacklist)
+                         ','.join(self.audio_keyword_blacklist),
+                         self.fast_subs_display
                         )
                  )
       
@@ -93,6 +96,7 @@ class settings():
           self.audio_keyword_blacklist = self.audio_keyword_blacklist.lower().split(',')
       else:
           self.audio_keyword_blacklist = []
+      self.fast_subs_display = int(addon.getSetting('FastSubsDisplay'))
       self.useFilename = addon.getSetting('useFilename') == 'true'
       self.filenameRegex = addon.getSetting('filenameRegex')
       if self.useFilename:
