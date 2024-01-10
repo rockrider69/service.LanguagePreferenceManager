@@ -1,3 +1,8 @@
+--- Version 1.0.3BETA6
+
+- 10sec subs latency workaround: new option to enable it at 'start only' or 'start+resume'. Default is disabled.
+    (fast multiple resumes can sometimes generate restart or freeze due to audio/video desynch)
+
 --- Version 1.0.3BETA5
 
 - Fix multiple 3 digit codes per language (ex. German ger,deu). Now OK also for Conditional Subtitles preferences.

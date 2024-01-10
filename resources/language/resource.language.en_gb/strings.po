@@ -137,6 +137,22 @@ msgctxt "#30130"
 msgid "Audio Keyword List:"
 msgstr "
 
+msgctxt "#30131"
+msgid "Fast Subtitles Display:"
+msgstr "
+
+msgctxt "#30132"
+msgid "Disabled"
+msgstr "
+
+msgctxt "#30133"
+msgid "New Start only"
+msgstr "
+
+msgctxt "#30134"
+msgid "Start & Resume"
+msgstr "
+
 msgctxt "#30201"
 msgid "Albanian"
 msgstr ""
