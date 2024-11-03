@@ -1,6 +1,6 @@
 --- Version 1.0.5
 
-- Add Norwegian Bokmal (nb,nob) and English Middle (enm) language codes according to ISO639-2.
+- Add Norwegian Bokmal (nb,nob), New Nowegian (nn,nno) and English Middle (enm) language codes according to ISO639-2.
 - Clean-up some info/log message.
 
 --- Version 1.0.4

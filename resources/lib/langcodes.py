@@ -56,6 +56,7 @@ LANGUAGES      = (
     ("Vietnamese"                 , "51",       "vi",            "vie",                 "44",                    30245  ),
     ("English Middle"             , "2",        "",              "enm",                 "47",                    30248  ),
     ("Norwegian Bokmal"           , "3",        "nb",            "nob",                 "48",                    30249  ),
+    ("New Norwegian"              , "3",        "nn",            "nno",                 "49",                    30250  ),
     ("None"                       , "-1",       "",              "non",                 "45",                    30200  ),
     ("Any"                        , "-2",       "",              "any",                 "46",                    30300  ) )
 
