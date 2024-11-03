@@ -341,6 +341,10 @@ msgctxt "#30249"
 msgid "Norwegian Bokmal"
 msgstr ""
 
+msgctxt "#30250"
+msgid "New Norwegian"
+msgstr ""
+
 msgctxt "#30200"
 msgid "None"
 msgstr ""
