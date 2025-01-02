@@ -115,43 +115,55 @@ msgstr ""
 
 msgctxt "#30125"
 msgid "Enable Subtitle Keyword Blacklist"
-msgstr "
+msgstr ""
 
 msgctxt "#30126"
 msgid "Enter a comma-separated list of keywords to blacklist in subtitle names"
-msgstr "
+msgstr ""
 
 msgctxt "#30127"
 msgid "Subtitle Keyword List:"
-msgstr "
+msgstr ""
 
 msgctxt "#30128"
 msgid "Enable Audio Keyword Blacklist"
-msgstr "
+msgstr ""
 
 msgctxt "#30129"
 msgid "Enter a comma-separated list of keywords to blacklist in audio names"
-msgstr "
+msgstr ""
 
 msgctxt "#30130"
 msgid "Audio Keyword List:"
-msgstr "
+msgstr ""
 
 msgctxt "#30131"
 msgid "Fast Subtitles Display:"
-msgstr "
+msgstr ""
 
 msgctxt "#30132"
 msgid "Disabled"
-msgstr "
+msgstr ""
 
 msgctxt "#30133"
 msgid "New Start only"
-msgstr "
+msgstr ""
 
 msgctxt "#30134"
 msgid "Start & Resume"
-msgstr "
+msgstr ""
+
+msgctxt "#30135"
+msgid "Overrides"
+msgstr ""
+
+msgctxt "#30136"
+msgid "Store Override Movies"
+msgstr ""
+
+msgctxt "#30137"
+msgid "Store Override TV Shows"
+msgstr ""
 
 msgctxt "#30201"
 msgid "Albanian"
