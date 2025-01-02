@@ -1,6 +1,8 @@
 import os, sys, re
 import xbmc, xbmcaddon, xbmcvfs
 
+from custom_media_preference import media_preference_manager, CustomMediaPreference
+
 import json as simplejson
 
 from langcodes import *
@@ -24,18 +26,19 @@ def log(level, msg):
         xbmc.log("[Language Preference Manager]: " + str(msg), l)
 
 class LangPref_Monitor( xbmc.Monitor ):
-  
+
   def __init__( self ):
       xbmc.Monitor.__init__( self )
-        
+
   def onSettingsChanged( self ):
       settings.init()
       settings.readSettings()
 
 class LangPrefMan_Player(xbmc.Player) :
-    
+
     def __init__ (self):
         self.LPM_initial_run_done = False
+        self.selected_sub_enabled = False
         settings.readSettings()
         xbmc.Player.__init__(self)
 
@@ -43,7 +46,7 @@ class LangPrefMan_Player(xbmc.Player) :
         if settings.service_enabled and settings.at_least_one_pref_on:
             log(LOG_DEBUG, 'New AV Playback initiated - Resetting LPM Initial Flag')
             self.LPM_initial_run_done = False
-    
+
     def onAVStarted(self):
         if settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
             log(LOG_DEBUG, 'Playback started')
@@ -54,7 +57,19 @@ class LangPrefMan_Player(xbmc.Player) :
                 xbmc.sleep(settings.delay)
             log(LOG_DEBUG, 'Getting video properties')
             self.getDetails()
-            self.evalPrefs()
+
+            if settings.is_store_override_player(self):
+                log(LOG_INFO, 'Looking for custom media preferences')
+                custom_preference = media_preference_manager.get_preference(self)
+
+                if custom_preference is not None:
+                    log(LOG_INFO, 'Custom media preferences found for current media')
+                    custom_preference.apply_to_player(self)
+                else:
+                    self.evalPrefs()
+            else:
+                self.evalPrefs()
+
             self.LPM_initial_run_done = True
 
     def onAVChange(self):
@@ -66,12 +81,34 @@ class LangPrefMan_Player(xbmc.Player) :
                 xbmc.sleep(settings.delay)
             previous_audio_index = self.selected_audio_stream['index']
             previous_audio_language = self.selected_audio_stream['language']
+
+            previous_sub_index = self.getSelectedSubtitleIndex()
+
+            previous_sub_language = self.getSelectedSubtitleLanguage()
+            previous_enabled_sub = self.selected_sub_enabled
+
             log(LOG_DEBUG, 'Getting video properties')
             self.getDetails()
+
+            log(LOG_INFO, 'Subtitle enabled: {0}'.format(self.selected_sub_enabled))
+
             if (self.selected_audio_stream['index'] != previous_audio_index):
                 log(LOG_INFO, 'Audio track changed from {0} to {1}. Reviewing Conditional Subtitles rules...'.format(previous_audio_language, self.selected_audio_stream['language']))
+
+                if settings.is_store_override_player(self):
+                    custom_preference = CustomMediaPreference.from_player(self)
+                    media_preference_manager.add_preference(custom_preference)
+                    media_preference_manager.save_preferences()
+
                 self.evalPrefs()
-    
+            if self.getSelectedSubtitleIndex() != previous_sub_index or self.selected_sub_enabled != previous_enabled_sub:
+                log(LOG_INFO, 'Subtitle track changed from {0} to {1}'.format(previous_sub_language, self.getSelectedSubtitleLanguage()))
+
+                if settings.is_store_override_player(self):
+                    custom_preference = CustomMediaPreference.from_player(self)
+                    media_preference_manager.add_preference(custom_preference)
+                    media_preference_manager.save_preferences()
+
     def evalPrefs(self):
         # recognized filename audio or filename subtitle
         fa = False
@@ -85,7 +122,7 @@ class LangPrefMan_Player(xbmc.Player) :
                 fa = True
             else:
                 log(LOG_INFO, 'Filename preference: No match found for audio track ({0})'.format(self.getPlayingFile()))
-                
+
             if (sub >= 0) and sub < len(self.subtitles):
                 self.setSubtitleStream(sub)
                 fs = True
@@ -98,25 +135,25 @@ class LangPrefMan_Player(xbmc.Player) :
                 if settings.turn_subs_off:
                     log(LOG_INFO, 'Subtitle: disabling subs' )
                     self.showSubtitles(False)
-                    
+
         if settings.audio_prefs_on and not fa and not self.LPM_initial_run_done:
             if settings.custom_audio_prefs_on:
                 trackIndex = self.evalAudioPrefs(settings.custom_audio)
             else:
                 trackIndex = self.evalAudioPrefs(settings.AudioPrefs)
-                
+
             if trackIndex == -2:
                 log(LOG_INFO, 'Audio: None of the preferred languages is available' )
             elif trackIndex >= 0:
                 self.setAudioStream(trackIndex)
                 self.audio_changed = True
-            
+
         if settings.sub_prefs_on and not fs and not self.LPM_initial_run_done:
             if settings.custom_sub_prefs_on:
                 trackIndex = self.evalSubPrefs(settings.custom_subs)
             else:
                 trackIndex = self.evalSubPrefs(settings.SubtitlePrefs)
-                
+
             if trackIndex == -2:
                 log(LOG_INFO, 'Subtitle: None of the preferred languages is available' )
                 if settings.turn_subs_off:
@@ -132,7 +169,7 @@ class LangPrefMan_Player(xbmc.Player) :
                 if settings.turn_subs_on:
                     log(LOG_INFO, 'Subtitle: enabling subs' )
                     self.showSubtitles(True)
-                
+
         if settings.condsub_prefs_on and not fs:
             if settings.custom_condsub_prefs_on:
                 trackIndex = self.evalCondSubPrefs(settings.custom_condsub)
@@ -166,10 +203,34 @@ class LangPrefMan_Player(xbmc.Player) :
             # This is a resume, seek back 10sec to secure the 8sec normal Aud/Vid buffers are flushed
             # Seek back less while resuming (ex. 1sec) create too many Large Audio Sync errors, with some unwanted restart from 0, or even possible bug freeze
             log(LOG_DEBUG, 'Fast Subs Display on Resume - Position time is {0} sec. Resume with 10 sec rewind.'.format(current_time))
-            self.seekTime(current_time - 10) 
+            self.seekTime(current_time - 10)
         else:
             # This is an Audio Track change on-the-fly or a Resume with fast_sub_display on 'Start Only', accept the subs latency to keep snappyness. No seek back at all.
             log(LOG_DEBUG, 'Position time was {0} sec. Subs display slightly delayed.'.format(current_time))
+
+    def getSelectedAudioLanguage(self):
+        if self.selected_audio_stream and 'language' in self.selected_audio_stream:
+            return self.selected_audio_stream['language']
+
+        return ""
+
+    def getSelectedAudioIndex(self):
+        if self.selected_audio_stream and 'index' in self.selected_audio_stream:
+            return self.selected_audio_stream['index']
+
+        return -1
+
+    def getSelectedSubtitleLanguage(self):
+        if self.selected_sub and 'language' in self.selected_sub:
+            return self.selected_sub['language']
+
+        return ""
+
+    def getSelectedSubtitleIndex(self):
+        if self.selected_sub and 'index' in self.selected_sub:
+            return self.selected_sub['index']
+
+        return -1
 
     def evalFilenamePrefs(self):
         log(LOG_DEBUG, 'Evaluating filename preferences' )
@@ -192,7 +253,7 @@ class LangPrefMan_Player(xbmc.Player) :
                     log(LOG_INFO, 'subtitle track extracted from filename: {0}'.format(sub))
         log(LOG_DEBUG, 'filename: audio: {0}, sub: {1} ({2})'.format(audio, sub, filename))
         return audio, sub
-    
+
     def evalAudioPrefs(self, audio_prefs):
         log(LOG_DEBUG, 'Evaluating audio preferences' )
         log(LOG_DEBUG, 'Audio names containing the following keywords are blacklisted: {0}'.format(','.join(settings.audio_keyword_blacklist)))
@@ -212,7 +273,7 @@ class LangPrefMan_Player(xbmc.Player) :
                 for code in codes:
                     if (code is None):
                         log(LOG_DEBUG,'continue')
-                        continue                
+                        continue
                     if (self.selected_audio_stream and
                         'language' in self.selected_audio_stream and
                         # filter out audio tracks matching Keyword Blacklist
@@ -232,7 +293,7 @@ class LangPrefMan_Player(xbmc.Player) :
                         log(LOG_INFO, 'Audio: preference {0} ({1}:{2}) not available'.format(i, name, code) )
                 i += 1
         return -2
-                
+
     def evalSubPrefs(self, sub_prefs):
         log(LOG_DEBUG, 'Evaluating subtitle preferences' )
         log(LOG_DEBUG, 'Subtitle names containing the following keywords are blacklisted: {0}'.format(','.join(settings.subtitle_keyword_blacklist)))
@@ -256,7 +317,7 @@ class LangPrefMan_Player(xbmc.Player) :
                 for code in codes:
                     if (code is None):
                         log(LOG_DEBUG,'continue')
-                        continue 
+                        continue
                     if (self.selected_sub and
                         'language' in self.selected_sub and
                         # filter out subtitles to be ignored via Signs&Songs Toggle or matching Keywords Blacklist
@@ -310,7 +371,7 @@ class LangPrefMan_Player(xbmc.Player) :
                 for audio_code in audio_codes:
                     if (audio_code is None):
                         log(LOG_DEBUG,'continue')
-                        continue 
+                        continue
 
                     if (self.selected_audio_stream and
                         'language' in self.selected_audio_stream and
@@ -374,7 +435,7 @@ class LangPrefMan_Player(xbmc.Player) :
         test = subName.lower()
         matches = ['signs']
         return any(x in test for x in matches)
-    
+
     def testForcedFlag(self, forced, subName, subForcedTag):
         test = subName.lower()
         matches = ['forced', 'forcés']
@@ -390,7 +451,7 @@ class LangPrefMan_Player(xbmc.Player) :
         test = subName.lower()
         matches = ['ext']
         return any(x in test for x in matches)
-    
+
     def getDetails(self):
         activePlayers ='{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}'
         json_query = xbmc.executeJSONRPC(activePlayers)
@@ -399,29 +460,29 @@ class LangPrefMan_Player(xbmc.Player) :
         activePlayerID = json_response['result'][0]['playerid']
         details_query_dict = {  "jsonrpc": "2.0",
                                 "method": "Player.GetProperties",
-                                "params": { "properties": 
+                                "params": { "properties":
                                             ["currentaudiostream", "audiostreams", "subtitleenabled",
-                                             "currentsubtitle", "subtitles" ],
+                                             "currentsubtitle", "subtitles"],
                                             "playerid": activePlayerID },
                                 "id": 1}
         details_query_string = simplejson.dumps(details_query_dict)
         json_query = xbmc.executeJSONRPC(details_query_string)
         #json_query = unicode(json_query, 'utf-8', errors='ignore')
         json_response = simplejson.loads(json_query)
-        
+
         if 'result' in json_response and json_response['result'] != None:
             self.selected_audio_stream = json_response['result']['currentaudiostream']
             self.selected_sub = json_response['result']['currentsubtitle']
             self.selected_sub_enabled = json_response['result']['subtitleenabled']
             self.audiostreams = json_response['result']['audiostreams']
             self.subtitles = json_response['result']['subtitles']
-        log(LOG_DEBUG, json_response )
-        
+        log(LOG_INFO, json_response )
+
         if (not settings.custom_condsub_prefs_on and not settings.custom_audio_prefs_on and not settings.custom_sub_prefs_on):
             log(LOG_DEBUG, 'No custom prefs used at all, skipping extra Video tags/genres JSON query.')
             self.genres_and_tags = set()
-            return        
-        
+            return
+
         genre_tags_query_dict = {"jsonrpc": "2.0",
                                  "method": "Player.GetItem",
                                  "params": { "properties":
@@ -439,6 +500,6 @@ class LangPrefMan_Player(xbmc.Player) :
             if 'tag' in json_response['result']['item']:
                 gt.extend(json_response['result']['item']['tag'])
             self.genres_and_tags = set(map(lambda x:x.lower(), gt))
-        log(LOG_DEBUG, 'Video tags/genres: {0}'.format(self.genres_and_tags))
-        log(LOG_DEBUG, json_response )
+        log(LOG_INFO, 'Video tags/genres: {0}'.format(self.genres_and_tags))
+        log(LOG_INFO, json_response )
 

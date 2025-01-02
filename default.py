@@ -10,6 +10,7 @@ __addonname__ = __addon__.getAddonInfo('name')
 __addonPath__ = __addon__.getAddonInfo('path')
 __addonResourcePath__ = xbmcvfs.translatePath(os.path.join(__addonPath__, 'resources', 'lib'))
 __addonIconFile__ = xbmcvfs.translatePath(os.path.join(__addonPath__, 'icon.png'))
+__user_data_path__ = xbmcvfs.translatePath("special://profile/addon_data/service.languagepreferencemanager/")
 sys.path.append(__addonResourcePath__)
 
 from langcodes import *
@@ -31,7 +32,7 @@ def log(level, msg):
         elif level == LOG_INFO:
             l = xbmc.LOGINFO
         elif level == LOG_DEBUG:
-            l = xbmc.LOGDEBUG
+            l = xbmc.LOGINFO
         xbmc.log("[Language Preference Manager]: " + str(msg), l)
 
 class Main:
@@ -53,5 +54,11 @@ class Main:
 
 if ( __name__ == "__main__" ):
     log(LOG_INFO, 'service {0} version {1} started'.format(__addonname__, __addonversion__))
+
+    # List current files in folder
+    log(LOG_DEBUG, "Current files in folder:")
+    for file in xbmcvfs.listdir(__user_data_path__)[1]:
+        log(LOG_INFO, file)
+
     main = Main()
     log(LOG_INFO, 'service {0} version {1} stopped'.format(__addonname__, __addonversion__))
