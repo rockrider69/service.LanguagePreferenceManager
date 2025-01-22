@@ -75,7 +75,9 @@ class LangPrefMan_Player(xbmc.Player) :
 
                 if custom_preference is not None:
                     log(LOG_INFO, 'Custom media preferences found for current media - Applying them...')
-                    custom_preference.apply_to_player(self)
+                    if not custom_preference.apply_to_player(self):
+                        log(LOG_INFO, 'Failed to apply custom media preferences for current media. Falling back to default preferences...')
+                        self.evalPrefs()
                 else:
                     self.evalPrefs()
             else:
@@ -103,7 +105,7 @@ class LangPrefMan_Player(xbmc.Player) :
 
             log(LOG_INFO, 'Subtitle enabled: {0}'.format(self.selected_sub_enabled))
 
-            if (self.selected_audio_stream['index'] != previous_audio_index):
+            if self.selected_audio_stream['index'] != previous_audio_index:
                 log(LOG_INFO, 'Audio track changed from {0} to {1}. Reviewing Conditional Subtitles rules...'.format(previous_audio_language, self.selected_audio_stream['language']))
 
                 if settings.is_store_user_preference_for_player(self):
