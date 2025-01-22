@@ -32,7 +32,7 @@ def log(level, msg):
         elif level == LOG_INFO:
             l = xbmc.LOGINFO
         elif level == LOG_DEBUG:
-            l = xbmc.LOGINFO
+            l = xbmc.LOGDEBUG
         xbmc.log("[Language Preference Manager]: " + str(msg), l)
 
 class Main:
