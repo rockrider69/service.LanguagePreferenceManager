@@ -42,6 +42,16 @@ class LangPrefMan_Player(xbmc.Player) :
         settings.readSettings()
         xbmc.Player.__init__(self)
 
+    def onPlayBackPaused(self):
+        """ Will be called when [user] stops Kodi playing a file """
+        log(LOG_DEBUG, 'Player: [onPlayBackPaused] called')
+        self.detect_subtitle_change()
+
+    def onPlayBackResumed(self):
+        """ Will be called when [user] stops Kodi playing a file """
+        log(LOG_DEBUG, 'Player: [onPlayBackResumed] called')
+        self.detect_subtitle_change()
+
     def onPlayBackStarted(self):
         if settings.service_enabled and settings.at_least_one_pref_on:
             log(LOG_DEBUG, 'New AV Playback initiated - Resetting LPM Initial Flag')
@@ -58,12 +68,13 @@ class LangPrefMan_Player(xbmc.Player) :
             log(LOG_DEBUG, 'Getting video properties')
             self.getDetails()
 
-            if settings.is_store_override_player(self):
-                log(LOG_INFO, 'Looking for custom media preferences')
+            # If the user has enabled to store preferences (that is manually overriden preferences) for the player, we willl check for that here
+            if settings.is_store_user_preference_for_player(self):
+                log(LOG_DEBUG, 'Media preference storage enabled for current media. Checking for custom preferences...')
                 custom_preference = media_preference_manager.get_preference(self)
 
                 if custom_preference is not None:
-                    log(LOG_INFO, 'Custom media preferences found for current media')
+                    log(LOG_INFO, 'Custom media preferences found for current media - Applying them...')
                     custom_preference.apply_to_player(self)
                 else:
                     self.evalPrefs()
@@ -73,6 +84,11 @@ class LangPrefMan_Player(xbmc.Player) :
             self.LPM_initial_run_done = True
 
     def onAVChange(self):
+        """
+        This method is called when the audio or video stream changes. It is not called when the subtitle stream changes.
+        :return: None
+        """
+        log(LOG_DEBUG, 'onAVChange detected')
         if self.LPM_initial_run_done and settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
             log(LOG_DEBUG, 'AVChange detected - Checking possible change of audio track...')
             self.audio_changed = False
@@ -82,11 +98,6 @@ class LangPrefMan_Player(xbmc.Player) :
             previous_audio_index = self.selected_audio_stream['index']
             previous_audio_language = self.selected_audio_stream['language']
 
-            previous_sub_index = self.getSelectedSubtitleIndex()
-
-            previous_sub_language = self.getSelectedSubtitleLanguage()
-            previous_enabled_sub = self.selected_sub_enabled
-
             log(LOG_DEBUG, 'Getting video properties')
             self.getDetails()
 
@@ -95,16 +106,32 @@ class LangPrefMan_Player(xbmc.Player) :
             if (self.selected_audio_stream['index'] != previous_audio_index):
                 log(LOG_INFO, 'Audio track changed from {0} to {1}. Reviewing Conditional Subtitles rules...'.format(previous_audio_language, self.selected_audio_stream['language']))
 
-                if settings.is_store_override_player(self):
+                if settings.is_store_user_preference_for_player(self):
                     custom_preference = CustomMediaPreference.from_player(self)
                     media_preference_manager.add_preference(custom_preference)
                     media_preference_manager.save_preferences()
 
                 self.evalPrefs()
-            if self.getSelectedSubtitleIndex() != previous_sub_index or self.selected_sub_enabled != previous_enabled_sub:
-                log(LOG_INFO, 'Subtitle track changed from {0} to {1}'.format(previous_sub_language, self.getSelectedSubtitleLanguage()))
 
-                if settings.is_store_override_player(self):
+    def detect_subtitle_change(self):
+        """
+        This method detects if the subtitle track has changed and stores the new preference if it has.
+        :return: None
+        """
+        if self.LPM_initial_run_done and settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
+            log(LOG_DEBUG, 'Subtitle change detected')
+            previous_sub_index = self.getSelectedSubtitleIndex()
+
+            previous_sub_language = self.getSelectedSubtitleLanguage()
+            previous_enabled_sub = self.selected_sub_enabled
+
+            self.getDetails()
+
+            if self.getSelectedSubtitleIndex() != previous_sub_index or self.selected_sub_enabled != previous_enabled_sub:
+                log(LOG_DEBUG, 'Subtitle track changed from {0} to {1}'.format(previous_sub_language,
+                                                                              self.getSelectedSubtitleLanguage()))
+
+                if settings.is_store_user_preference_for_player(self):
                     custom_preference = CustomMediaPreference.from_player(self)
                     media_preference_manager.add_preference(custom_preference)
                     media_preference_manager.save_preferences()

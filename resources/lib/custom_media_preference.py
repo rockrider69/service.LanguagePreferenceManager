@@ -107,7 +107,7 @@ class MediaPreferenceManager:
         for preference_json in json:
             custom_media_preferences.add_preference(CustomMediaPreference.from_json(preference_json))
 
-        log(LOG_INFO, "Loaded " + str(len(custom_media_preferences.preferences)) + " custom media preferences")
+        log(LOG_DEBUG, "Loaded " + str(len(custom_media_preferences.preferences)) + " custom media preferences")
 
         return custom_media_preferences
 

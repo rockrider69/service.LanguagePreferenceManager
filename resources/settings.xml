@@ -921,12 +921,12 @@
             </group>
         </category>
         <category id="Overrides" label="30135">
-            <group id="1">
-                <setting id="movieOverrides" type="boolean" label="30136">
+            <group id="6" label="30138">
+                <setting id="movieOverrides" type="boolean" label="30136" help="30139">
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="tvShowOverrides" type="boolean" label="30137">
+                <setting id="tvShowOverrides" type="boolean" label="30137" help="30139">
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
