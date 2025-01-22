@@ -124,13 +124,22 @@ class CustomMediaPreference:
         self.enable_subtitles = False
 
     def apply_to_player(self, player):
+        """
+        Apply the custom media preference to the player. This will set the audio and subtitle streams according to the preference.
+
+        :param player: The player to apply the custom media preference to
+        :return: True if the custom media preference was successfully applied, False otherwise. False can be returned if the audio or subtitle track is not found in the media.
+        """
         if not player.isPlayingVideo():
-            return
+            return False
 
         if self.audio_language or self.audio_track_id != -1:
             audio_track_index = self.get_audio_track_index(player)
             if audio_track_index is not None:
                 player.setAudioStream(audio_track_index)
+            else:
+                # If the audio track is not found, we failed to apply the preferences
+                return False
 
         if self.subtitle_language or self.subtitle_track_id != -1:
             subtitle_track_index = self.get_subtitle_track_index(player)
@@ -138,8 +147,21 @@ class CustomMediaPreference:
                 if self.enable_subtitles:
                     player.setSubtitleStream(subtitle_track_index)
                 player.showSubtitles(self.enable_subtitles)
+            else:
+                # If the subtitle track is not found, we failed to apply the preferences.
+                # However, we can return success, if the subtitles are disabled and no subtitle track is found.
+                return not self.enable_subtitles
+
+        return True
 
     def get_audio_track_index(self, player):
+        """
+        Get the audio track index that matches the custom media preference. If no audio track matches, return None.
+        First, the audio track is searched by language. If no audio track is found by language, the audio track is searched by raw index.
+
+        :param player: The player to get the audio track index for
+        :return: The audio track index that matches the custom media preference, or None if no audio track matches
+        """
         for stream in player.audiostreams:
             if self.audio_language:
                 if 'language' in stream and stream['language'] == self.audio_language:
@@ -156,6 +178,13 @@ class CustomMediaPreference:
         return None
 
     def get_subtitle_track_index(self, player):
+        """
+        Get the subtitle track index that matches the custom media preference. If no subtitle track matches, return None.
+        First, the subtitle track is searched by language. If no subtitle track is found by language, the subtitle track is searched by raw index.
+
+        :param player: The player to get the subtitle track index for
+        :return: The subtitle track index that matches the custom media preference, or None if no subtitle track matches
+        """
         for subtitle in player.subtitles:
             if self.subtitle_language:
                 if subtitle['language'] == self.subtitle_language:
@@ -171,6 +200,11 @@ class CustomMediaPreference:
         return
 
     def to_json(self):
+        """
+        Convert the custom media preference to a JSON object. The selector is converted to a string separately.
+        Counterpart to from_json.
+        :return: The custom media preference as a JSON object
+        """
         selector_string = ""
 
         if self.selector:
@@ -188,6 +222,12 @@ class CustomMediaPreference:
 
     @staticmethod
     def from_json(json):
+        """
+        Create a custom media preference from a JSON object. The selector is created from a string separately.
+        Counterpart to to_json.
+        :param json: The JSON object to create the custom media preference from
+        :return: The custom media preference created from the JSON object
+        """
         custom_media_preference = CustomMediaPreference()
         custom_media_preference.selector = MediaSelector.from_string(json["selector"])
         custom_media_preference.priority_index = json["priority"]
@@ -200,6 +240,12 @@ class CustomMediaPreference:
 
     @staticmethod
     def from_player(player):
+        """
+        Create a custom media preference from the currently playing item of the player. The selector is created from the playing item.
+        :param player: The player to create the custom media preference from
+        :return: The custom media preference created from the player or None if the player is not playing a video
+        """
+
         if not player.isPlayingVideo():
             return None
 
@@ -215,12 +261,23 @@ class CustomMediaPreference:
         return custom_media_preference
 
 class MediaSelector:
+    """
+    A media selector is used to identify and store a specific media item. It can be created from a playing item or restored from a string.
+    MediaSelector supports two types of media selection:
+    - TV Show: The TV show name is used to identify the media item.
+    - File: The file name is used to identify the media item.
+    """
 
     def __init__(self):
         self.tv_show_name = ""
         self.file_name = ""
 
     def applies_to_player(self, player):
+        """
+        Check if the media selector applies to the player. That is, if the playing item of the player matches the media selector.
+        :param player: The player to check the media selector against
+        :return: True if the media selector applies to the player, False otherwise
+        """
         if not player:
             return False
 
@@ -253,6 +310,11 @@ class MediaSelector:
             return False
 
     def to_string(self):
+        """
+        Convert the media selector to a string. The string is used to serialize the media selector.
+        Counterpart to from_string.
+        :return: The media selector as a string
+        """
         if self.tv_show_name:
             return "tv_show:" + self.tv_show_name
         elif self.file_name:
@@ -261,10 +323,21 @@ class MediaSelector:
             return "unknown"
 
     def is_same_media(self, media_selector):
+        """
+        Check if the media selector is the same as the given media selector. That is, if the media selector serializes to the same string.
+        :param media_selector: The media selector to compare to
+        :return: True if the media selector is the same as the given media selector, False otherwise
+        """
         return self.to_string() == media_selector.to_string()
 
     @staticmethod
     def from_string(s):
+        """
+        Create a media selector from a string.
+        Counterpart to to_string.
+        :param s: The string to create the media selector from
+        :return: The media selector created from the string
+        """
         if not s:
             return None
 
@@ -277,6 +350,12 @@ class MediaSelector:
 
     @staticmethod
     def from_playing_item(player):
+        """
+        Create a media selector from the playing item of the player. The media selector is created based on the media type of the playing item.
+        If the media type is a TV show, the TV show name is used. If the media type is a movie, the file name is used.
+        :param player: The player to create the media selector from
+        :return: The media selector created from the playing item or None if the player is not playing a video
+        """
         media_selector = MediaSelector()
         playing_item = player.getPlayingItem()
 
