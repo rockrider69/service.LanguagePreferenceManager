@@ -26,7 +26,7 @@ LANGUAGES      = (
     ("Finnish"                    , "31",       "fi",            "fin",                 "14",                    30215  ),
     ("French"                     , "8",        "fr",            "fre",                 "15",                    30216  ),
     ("German"                     , "5",        "de",            "ger,deu",             "16",                    30217  ),
-    ("Greek"                      , "16",       "el",            "ell",                 "17",                    30218  ),
+    ("Greek"                      , "16",       "el",            "ell,gre",             "17",                    30218  ),
     ("Hebrew"                     , "22",       "he",            "heb",                 "18",                    30219  ),
     ("Hindi"                      , "42",       "hi",            "hin",                 "19",                    30220  ),
     ("Hungarian"                  , "15",       "hu",            "hun",                 "20",                    30221  ),
@@ -45,7 +45,7 @@ LANGUAGES      = (
     ("Portuguese (Brazil)"        , "48",       "pb",            "pt-br",               "33",                    30234  ),
     ("Romanian"                   , "13",       "ro",            "rum",                 "34",                    30235  ),
     ("Russian"                    , "27",       "ru",            "rus",                 "35",                    30236  ),
-    ("Serbian"                    , "36",       "sr",            "scc",                 "36",                    30237  ),
+    ("Serbian"                    , "36",       "sr",            "srp,scc",             "36",                    30237  ),
     ("Slovak"                     , "37",       "sk",            "slo",                 "37",                    30238  ),
     ("Slovenian"                  , "1",        "sl",            "slv",                 "38",                    30239  ),
     ("Spanish"                    , "28",       "es",            "spa",                 "39",                    30240  ),
@@ -54,6 +54,9 @@ LANGUAGES      = (
     ("Turkish"                    , "30",       "tr",            "tur",                 "42",                    30243  ),
     ("Ukrainian"                  , "46",       "uk",            "ukr",                 "43",                    30244  ),
     ("Vietnamese"                 , "51",       "vi",            "vie",                 "44",                    30245  ),
+    ("English Middle"             , "2",        "",              "enm",                 "47",                    30248  ),
+    ("Norwegian Bokmal"           , "3",        "nb",            "nob",                 "48",                    30249  ),
+    ("New Norwegian"              , "3",        "nn",            "nno",                 "49",                    30250  ),
     ("None"                       , "-1",       "",              "non",                 "45",                    30200  ),
     ("Any"                        , "-2",       "",              "any",                 "46",                    30300  ) )
 
