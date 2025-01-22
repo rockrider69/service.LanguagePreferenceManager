@@ -154,16 +154,25 @@ msgid "Start & Resume"
 msgstr ""
 
 msgctxt "#30135"
-msgid "Overrides"
+msgid "Stored Preferences"
 msgstr ""
 
 msgctxt "#30136"
-msgid "Store Override Movies"
+msgid "Store Pref. Movies"
 msgstr ""
 
 msgctxt "#30137"
-msgid "Store Override TV Shows"
+msgid "Store Pref. TV Shows"
 msgstr ""
+
+msgctxt "#30138"
+msgid "Changed audio/subt. override config pref. next time for the same movie/series?"
+msgstr ""
+
+msgctxt "#30139"
+msgid "If enabled, manually selected audio/subtitle tracks during playback will be stored and restored next time for the same movie/whole series."
+msgstr ""
+
 
 msgctxt "#30201"
 msgid "Albanian"

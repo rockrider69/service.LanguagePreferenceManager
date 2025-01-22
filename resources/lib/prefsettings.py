@@ -155,6 +155,7 @@ class settings():
           )]
       )]
 
+      # These handle custom user preferences, that should be stored
       self.movieOverrides = addon.getSetting('movieOverrides') == 'true'
       self.tvShowOverrides = addon.getSetting('tvShowOverrides') == 'true'
       self.storeCustomMediaPreferences = self.movieOverrides or self.tvShowOverrides
@@ -190,21 +191,30 @@ class settings():
         if len(self.custom_condsub) >0:
             self.custom_condsub_prefs_on = True
 
-    def is_store_override_player(self, player):
+    def is_store_user_preference_for_player(self, player):
+        """
+        Check if the player is playing a video and if the store user preference is enabled for the media type of the video (e.g. movie, tv show).
+        :param player: The player object
+        :return: True if the player is playing a video and the store user preference is enabled for the media type, False otherwise
+        """
         if not player.isPlayingVideo():
             return False
 
-        return self.is_store_override(kodi_utils.get_media_type(player))
+        return self.is_store_user_preference(kodi_utils.get_media_type(player))
 
-    def is_store_override(self, media_type):
+    def is_store_user_preference(self, media_type):
+        """
+        Check if the user preference is supposed to be stored. That means that the custom preferences are stored for the media type.
+        :param media_type:  The media type string
+        :return: True if the user preference is supposed to be stored, False otherwise
+        """
         if media_type is None:
             return False
 
-        self.log(LOG_INFO, 'is_store_override: {0}'.format(media_type))
         if kodi_utils.is_movie(media_type):
-            self.log(LOG_INFO, 'is_store_override: {0}'.format(self.movieOverrides))
+            self.log(LOG_DEBUG, 'Store user preference for movie: {0}'.format(self.movieOverrides))
             return self.movieOverrides
         elif kodi_utils.is_tv_show(media_type):
-            self.log(LOG_INFO, 'is_store_override: {0}'.format(self.tvShowOverrides))
+            self.log(LOG_DEBUG, 'Store user preference for tv show: {0}'.format(self.tvShowOverrides))
             return self.tvShowOverrides
         return False

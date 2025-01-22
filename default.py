@@ -54,11 +54,5 @@ class Main:
 
 if ( __name__ == "__main__" ):
     log(LOG_INFO, 'service {0} version {1} started'.format(__addonname__, __addonversion__))
-
-    # List current files in folder
-    log(LOG_DEBUG, "Current files in folder:")
-    for file in xbmcvfs.listdir(__user_data_path__)[1]:
-        log(LOG_INFO, file)
-
     main = Main()
     log(LOG_INFO, 'service {0} version {1} stopped'.format(__addonname__, __addonversion__))
