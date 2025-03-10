@@ -10,7 +10,8 @@ __addonname__ = __addon__.getAddonInfo('name')
 __addonPath__ = __addon__.getAddonInfo('path')
 __addonResourcePath__ = xbmcvfs.translatePath(os.path.join(__addonPath__, 'resources', 'lib'))
 __addonIconFile__ = xbmcvfs.translatePath(os.path.join(__addonPath__, 'icon.png'))
-__user_data_path__ = xbmcvfs.translatePath("special://profile/addon_data/service.languagepreferencemanager/")
+#__user_data_path__ = xbmcvfs.translatePath("special://profile/addon_data/service.languagepreferencemanager/")
+__user_data_path__ = xbmcvfs.translatePath( __addon__.getAddonInfo('profile'))
 sys.path.append(__addonResourcePath__)
 
 from langcodes import *
