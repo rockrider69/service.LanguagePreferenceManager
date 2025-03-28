@@ -162,18 +162,27 @@ class CustomMediaPreference:
         :param player: The player to get the audio track index for
         :return: The audio track index that matches the custom media preference, or None if no audio track matches
         """
+        found_audio_languages = []
         for stream in player.audiostreams:
             if self.audio_language:
                 if 'language' in stream and stream['language'] == self.audio_language:
-                    return stream['index']
-            if self.audio_track_id != -1:
-                log(LOG_DEBUG,
+                    found_audio_languages.append(stream['index'])
+
+        if len(found_audio_languages) == 1:
+            log(LOG_DEBUG, "Found audio track by language " + self.audio_language + " for file " + player.getPlayingFile())
+            return found_audio_languages[0]
+
+        if self.audio_track_id != -1:
+            log(LOG_DEBUG,
                     "Failed to find audio track by language " + self.audio_language + " for file " + player.getPlayingFile() + ". Trying by index")
-                if self.audio_track_id < len(player.audiostreams):
-                    return self.audio_track_id
-                else:
-                    log(LOG_ERROR, "Audio track id " + str(
+            if self.audio_track_id < len(player.audiostreams):
+                return self.audio_track_id
+            else:
+                log(LOG_ERROR, "Audio track id " + str(
                         self.audio_track_id) + " is out of range for file " + player.getPlayingFile())
+        elif len(found_audio_languages) > 1:
+            log(LOG_INFO, "Multiple audio tracks found for language " + self.audio_language + " for file " + player.getPlayingFile() + " and no set index. Picking first")
+            return found_audio_languages[0]
 
         return None
 
@@ -185,19 +194,29 @@ class CustomMediaPreference:
         :param player: The player to get the subtitle track index for
         :return: The subtitle track index that matches the custom media preference, or None if no subtitle track matches
         """
+        found_language_subtitles = []
         for subtitle in player.subtitles:
             if self.subtitle_language:
                 if subtitle['language'] == self.subtitle_language:
-                    return subtitle['index']
-            if self.subtitle_track_id != -1:
-                log(LOG_DEBUG,
+                    found_language_subtitles.append(subtitle['index'])
+
+        if len(found_language_subtitles) == 1:
+            log(LOG_DEBUG, "Found subtitle track by language " + self.subtitle_language + " for file " + player.getPlayingFile())
+            return found_language_subtitles[0]
+
+        if self.subtitle_track_id != -1:
+            log(LOG_DEBUG,
                     "Failed to find subtitle track by language " + self.subtitle_language + " for file " + player.getPlayingFile() + ". Trying by index")
-                if self.subtitle_track_id < len(player.subtitles):
-                    return self.subtitle_track_id
-                else:
-                    log(LOG_ERROR, "Subtitle track id " + str(
+            if self.subtitle_track_id < len(player.subtitles):
+                return self.subtitle_track_id
+            else:
+                log(LOG_ERROR, "Subtitle track id " + str(
                         self.subtitle_track_id) + " is out of range for file " + player.getPlayingFile())
-        return
+        elif len(found_language_subtitles) > 1:
+            log(LOG_INFO, "Multiple subtitle tracks found for language " + self.subtitle_language + " for file " + player.getPlayingFile() + " and no set index. Picking first")
+            return found_language_subtitles[0]
+
+        return None
 
     def to_json(self):
         """
