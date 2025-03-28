@@ -162,27 +162,33 @@ class CustomMediaPreference:
         :param player: The player to get the audio track index for
         :return: The audio track index that matches the custom media preference, or None if no audio track matches
         """
-        found_audio_languages = []
-        for stream in player.audiostreams:
-            if self.audio_language:
-                if 'language' in stream and stream['language'] == self.audio_language:
-                    found_audio_languages.append(stream['index'])
 
-        if len(found_audio_languages) == 1:
-            log(LOG_DEBUG, "Found audio track by language " + self.audio_language + " for file " + player.getPlayingFile())
-            return found_audio_languages[0]
+        # Find all audio tracks (index) that match the language code
+        found_audio_languages = [stream['index'] for stream in player.audiostreams if
+                                 stream['language'] == self.audio_language]
+
+        if found_audio_languages:
+            if len(found_audio_languages) == 1:
+                log(LOG_DEBUG,
+                    "Found audio track by language " + self.audio_language + " for file " + player.getPlayingFile())
+                return found_audio_languages[0]
+            elif len(found_audio_languages) > 1:
+                log(LOG_DEBUG, "Multiple audio tracks found for language " + self.audio_language + " for file " + player.getPlayingFile())
 
         if self.audio_track_id != -1:
             log(LOG_DEBUG,
-                    "Failed to find audio track by language " + self.audio_language + " for file " + player.getPlayingFile() + ". Trying by index")
+                "Failed to find audio track by language " + self.audio_language + " for file " + player.getPlayingFile() + ". Trying by index")
             if self.audio_track_id < len(player.audiostreams):
+                log(LOG_DEBUG, "Found audio track by index " + str(self.audio_track_id) + " for file " + player.getPlayingFile())
                 return self.audio_track_id
             else:
                 log(LOG_ERROR, "Audio track id " + str(
-                        self.audio_track_id) + " is out of range for file " + player.getPlayingFile())
-        elif len(found_audio_languages) > 1:
-            log(LOG_INFO, "Multiple audio tracks found for language " + self.audio_language + " for file " + player.getPlayingFile() + " and no set index. Picking first")
-            return found_audio_languages[0]
+                    self.audio_track_id) + " is out of range for file " + player.getPlayingFile())
+
+        if found_audio_languages:
+            log(LOG_DEBUG,
+                "Multiple audio tracks found for language " + self.audio_language + " for file " + player.getPlayingFile() + " and no set index. Picking first.")
+            return found_audio_languages
 
         return None
 
@@ -194,26 +200,33 @@ class CustomMediaPreference:
         :param player: The player to get the subtitle track index for
         :return: The subtitle track index that matches the custom media preference, or None if no subtitle track matches
         """
-        found_language_subtitles = []
-        for subtitle in player.subtitles:
-            if self.subtitle_language:
-                if subtitle['language'] == self.subtitle_language:
-                    found_language_subtitles.append(subtitle['index'])
 
-        if len(found_language_subtitles) == 1:
-            log(LOG_DEBUG, "Found subtitle track by language " + self.subtitle_language + " for file " + player.getPlayingFile())
-            return found_language_subtitles[0]
+        # Find all subtitle tracks (index) that match the language code
+        found_language_subtitles = [subtitle['index'] for subtitle in player.subtitles if
+                                    subtitle['language'] == self.subtitle_language]
+
+        if found_language_subtitles:
+            if len(found_language_subtitles) == 1:
+                log(LOG_DEBUG,
+                    f"Found subtitle track by language {self.subtitle_language} for file {player.getPlayingFile()}")
+                return found_language_subtitles[0]
+            else:
+                log(LOG_DEBUG,
+                    f"Multiple subtitle tracks found for language {self.subtitle_language} for file {player.getPlayingFile()}")
 
         if self.subtitle_track_id != -1:
             log(LOG_DEBUG,
-                    "Failed to find subtitle track by language " + self.subtitle_language + " for file " + player.getPlayingFile() + ". Trying by index")
+                "Failed to find subtitle track by language " + self.subtitle_language + " for file " + player.getPlayingFile() + ". Trying by index")
             if self.subtitle_track_id < len(player.subtitles):
+                log(LOG_DEBUG, "Found subtitle track by index " + str(self.subtitle_track_id) + " for file " + player.getPlayingFile())
                 return self.subtitle_track_id
             else:
                 log(LOG_ERROR, "Subtitle track id " + str(
-                        self.subtitle_track_id) + " is out of range for file " + player.getPlayingFile())
-        elif len(found_language_subtitles) > 1:
-            log(LOG_INFO, "Multiple subtitle tracks found for language " + self.subtitle_language + " for file " + player.getPlayingFile() + " and no set index. Picking first")
+                    self.subtitle_track_id) + " is out of range for file " + player.getPlayingFile())
+
+        if found_language_subtitles:
+            log(LOG_DEBUG,
+                f"Multiple subtitle tracks found for language {self.subtitle_language} for file {player.getPlayingFile()} and no set index. Picking first.")
             return found_language_subtitles[0]
 
         return None
@@ -279,6 +292,7 @@ class CustomMediaPreference:
 
         return custom_media_preference
 
+
 class MediaSelector:
     """
     A media selector is used to identify and store a specific media item. It can be created from a playing item or restored from a string.
@@ -320,7 +334,8 @@ class MediaSelector:
         log(LOG_DEBUG, 'Media Info: ' + video_info_tag.getMediaType() + " is_tv_show: " + str(is_tv_show))
 
         if is_tv_show and self.tv_show_name:
-            log(LOG_DEBUG, 'Checking TV Show name: ' + self.tv_show_name + ' against ' + video_info_tag.getTVShowTitle())
+            log(LOG_DEBUG,
+                'Checking TV Show name: ' + self.tv_show_name + ' against ' + video_info_tag.getTVShowTitle())
             return video_info_tag.getTVShowTitle() == self.tv_show_name
         elif self.file_name:
             log(LOG_DEBUG, 'Checking file name: ' + self.file_name + ' against ' + player.getPlayingFile())
