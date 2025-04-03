@@ -77,12 +77,45 @@ class LangPrefMan_Player(xbmc.Player):
     def __init__(self):
         self.LPM_initial_run_done = False
         self.selected_sub_enabled = False
+
+        self.ignore_audio_change_index_list = []
+
         settings.readSettings()
         xbmc.Player.__init__(self)
 
         # Start the LangPrefWatcher thread. This thread will periodically check for subtitle changes.
         self.lang_pref_watcher = LangPrefWatcher(self, check_interval=10)
         self.lang_pref_watcher.start()
+
+    def add_ignore_audio_change_index(self, index):
+        """
+        Adds an audio stream index to the ignore list.
+        This means that the audio stream will be ignored for changes and preference re-evaluation will not be done.
+        After one matching change based on index, the audio stream will be considered again.
+        :param index: The index of the audio stream to ignore.
+        """
+        if index not in self.ignore_audio_change_index_list:
+            self.ignore_audio_change_index_list.append(index)
+            log(LOG_DEBUG, f"Audio stream index {index} added to ignore list.")
+
+    def remove_ignore_audio_change_index(self, index):
+        """
+        Removes an audio stream index from the ignore list.
+        This means that the audio stream will be considered for changes again and preference re-evaluation will be done.
+        :param index: The index of the audio stream to remove from the ignore list.
+        """
+        if index in self.ignore_audio_change_index_list:
+            self.ignore_audio_change_index_list.remove(index)
+            log(LOG_DEBUG, f"Audio stream index {index} removed from ignore list.")
+
+    def is_ignore_audio_change_index(self, index):
+        """
+        Checks if an audio stream index is in the ignore list.
+        This means that the audio stream will be ignored for changes and preference re-evaluation will not be done.
+        :param index: The index of the audio stream to check.
+        :return: True if the index is in the ignore list, False otherwise.
+        """
+        return index in self.ignore_audio_change_index_list
 
     def onPlayBackPaused(self):
         """ Will be called when [user] stops Kodi playing a file """
@@ -137,9 +170,11 @@ class LangPrefMan_Player(xbmc.Player):
         if self.LPM_initial_run_done and settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
             log(LOG_DEBUG, 'AVChange detected - Checking possible change of audio track...')
             self.audio_changed = False
+
             if settings.delay > 0:
                 log(LOG_DEBUG, "Delaying preferences evaluation by {0} ms".format(settings.delay))
                 xbmc.sleep(settings.delay)
+
             previous_audio_index = self.selected_audio_stream['index']
             previous_audio_language = self.selected_audio_stream['language']
 
@@ -148,7 +183,14 @@ class LangPrefMan_Player(xbmc.Player):
 
             log(LOG_INFO, 'Subtitle enabled: {0}'.format(self.selected_sub_enabled))
 
-            if self.selected_audio_stream['index'] != previous_audio_index:
+            new_audio_index = self.getSelectedAudioIndex()
+
+            if self.is_ignore_audio_change_index(new_audio_index):
+                log(LOG_DEBUG, 'Audio track index {0} is in the ignore list. Skipping preference evaluation.'.format(new_audio_index))
+                self.remove_ignore_audio_change_index(new_audio_index)
+                return
+
+            if new_audio_index != previous_audio_index:
                 log(LOG_INFO, 'Audio track changed from {0} to {1}. Reviewing Conditional Subtitles rules...'.format(
                     previous_audio_language, self.selected_audio_stream['language']))
 
@@ -184,21 +226,22 @@ class LangPrefMan_Player(xbmc.Player):
 
     def evalPrefs(self):
         # recognized filename audio or filename subtitle
-        fa = False
-        fs = False
+        use_filename_audio = False
+        use_filename_subs = False
+
         if settings.useFilename and not self.LPM_initial_run_done:
             audio, sub = self.evalFilenamePrefs()
             if (audio >= 0) and audio < len(self.audiostreams):
                 log(LOG_INFO, 'Filename preference: Match, selecting audio track {0}'.format(audio))
                 self.setAudioStream(audio)
                 self.audio_changed = True
-                fa = True
+                use_filename_audio = True
             else:
                 log(LOG_INFO, 'Filename preference: No match found for audio track ({0})'.format(self.getPlayingFile()))
 
             if (sub >= 0) and sub < len(self.subtitles):
                 self.setSubtitleStream(sub)
-                fs = True
+                use_filename_subs = True
                 log(LOG_INFO, 'Filename preference: Match, selecting subtitle track {0}'.format(sub))
                 if settings.turn_subs_on:
                     log(LOG_DEBUG, 'Subtitle: enabling subs')
@@ -210,7 +253,7 @@ class LangPrefMan_Player(xbmc.Player):
                     log(LOG_INFO, 'Subtitle: disabling subs')
                     self.showSubtitles(False)
 
-        if settings.audio_prefs_on and not fa and not self.LPM_initial_run_done:
+        if settings.audio_prefs_on and not use_filename_audio and not self.LPM_initial_run_done:
             if settings.custom_audio_prefs_on:
                 trackIndex = self.evalAudioPrefs(settings.custom_audio)
             else:
@@ -222,7 +265,7 @@ class LangPrefMan_Player(xbmc.Player):
                 self.setAudioStream(trackIndex)
                 self.audio_changed = True
 
-        if settings.sub_prefs_on and not fs and not self.LPM_initial_run_done:
+        if settings.sub_prefs_on and not use_filename_subs and not self.LPM_initial_run_done:
             if settings.custom_sub_prefs_on:
                 trackIndex = self.evalSubPrefs(settings.custom_subs)
             else:
@@ -244,7 +287,7 @@ class LangPrefMan_Player(xbmc.Player):
                     log(LOG_INFO, 'Subtitle: enabling subs')
                     self.showSubtitles(True)
 
-        if settings.condsub_prefs_on and not fs:
+        if settings.condsub_prefs_on and not use_filename_subs:
             if settings.custom_condsub_prefs_on:
                 trackIndex = self.evalCondSubPrefs(settings.custom_condsub)
             else:
@@ -414,6 +457,8 @@ class LangPrefMan_Player(xbmc.Player):
                         log(LOG_INFO, 'Selected subtitle language matches preference {0} ({1})'.format(i, name))
                         return -1
                     else:
+                        to_chose_subtitle_indexes = []
+
                         for sub in self.subtitles:
                             # filter out subtitles to be ignored via Signs&Songs Toggle or matching Keywords Blacklist
                             if self.isInBlacklist(sub['name'], 'Subtitle'):
@@ -425,14 +470,28 @@ class LangPrefMan_Player(xbmc.Player):
                                 log(LOG_INFO,
                                     'SubPrefs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
                                 continue
-                            if ((code == sub['language'] or name == sub['language']) and self.testForcedFlag(forced,
-                                                                                                             sub[
-                                                                                                                 'name'],
-                                                                                                             sub[
-                                                                                                                 'isforced'])):
+                            if (code == sub['language'] or name == sub['language']) and self.testForcedFlag(forced, sub['name'], sub['isforced']):
                                 log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2})'.format(
                                     (sub['index'] + 1), i, name))
-                                return sub['index']
+                                to_chose_subtitle_indexes.append(sub['index'])
+
+                        current_subtitle_index = self.getSelectedSubtitleIndex()
+
+                        # If our current subtitle is eligible for the condition, we will not change it
+                        if current_subtitle_index in to_chose_subtitle_indexes:
+                            log(LOG_INFO,
+                                'Pref sub: already selected subtitle {0} matches preference {1} ({2})'.format(
+                                    (current_subtitle_index + 1), i, name))
+                            return current_subtitle_index
+
+                        if len(to_chose_subtitle_indexes) > 0:
+                            # if we have more than one subtitles, we will take the first one
+                            to_chose_subtitle_index = to_chose_subtitle_indexes[0]
+                            log(LOG_INFO, 'Pref. sub: Found {0} matching subtitles, using first at index {1}'.format(
+                                len(to_chose_subtitle_indexes), to_chose_subtitle_index))
+
+                            return to_chose_subtitle_index
+
                         log(LOG_INFO, 'Subtitle: preference {0} ({1}:{2}) not available'.format(i, name, code))
                 i += 1
         return -2
@@ -466,7 +525,7 @@ class LangPrefMan_Player(xbmc.Player):
                 nbr_sub_codes = len(sub_codes)
 
                 for audio_code in audio_codes:
-                    if (audio_code is None):
+                    if audio_code is None:
                         log(LOG_DEBUG, 'continue')
                         continue
 
@@ -478,8 +537,8 @@ class LangPrefMan_Player(xbmc.Player):
                             'Selected audio language matches conditional preference {0} ({1}:{2}), force tag is {3}'.format(
                                 i, audio_name, sub_name, forced))
                         for sub_code in sub_codes:
-                            if (sub_code == "non"):
-                                if (forced == 'true'):
+                            if sub_code == "non":
+                                if forced == 'true':
                                     log(LOG_INFO,
                                         'Subtitle condition is None but forced is true, searching a forced subtitle matching selected audio...')
                                     for sub in self.subtitles:
@@ -490,13 +549,13 @@ class LangPrefMan_Player(xbmc.Player):
                                                 'CondSubs : one subtitle track is found matching Keyword Blacklist : {0}. Skipping it.'.format(
                                                     ','.join(settings.subtitle_keyword_blacklist)))
                                             continue
-                                        if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
+                                        if settings.ignore_signs_on and self.isSignsSub(sub['name']):
                                             log(LOG_INFO,
                                                 'CondSubs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
                                             continue
-                                        if ((audio_code == sub['language']) or (audio_name == sub['language'])):
+                                        if (audio_code == sub['language']) or (audio_name == sub['language']):
                                             log(LOG_DEBUG, 'One potential match found...')
-                                            if (self.testForcedFlag(forced, sub['name'], sub['isforced'])):
+                                            if self.testForcedFlag(forced, sub['name'], sub['isforced']):
                                                 log(LOG_DEBUG, 'One forced match found...')
                                                 log(LOG_INFO,
                                                     'Language of subtitle {0} matches audio preference {1} ({2}:{3}) with forced overriding rule {4}'.format(
@@ -507,31 +566,52 @@ class LangPrefMan_Player(xbmc.Player):
                                             i, audio_name, sub_name, forced))
                                 return -1
                             else:
+                                to_chose_subtitle_indexes = []
+
                                 for sub in self.subtitles:
                                     # take into account -ss tag to prioritize specific Signs&Songs subtitles track
-                                    if ((sub_code == sub['language']) or (sub_name == sub['language'])):
-                                        if (ss_tag == 'true' and self.isSignsSub(sub['name'])):
+                                    if (sub_code == sub['language']) or (sub_name == sub['language']):
+                                        if ss_tag == 'true' and self.isSignsSub(sub['name']):
                                             log(LOG_INFO,
                                                 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) SubTag {4}'.format(
                                                     (sub['index'] + 1), i, audio_name, sub_name, ss_tag))
-                                            return sub['index']
+                                            to_chose_subtitle_indexes.append(sub['index'])
+                                            # return sub['index']
                                     # filter out subtitles to be ignored via Signs&Songs Toggle or matching Keywords Blacklist
                                     if self.isInBlacklist(sub['name'], 'Subtitle'):
                                         log(LOG_INFO,
                                             'CondSubs : one subtitle track is found matching Keyword Blacklist : {0}. Skipping it.'.format(
                                                 ','.join(settings.subtitle_keyword_blacklist)))
                                         continue
-                                    if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
+                                    if settings.ignore_signs_on and self.isSignsSub(sub['name']):
                                         log(LOG_INFO,
                                             'CondSubs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
                                         continue
-                                    if ((sub_code == sub['language']) or (sub_name == sub['language'])):
+                                    if (sub_code == sub['language']) or (sub_name == sub['language']):
                                         if (ss_tag == 'false' and self.testForcedFlag(forced, sub['name'],
                                                                                       sub['isforced'])):
                                             log(LOG_INFO,
                                                 'Language of subtitle {0} matches conditional preference {1} ({2}:{3}) forced {4}'.format(
                                                     (sub['index'] + 1), i, audio_name, sub_name, forced))
-                                            return sub['index']
+                                            to_chose_subtitle_indexes.append(sub['index'])
+
+                                current_subtitle_index = self.getSelectedSubtitleIndex()
+
+                                # If our current subtitle is eligible for the condition, we will not change it
+                                if current_subtitle_index in to_chose_subtitle_indexes:
+                                    log(LOG_INFO,
+                                        'Conditional subtitle: already selected subtitle matches preference {0} ({1}:{2})'.format(
+                                            i, audio_name, sub_name))
+                                    return current_subtitle_index
+
+                                if len(to_chose_subtitle_indexes) > 0:
+                                    # if we have more than one subtitles, we will take the first one
+                                    to_chose_subtitle_index = to_chose_subtitle_indexes[0]
+                                    log(LOG_INFO, 'Cond. sub: Found {0} matching subtitles, using first at index {1}'.format(
+                                        len(to_chose_subtitle_indexes), to_chose_subtitle_index))
+
+                                    return to_chose_subtitle_index
+
                                 nbr_sub_codes -= 1
                                 if nbr_sub_codes == 0:
                                     log(LOG_INFO,
