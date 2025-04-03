@@ -133,15 +133,22 @@ class CustomMediaPreference:
         if not player.isPlayingVideo():
             return False
 
+        set_subtitles = self.subtitle_language or self.subtitle_track_id != -1
+
         if self.audio_language or self.audio_track_id != -1:
             audio_track_index = self.get_audio_track_index(player)
             if audio_track_index is not None:
+                # Changing audio track causes an audio stream change call (delayed)
+                # We need to ignore the change, otherwise this we might unnecessarily change the subtitles again
+                if set_subtitles:
+                    player.add_ignore_audio_change_index(audio_track_index)
+
                 player.setAudioStream(audio_track_index)
             else:
                 # If the audio track is not found, we failed to apply the preferences
                 return False
 
-        if self.subtitle_language or self.subtitle_track_id != -1:
+        if set_subtitles:
             subtitle_track_index = self.get_subtitle_track_index(player)
             if subtitle_track_index is not None:
                 if self.enable_subtitles:
