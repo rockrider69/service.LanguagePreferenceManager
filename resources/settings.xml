@@ -930,6 +930,16 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="test34" type="string" label="30140">
+                    <level>0</level>
+                    <default/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="button" format="action">
+                        <data>RunScript(service.languagepreferencemanager,show_overrides)</data>
+                    </control>
+                </setting>
             </group>
         </category>
     </section>

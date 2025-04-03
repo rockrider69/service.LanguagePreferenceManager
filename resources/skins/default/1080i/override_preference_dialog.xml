@@ -1,0 +1,53 @@
+<window width="1920" height="1080">
+
+    <controls>
+        <control type="image" id="1">
+            <centerleft>50%</centerleft>
+            <centertop>50%</centertop>
+            <width>500</width>
+            <height>500</height>
+            <texture colordiffuse="ff222326" border="10">dialogs/dialog_back.png</texture>
+        </control>
+
+        <control type="list" id="100">
+            <description>My first list container</description>
+            <!--            <left>80</left>-->
+            <!--            <top>60</top>-->
+            <width>500</width>
+            <height>500</height>
+            <centerleft>50%</centerleft>
+            <centertop>50%</centertop>
+            <!--            <visible>true</visible>-->
+            <!--            <viewtype label="list">list</viewtype>-->
+            <!--            <pagecontrol>25</pagecontrol>-->
+            <!--            <autoscroll>true</autoscroll>-->
+            <!--            <scrolltime tween="sine" easing="out">200</scrolltime>-->
+            <itemlayout width="650" height="29">
+                <control type="label">
+                    <width>430</width>
+                    <height>30</height>
+                    <centerleft>50%</centerleft>
+                    <centertop>50%</centertop>
+                    <font>font13</font>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>ffe1e1e1</textcolor>
+                    <textshadow>66000000</textshadow>
+                    <texture colordiffuse="ff222326" border="10">dialogs/dialog_back.png</texture>
+                </control>
+            </itemlayout>
+            <focusedlayout height="29" width="650">
+                <control type="label">
+                    <centerleft>50%</centerleft>
+                    <centertop>50%</centertop>
+                    <width>430</width>
+                    <height>30</height>
+                    <font>font13</font>
+                    <selectedcolor>green</selectedcolor>
+                    <label>$INFO[ListItem.Label]</label>
+                    <textcolor>ffdb0d0d</textcolor>
+                    <texture colordiffuse="ff222326" border="10">dialogs/dialog_back.png</texture>
+                </control>
+            </focusedlayout>
+        </control>
+    </controls>
+</window>
