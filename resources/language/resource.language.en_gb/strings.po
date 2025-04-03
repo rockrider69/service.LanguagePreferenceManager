@@ -173,6 +173,14 @@ msgctxt "#30139"
 msgid "If enabled, manually selected audio/subtitle tracks during playback will be stored and restored next time for the same movie/whole series."
 msgstr ""
 
+msgctxt "#30140"
+msgid "Edit Overrides"
+msgstr ""
+
+msgctxt "#30141"
+msgid "A new label"
+msgstr ""
+
 
 msgctxt "#30201"
 msgid "Albanian"
