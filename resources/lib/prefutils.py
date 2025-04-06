@@ -181,7 +181,7 @@ class LangPrefMan_Player(xbmc.Player):
             log(LOG_DEBUG, 'Getting video properties')
             self.getDetails()
 
-            log(LOG_INFO, 'Subtitle enabled: {0}'.format(self.selected_sub_enabled))
+            log(LOG_DEBUG, 'Subtitle enabled: {0}'.format(self.selected_sub_enabled))
 
             new_audio_index = self.getSelectedAudioIndex()
 
@@ -677,7 +677,7 @@ class LangPrefMan_Player(xbmc.Player):
             self.selected_sub_enabled = json_response['result']['subtitleenabled']
             self.audiostreams = json_response['result']['audiostreams']
             self.subtitles = json_response['result']['subtitles']
-        log(LOG_INFO, json_response)
+        log(LOG_DEBUG, json_response)
 
         if (
                 not settings.custom_condsub_prefs_on and not settings.custom_audio_prefs_on and not settings.custom_sub_prefs_on):
@@ -702,8 +702,8 @@ class LangPrefMan_Player(xbmc.Player):
             if 'tag' in json_response['result']['item']:
                 gt.extend(json_response['result']['item']['tag'])
             self.genres_and_tags = set(map(lambda x: x.lower(), gt))
-        log(LOG_INFO, 'Video tags/genres: {0}'.format(self.genres_and_tags))
-        log(LOG_INFO, json_response)
+        log(LOG_DEBUG, 'Video tags/genres: {0}'.format(self.genres_and_tags))
+        log(LOG_DEBUG, json_response)
 
     def __del__(self):
         """ Ensure that the watcher thread is properly stopped when the object is deleted """
