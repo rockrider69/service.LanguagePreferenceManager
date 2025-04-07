@@ -17,6 +17,7 @@ class OverridePreferenceDialog(xbmcgui.WindowXMLDialog):
         self.list_control = self.getControl(window_control_id)
         self.preference_list = []
         self.fill_preference_list()
+        self.setFocusId(window_control_id)
 
     def fill_preference_list(self):
         """
