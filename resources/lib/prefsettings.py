@@ -165,7 +165,7 @@ class settings():
                                   or self.condsub_prefs_on
                                   or self.useFilename or self.storeCustomMediaPreferences)
 
-      self.log(LOG_INFO, 'storeCustomMediaPreferences: {0}'.format(self.storeCustomMediaPreferences))
+      self.log(LOG_DEBUG, 'storeCustomMediaPreferences: {0}'.format(self.storeCustomMediaPreferences))
 
     def readCustomPrefs(self):
         addon = xbmcaddon.Addon()

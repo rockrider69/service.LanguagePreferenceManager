@@ -24,5 +24,3 @@ def log(level, msg):
             return
 
         xbmc.log("[Language Preference Manager]: " + str(msg), kodi_log_level)
-
-log(LOG_ERROR, "Loading logger.py")
