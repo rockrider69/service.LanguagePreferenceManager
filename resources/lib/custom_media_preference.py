@@ -356,10 +356,31 @@ class MediaSelector:
         Counterpart to from_string.
         :return: The media selector as a string
         """
+        type_name = self.get_type_name()
+        display_name = self.get_display_name()
+        return type_name + ":" + display_name
+
+    def get_display_name(self):
+        """
+        Get the display name of the media selector. The display name is used to identify the media selector in the UI.
+        :return: The display name of the media selector
+        """
         if self.tv_show_name:
-            return "tv_show:" + self.tv_show_name
+            return self.tv_show_name
         elif self.file_name:
-            return "file:" + self.file_name
+            return self.file_name
+        else:
+            return "Unknown Media Selector"
+
+    def get_type_name(self):
+        """
+        Get the type name of the media selector. The type name is used to identify the media selector type.
+        :return: The type name of the media selector
+        """
+        if self.tv_show_name:
+            return "tv_show"
+        elif self.file_name:
+            return "file"
         else:
             return "unknown"
 
