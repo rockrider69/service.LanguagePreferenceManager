@@ -83,9 +83,11 @@ class LangPrefMan_Player(xbmc.Player):
         settings.readSettings()
         xbmc.Player.__init__(self)
 
-        # Start the LangPrefWatcher thread. This thread will periodically check for subtitle changes.
-        self.lang_pref_watcher = LangPrefWatcher(self, check_interval=10)
-        self.lang_pref_watcher.start()
+        if settings.storeCustomMediaPreferences:
+            # Start the LangPrefWatcher thread. This thread will periodically check for subtitle changes.
+            # This is because onAVChange does not get called when the subtitle stream changes.
+            self.lang_pref_watcher = LangPrefWatcher(self, check_interval=10)
+            self.lang_pref_watcher.start()
 
     def add_ignore_audio_change_index(self, index):
         """
