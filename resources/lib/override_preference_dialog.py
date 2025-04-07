@@ -27,9 +27,11 @@ class OverridePreferenceDialog(xbmcgui.WindowXMLDialog):
         """
         items = self.get_all_preferences()
         for preference in items:
-            label_name = preference.selector.to_string()
-            log(LOG_DEBUG, f"Adding item: {label_name}")
-            li = xbmcgui.ListItem(label=label_name)
+            type_name = preference.selector.get_type_name()
+            display_name = self.cut_string_at_start(preference.selector.get_display_name(), 35)
+
+            log(LOG_DEBUG, f"Adding item: {type_name}")
+            li = xbmcgui.ListItem(label=type_name + ":" + display_name)
             self.list_control.addItem(li)
 
             # We want to track the items by index, so we can get them later on
@@ -83,6 +85,31 @@ class OverridePreferenceDialog(xbmcgui.WindowXMLDialog):
 
                         # Remove the item from the list
                         self.list_control.removeItem(self.list_control.getSelectedPosition())
+
+    @staticmethod
+    def split_lines(text, max_length):
+        """
+        Split a string into multiple lines separating them using \n.
+        :param text: The text to split.
+        :param max_length: The maximum length of each line.
+        :return: A list of lines.
+        """
+        result = ""
+        for i in range(0, len(text), max_length):
+            result += text[i:i + max_length] + "\n"
+        return result.strip()
+
+    @staticmethod
+    def cut_string_at_start(string, max_length):
+        """
+        Cut a string at the start if it is too long.
+        :param string: The string to cut.
+        :param max_length: The maximum length of the string.
+        :return: The cut string.
+        """
+        if len(string) > max_length:
+            return "..." + string[len(string)-max_length:]
+        return string
 
 
 dialog = OverridePreferenceDialog("override_preference_dialog.xml", xbmcaddon.Addon().getAddonInfo('path'), "default",
