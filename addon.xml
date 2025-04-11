@@ -2,7 +2,7 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="1.0.6BETA3"
+	version="1.0.6BETA4"
 	provider-name="ace20022/scott967/rockrider69"
 	>
 	<requires>
@@ -29,7 +29,7 @@
 1.0.4     : Fix and simplify SignsSongs subtagging (was colliding with language codes subtagging ie. pt-br). Thanks to BrutuZ!
 1.0.5     : Add Norwegian Bokmal (nb,nob), New Nowegian (nn,nno) and English Middle (enm) language codes according to ISO639-2.
             Clean-up some info/log message.
-1.0.6Beta3: New option to store persistent media preferences on a per TVshow/Movie basis, based on user selection.
+1.0.6Beta4: New option to store persistent media preferences on a per TVshow/Movie basis, based on user selection.
 			    These override calculated preferences (Thanks to SgtJalau!) - Some more fixes
 			
 		</news>
