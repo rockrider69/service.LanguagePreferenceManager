@@ -381,3 +381,7 @@ msgstr ""
 msgctxt "#30300"
 msgid "Any"
 msgstr ""
+
+msgctxt "#30350"
+msgid "Undefined"
+msgstr ""
