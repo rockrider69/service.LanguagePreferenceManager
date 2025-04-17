@@ -1,6 +1,8 @@
---- Version 1.0.6BETA4 
+--- Version 1.0.6BETA8
+
 - New option to store persistent media preferences on a per TVshow/Movie basis, based on user selection.
 	These override calculated preferences (Thanks to SgtJalau!) - Some more fixes
+- Consider empty subtitle language code as und/Undefined so it can still be prioritized in rules, not just ignored
 
 --- Version 1.0.5
 
