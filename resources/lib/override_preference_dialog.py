@@ -1,5 +1,6 @@
 import xbmcgui
 import xbmcaddon
+import os
 
 from logger import *
 from custom_media_preference import media_preference_manager
@@ -29,6 +30,9 @@ class OverridePreferenceDialog(xbmcgui.WindowXMLDialog):
         for preference in items:
             type_name = preference.selector.get_type_name()
             display_name = self.cut_string_at_start(preference.selector.get_display_name(), 35)
+            # for Movies, rather get rid of the file path and keep first 35 characters for better readability in the dialog
+            if type_name == 'file':
+                display_name = os.path.basename(preference.selector.get_display_name())[0:34]
 
             log(LOG_DEBUG, f"Adding item: {type_name}")
             li = xbmcgui.ListItem(label=type_name + ":" + display_name)
@@ -72,7 +76,7 @@ class OverridePreferenceDialog(xbmcgui.WindowXMLDialog):
             # Ask for delete confirmation
             if selected_item:
                 result = xbmcgui.Dialog().yesno("Delete Confirmation",
-                                                f"Do you want to delete {selected_item.getLabel()}?")
+                                                f"Do you want to remove custom preference for {selected_item.getLabel()}?")
                 if result:
                     preference = self.get_preference_by_index(self.list_control.getSelectedPosition())
 
