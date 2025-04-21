@@ -112,7 +112,7 @@ msgstr "Allmänt"
 
 msgctxt "#30123"
 msgid "Ignore all Signs and Songs subtitles tracks"
-msgstr "Ignore all Signs and Songs undertextspår"
+msgstr "Ignorera alla Signs and Songs-undertextspår"
 
 msgctxt "#30125"
 msgid "Enable Subtitle Keyword Blacklist"
