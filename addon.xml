@@ -14,8 +14,11 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<summary lang="en_GB">Language Preference Manager</summary>
+		<summary lang="sv_SE">Hanterare för språkinställningar</summary>
 		<description lang="en_GB">Sets the audio and subtitle track according to your language preferences</description>
+		<description lang="sv_SE">Ställer in ljud- och undertextspår enligt dina språkinställningar</description>
 		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
+		<disclaimer lang="sv_SE">För buggar, önskemål eller allmänna frågor, besök tråden Language Preference Manager på Kodi-forumet.</disclaimer>
 		<platform>all</platform>
 		<news>1.0.6     : - New option to store persistent media preferences on a per TVshow/Movie basis, based on user selection.
 	These override calculated preferences - See README for more (Thanks to SgtJalau!)
