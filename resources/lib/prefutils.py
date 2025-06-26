@@ -658,17 +658,17 @@ class LangPrefMan_Player(xbmc.Player):
         if found_original_audio_languages:
             if found_original_audio_languages[0][0] != self.selected_audio_stream['index']:
                 log(LOG_INFO,
-                    "Audio: Found at least one preferred original audio track among " + settings.audio_original_preflist +
+                    "Audio: Found at least one preferred original audio track among " + ",".join(settings.audio_original_preflist) +
                     " . Picking first: " + found_original_audio_languages[0][1])
                 return found_original_audio_languages[0][0]
             else:
                 # Found audio track is already the selected one - No need to change
                 log(LOG_INFO,
-                    "Audio: Selected audio track matches preferred original list " + settings.audio_original_preflist +
+                    "Audio: Selected audio track matches preferred original list " + ",".join(settings.audio_original_preflist) +
                     " . Keeping it   : " + found_original_audio_languages[0][1])
                 return -1
         log(LOG_INFO,
-            "Audio: No preferred original audio track found among " + settings.audio_original_preflist +
+            "Audio: No preferred original audio track found among " + ",".join(settings.audio_original_preflist) +
             " . Continue preferences evaluation...")
         return None
 
