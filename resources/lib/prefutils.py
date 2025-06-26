@@ -380,6 +380,16 @@ class LangPrefMan_Player(xbmc.Player):
         log(LOG_DEBUG, 'Evaluating audio preferences')
         log(LOG_DEBUG, 'Audio names containing the following keywords are blacklisted: {0}'.format(
             ','.join(settings.audio_keyword_blacklist)))
+        
+        log(LOG_DEBUG, 'Original Audio tracks to be preferred if present: {0}'.format(
+            ','.join(settings.audio_original_preflist)))
+        
+        if settings.audio_original_preflist_enabled and settings.audio_original_preflist:
+            AudioOriginalTrackIndex = self.get_original_audio_track_index()
+            # Audio Original tracks are preferred. If one is found we choose it and skip remaining preference evaluation.
+            if AudioOriginalTrackIndex is not None:
+                return AudioOriginalTrackIndex
+            
         i = 0
         for pref in audio_prefs:
             i += 1
@@ -628,6 +638,39 @@ class LangPrefMan_Player(xbmc.Player):
                                                                                                                    sub_name))
                 i += 1
         return -2
+
+    def get_original_audio_track_index(self):
+        """
+        Get the audio track index that matches the original_preferred_list. If no audio track matches, return None.
+        The audio track is searched by language, checking for the isoriginal tag. If multiple original found (weird...) the first one is returned.
+
+        :return: The first audio track index tagged as isoriginal and that matches the original_preferred_list.
+                -1 if the current selected audio track is already correct (to avoid unnecessary audio change)
+                 None if no original audio track found or no match.       
+        """
+
+        # Find all 'isoriginal' audio tracks (index, language) that match one language code in the original preferred list
+        found_original_audio_languages = [[stream['index'],stream['language']] for stream in self.audiostreams if
+                                          ('index' in stream and 'language' in stream and 'isoriginal' in stream
+                                            and stream['language'] in settings.audio_original_preflist
+								            and stream['isoriginal'])]
+
+        if found_original_audio_languages:
+            if found_original_audio_languages[0][0] != self.selected_audio_stream['index']:
+                log(LOG_INFO,
+                    "Audio: Found at least one preferred original audio track among " + settings.audio_original_preflist +
+                    " . Picking first: " + found_original_audio_languages[0][1])
+                return found_original_audio_languages[0][0]
+            else:
+                # Found audio track is already the selected one - No need to change
+                log(LOG_INFO,
+                    "Audio: Selected audio track matches preferred original list " + settings.audio_original_preflist +
+                    " . Keeping it   : " + found_original_audio_languages[0][1])
+                return -1
+        log(LOG_INFO,
+            "Audio: No preferred original audio track found among " + settings.audio_original_preflist +
+            " . Continue preferences evaluation...")
+        return None
 
     def isInBlacklist(self, TrackName, TrackType):
         found = False

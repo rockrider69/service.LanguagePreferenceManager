@@ -181,6 +181,17 @@ msgctxt "#30141"
 msgid "A new label"
 msgstr ""
 
+msgctxt "#30142"
+msgid "Enable Audio Original Preferences"
+msgstr ""
+
+msgctxt "#30143"
+msgid "Enter a comma-separated list of codes (e.g eng,ger,fre)"
+msgstr ""
+
+msgctxt "#30144"
+msgid "Audio Original Preference List:"
+msgstr ""
 
 msgctxt "#30201"
 msgid "Albanian"

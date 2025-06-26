@@ -54,6 +54,7 @@ class settings():
                  'signs: {15}\n' \
                  'blacklisted keywords (subtitles): {16}\n' \
                  'blacklisted keywords (audio): {17}\n' \
+                 'audio original pref list: {19}\n' \
                  'fast subtitles display (10sec latency workaround): {18}\n' \
                  'use file name: {6}, file name regex: {7}\n' \
                  'at least one pref on: {8}\n'\
@@ -61,8 +62,8 @@ class settings():
                  'sub prefs: {10}\n' \
                  'cond sub prefs: {11}\n' \
                  'custom audio prefs: {12}\n' \
-                 'custom subs prefs: {13}\n'
-                 'custom cond subs prefs: {14}\n'
+                 'custom subs prefs: {13}\n' \
+                 'custom cond subs prefs: {14}\n' \
                  '##### LPM Settings #####\n'
                  .format(self.delay, self.audio_prefs_on, self.sub_prefs_on,
                          self.condsub_prefs_on, self.turn_subs_on, self.turn_subs_off,
@@ -71,7 +72,8 @@ class settings():
                          self.custom_audio, self.custom_subs, self.custom_condsub, self.ignore_signs_on,
                          ','.join(self.subtitle_keyword_blacklist),
                          ','.join(self.audio_keyword_blacklist),
-                         self.fast_subs_display
+                         self.fast_subs_display,
+                         ','.join(self.audio_original_preflist)
                         )
                  )
       
@@ -81,6 +83,12 @@ class settings():
       self.service_enabled = addon.getSetting('enabled') == 'true'
       self.delay = int(addon.getSetting('delay'))
       self.audio_prefs_on = addon.getSetting('enableAudio') == 'true'
+      self.audio_original_preflist_enabled = addon.getSetting('enableAudioOriginalPreflist') == 'true'
+      self.audio_original_preflist = addon.getSetting('AudioOriginalPreflist')
+      if self.audio_original_preflist and self.audio_original_preflist_enabled:
+          self.audio_original_preflist = self.audio_original_preflist.lower().split(',')
+      else:
+          self.audio_original_preflist = []
       self.sub_prefs_on = addon.getSetting('enableSub') == 'true'
       self.condsub_prefs_on = addon.getSetting('enableCondSub') == 'true'
       self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'

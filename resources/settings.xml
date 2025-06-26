@@ -71,8 +71,7 @@
                     </control>
                     <enable>false</enable>
                     <dependencies>
-                        <dependency type="visible" setting="enableSubtitleKeywordBlacklist" operator="is">true
-                        </dependency>
+                        <dependency type="visible" setting="enableSubtitleKeywordBlacklist" operator="is">true</dependency>
                     </dependencies>
                 </setting>
                 <setting label="30127" type="string" id="SubtitleKeywordBlacklist">
@@ -84,8 +83,7 @@
                         <heading>30127</heading>
                     </control>
                     <dependencies>
-                        <dependency type="visible" setting="enableSubtitleKeywordBlacklist" operator="is">true
-                        </dependency>
+                        <dependency type="visible" setting="enableSubtitleKeywordBlacklist" operator="is">true</dependency>
                     </dependencies>
                 </setting>
             </group>
@@ -327,6 +325,37 @@
                     <control type="edit" format="string">
                         <heading>30118</heading>
                     </control>
+                </setting>
+            </group>
+            <group id="6">
+                <setting id="enableAudioOriginalPreflist" label="30142" type="boolean">
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="30143" type="string" id="AudioOriginalPreflistLabel">
+                    <default></default>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>30143</heading>
+                    </control>
+                    <enable>false</enable>
+                    <dependencies>
+                        <dependency type="visible" setting="enableAudioOriginalPreflist" operator="is">true</dependency>
+                    </dependencies>
+                </setting>
+                <setting label="30144" type="string" id="AudioOriginalPreflist">
+                    <default></default>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>30144</heading>
+                    </control>
+                    <dependencies>
+                        <dependency type="visible" setting="enableAudioOriginalPreflist" operator="is">true</dependency>
+                    </dependencies>
                 </setting>
             </group>
         </category>
