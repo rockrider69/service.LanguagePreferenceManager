@@ -1,3 +1,10 @@
+--- Version 1.0.7Beta1
+
+- New option to always prefer Original audio tracks if present. Based on a list e.g: eng,ger,fre
+	If one is found we force activate it and skip usual audio preference evaluation. Uses 'isoriginal' tag.
+- Add Swedish translation in Addon.xml (Thanks to Yeager)
+- Fix minor bug in settings.xml, display error in subtitles keywords blacklist settings menu
+
 --- Version 1.0.6
 
 - New option to store persistent media preferences on a per TVshow/Movie basis, based on user selection.
