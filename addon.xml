@@ -2,7 +2,7 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="1.0.7Beta1"
+	version="1.0.7Beta2"
 	provider-name="ace20022/scott967/rockrider69"
 	>
 	<requires>
@@ -20,10 +20,11 @@
 		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
 		<disclaimer lang="sv_SE">För buggar, önskemål eller allmänna frågor, besök tråden Language Preference Manager på Kodi-forumet.</disclaimer>
 		<platform>all</platform>
-		<news>1.0.7Beta1 : - New option to always prefer Original audio tracks if present. Based on a list e.g: eng,ger,fre
+		<news>1.0.7Beta2 : - New option to always prefer Original audio tracks if present. Based on a list e.g: eng,ger,fre
 	If one is found we force activate it and skip usual audio preference evaluation. Uses 'isoriginal' tag.
 - Add Swedish translation in Addon.xml (Thanks to Yeager)
 - Fix minor bug in settings.xml, display error in subtitles keywords blacklist settings menu
+- Custom Conditional Subs preferences : new -ff tag to prioritize Forced flagged subtitles e.g: Jpn:Eng-ff
 			
 		</news>
 		<assets>

@@ -1,9 +1,10 @@
---- Version 1.0.7Beta1
+--- Version 1.0.7Beta2
 
 - New option to always prefer Original audio tracks if present. Based on a list e.g: eng,ger,fre
 	If one is found we force activate it and skip usual audio preference evaluation. Uses 'isoriginal' tag.
 - Add Swedish translation in Addon.xml (Thanks to Yeager)
 - Fix minor bug in settings.xml, display error in subtitles keywords blacklist settings menu
+- Custom Conditional Subs preferences : new -ff tag to prioritize Forced flagged subtitles e.g : ...>Jpn:Eng-ff>...
 
 --- Version 1.0.6
 
