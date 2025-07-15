@@ -152,6 +152,9 @@ class LangPrefMan_Player(xbmc.Player):
 
                 if custom_preference is not None:
                     log(LOG_INFO, 'Custom media preferences found for current media - Applying them...')
+                    log(LOG_INFO, '       ... Audio {0} Subtitles {1} Enabled {2} .'.format(custom_preference.audio_language,
+                                                                                        custom_preference.subtitle_language,
+                                                                                        custom_preference.enable_subtitles))
                     if not custom_preference.apply_to_player(self):
                         log(LOG_INFO,
                             'Failed to apply custom media preferences for current media. Falling back to default preferences...')
