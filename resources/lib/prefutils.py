@@ -303,7 +303,14 @@ class LangPrefMan_Player(xbmc.Player):
                 self.showSubtitles(False)
             if trackIndex == -2:
                 log(LOG_INFO,
-                    'Conditional subtitle: No matching preferences found for current audio stream. Doing nothing.')
+                    'Conditional subtitle: No matching preferences found for current audio stream.')
+                if settings.turn_subs_off:
+                    log(LOG_INFO,
+                        'Conditional subtitle: Disabling subs.')
+                    self.showSubtitles(False)
+                else:
+                    log(LOG_INFO,
+                        'Conditional subtitle: Doing nothing.')
             elif trackIndex >= 0:
                 self.setSubtitleStream(trackIndex)
                 if settings.turn_subs_on:
