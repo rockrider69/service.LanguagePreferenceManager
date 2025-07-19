@@ -1,5 +1,5 @@
 import os, sys, re
-import xbmc, xbmcaddon, xbmcvfs, xmbcgui
+import xbmc, xbmcaddon, xbmcvfs, xbmcgui
 
 import json as simplejson
 
