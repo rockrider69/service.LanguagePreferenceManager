@@ -7,6 +7,10 @@ LOG_DEBUG = 3
 
 addon = xbmcaddon.Addon()
 log_level = addon.getSetting('log_level')
+if log_level and len(log_level) > 0:
+    log_level = int(log_level)
+else:
+    log_level = LOG_INFO
 
 
 def log(level, msg):
