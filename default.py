@@ -1,5 +1,5 @@
 import os, sys, re
-import xbmc, xbmcaddon, xbmcvfs
+import xbmc, xbmcaddon, xbmcvfs, xbmcgui
 
 import json as simplejson
 
@@ -59,6 +59,11 @@ class Main:
 if len(sys.argv) > 1 and sys.argv[1] == 'show_overrides':
     from resources.lib.override_preference_dialog import *
 elif __name__ == "__main__":
-    log(LOG_INFO, 'service {0} version {1} started'.format(__addonname__, __addonversion__))
-    main = Main()
-    log(LOG_INFO, 'service {0} version {1} stopped'.format(__addonname__, __addonversion__))
+    if xbmcgui.Window(10000).getProperty(__addonid__ + '_isrunning') == 'True':
+        log(LOG_INFO, 'service {0} version {1} is already started. Doing nothing.'.format(__addonname__, __addonversion__))
+    else:
+        xbmcgui.Window(10000).setProperty(__addonid__ + '_isrunning', 'True')
+        log(LOG_INFO, 'service {0} version {1} started'.format(__addonname__, __addonversion__))
+        main = Main()
+        xbmcgui.Window(10000).setProperty(__addonid__ + '_isrunning', 'False')
+        log(LOG_INFO, 'service {0} version {1} stopped'.format(__addonname__, __addonversion__))
