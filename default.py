@@ -1,6 +1,5 @@
 import os, sys, re
 import xbmc, xbmcaddon, xbmcvfs, xbmcgui
-from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
 import json as simplejson
 
 __addon__ = xbmcaddon.Addon()
@@ -17,6 +16,7 @@ from langcodes import *
 from prefsettings import settings
 from prefutils import LangPref_Monitor
 from prefutils import LangPrefMan_Player
+from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
 
 settings = settings()
 
