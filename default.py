@@ -1,6 +1,6 @@
 import os, sys, re
 import xbmc, xbmcaddon, xbmcvfs, xbmcgui
-
+from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
 import json as simplejson
 
 __addon__ = xbmcaddon.Addon()
@@ -19,22 +19,6 @@ from prefutils import LangPref_Monitor
 from prefutils import LangPrefMan_Player
 
 settings = settings()
-
-LOG_NONE = 0
-LOG_ERROR = 1
-LOG_INFO = 2
-LOG_DEBUG = 3
-
-
-def log(level, msg):
-    if level <= settings.logLevel:
-        if level == LOG_ERROR:
-            l = xbmc.LOGERROR
-        elif level == LOG_INFO:
-            l = xbmc.LOGINFO
-        elif level == LOG_DEBUG:
-            l = xbmc.LOGDEBUG
-        xbmc.log("[Language Preference Manager]: " + str(msg), l)
 
 
 class Main:
