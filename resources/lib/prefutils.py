@@ -613,14 +613,15 @@ class LangPrefMan_Player(xbmc.Player):
                                 # If our current subtitle is eligible for the condition, we will not change it
                                 if current_subtitle_index in to_chose_subtitle_indexes:
                                     log(LOG_INFO,
-                                        'CondSubs: already selected subtitle matches preference {0} ({1}:{2})'.format(
-                                            i, audio_name, sub_name))
+                                        'CondSubs : already selected subtitle matches preference {0} ({1}:{2}) with forced {3} & ss-tag {4}'.format(
+                                            i, audio_name, sub_name, forced, ss_tag))
                                     return current_subtitle_index
 
                                 if len(to_chose_subtitle_indexes) > 0:
                                     # if we have more than one subtitles, we will take the first one
                                     to_chose_subtitle_index = to_chose_subtitle_indexes[0]
-                                    log(LOG_INFO, 'CondSubs : Found {0} matching subtitles, using first at index {1}'.format(
+                                    log(LOG_INFO,
+                                        'CondSubs : Found {0} matching subtitles, using first at index {1}'.format(
                                         len(to_chose_subtitle_indexes), to_chose_subtitle_index))
 
                                     return to_chose_subtitle_index
@@ -628,9 +629,8 @@ class LangPrefMan_Player(xbmc.Player):
                                 nbr_sub_codes -= 1
                                 if nbr_sub_codes == 0:
                                     log(LOG_INFO,
-                                        'CondSubs : no match found for preference {0} ({1}:{2})'.format(i,
-                                                                                                                   audio_name,
-                                                                                                                   sub_name))
+                                        'CondSubs : no match found for preference {0} ({1}:{2}) with forced {3} & ss-tag {4}'.format(
+                                            i, audio_name, sub_name, forced, ss_tag))                                                                                                                   )
                 i += 1
         return -2
 
