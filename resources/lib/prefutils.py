@@ -630,7 +630,7 @@ class LangPrefMan_Player(xbmc.Player):
                                 if nbr_sub_codes == 0:
                                     log(LOG_INFO,
                                         'CondSubs : no match found for preference {0} ({1}:{2}) with forced {3} & ss-tag {4}'.format(
-                                            i, audio_name, sub_name, forced, ss_tag))                                                                                                                   )
+                                            i, audio_name, sub_name, forced, ss_tag))
                 i += 1
         return -2
 
