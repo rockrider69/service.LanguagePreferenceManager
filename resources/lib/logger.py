@@ -1,15 +1,19 @@
 import xbmc, xbmcaddon
-from prefsettings import settings
 
 LOG_NONE = 0
 LOG_ERROR = 1
 LOG_INFO = 2
 LOG_DEBUG = 3
 
-settings = settings()
+addon = xbmcaddon.Addon()
+log_level = addon.getSetting('log_level')
+if log_level and len(log_level) > 0:
+    log_level = int(log_level)
+else:
+    log_level = LOG_INFO
+
 
 def log(level, msg):
-    log_level = settings.logLevel
 
     if level <= log_level:
         if level == LOG_ERROR:
