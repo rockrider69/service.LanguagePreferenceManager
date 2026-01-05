@@ -38,6 +38,11 @@ class Main:
     def _daemon(self):
         while not self.Monitor.abortRequested():
             self.Monitor.waitForAbort(1)
+        if settings.storeCustomMediaPreferences:
+            # Stop properly the LangPrefWatcher thread
+            log(LOG_DEBUG, 'Stopping Subtitles changes Watcher thread...')
+            self.Player.WatcherStop()
+            log(LOG_DEBUG, 'Stopped Subtitles changes Watcher thread.')
 
 
 # Allow this to be called as a script with parameters

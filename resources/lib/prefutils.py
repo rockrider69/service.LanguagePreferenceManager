@@ -755,3 +755,8 @@ class LangPrefMan_Player(xbmc.Player):
         """ Ensure that the watcher thread is properly stopped when the object is deleted """
         if hasattr(self, 'lang_pref_watcher'):
             self.lang_pref_watcher.stop()
+
+    def WatcherStop(self):
+        """ Ensure that the watcher thread is properly stopped. Called when stopping main daemon in default.py because __del__ seems faulty"""
+        if hasattr(self, 'lang_pref_watcher'):
+            self.lang_pref_watcher.stop()
