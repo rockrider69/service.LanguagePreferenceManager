@@ -21,6 +21,7 @@ from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
 settings = settings()
 
 
+
 class Main:
     def __init__(self):
         self._init_vars()
