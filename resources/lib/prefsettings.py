@@ -3,25 +3,10 @@ import re
 from langcodes import *
 from prefparser import PrefParser
 from resources.lib import kodi_utils
-
-LOG_NONE = 0
-LOG_ERROR = 1
-LOG_INFO = 2
-LOG_DEBUG = 3
-    
+from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
 
 
 class settings():
-
-    def log(self, level, msg):
-        if level <= self.logLevel:
-            if level == LOG_ERROR:
-                l = xbmc.LOGERROR
-            elif level == LOG_INFO:
-                l = xbmc.LOGINFO
-            elif level == LOG_DEBUG:
-                l = xbmc.LOGDEBUG
-            xbmc.log("[Language Preference Manager]: " + str(msg), l)
 
     def init(self):
         addon = xbmcaddon.Addon()
@@ -44,7 +29,7 @@ class settings():
     def readSettings(self):
         self.readPrefs()
         self.readCustomPrefs()
-        self.log(LOG_DEBUG,
+        log(LOG_DEBUG,
                  '\n##### LPM Settings #####\n' \
                  'delay: {0}ms\n' \
                  'audio on: {1}\n' \
@@ -54,6 +39,7 @@ class settings():
                  'signs: {15}\n' \
                  'blacklisted keywords (subtitles): {16}\n' \
                  'blacklisted keywords (audio): {17}\n' \
+                 'audio original pref list: {19}\n' \
                  'fast subtitles display (10sec latency workaround): {18}\n' \
                  'use file name: {6}, file name regex: {7}\n' \
                  'at least one pref on: {8}\n'\
@@ -61,8 +47,8 @@ class settings():
                  'sub prefs: {10}\n' \
                  'cond sub prefs: {11}\n' \
                  'custom audio prefs: {12}\n' \
-                 'custom subs prefs: {13}\n'
-                 'custom cond subs prefs: {14}\n'
+                 'custom subs prefs: {13}\n' \
+                 'custom cond subs prefs: {14}\n' \
                  '##### LPM Settings #####\n'
                  .format(self.delay, self.audio_prefs_on, self.sub_prefs_on,
                          self.condsub_prefs_on, self.turn_subs_on, self.turn_subs_off,
@@ -71,7 +57,8 @@ class settings():
                          self.custom_audio, self.custom_subs, self.custom_condsub, self.ignore_signs_on,
                          ','.join(self.subtitle_keyword_blacklist),
                          ','.join(self.audio_keyword_blacklist),
-                         self.fast_subs_display
+                         self.fast_subs_display,
+                         ','.join(self.audio_original_preflist)
                         )
                  )
       
@@ -81,6 +68,12 @@ class settings():
       self.service_enabled = addon.getSetting('enabled') == 'true'
       self.delay = int(addon.getSetting('delay'))
       self.audio_prefs_on = addon.getSetting('enableAudio') == 'true'
+      self.audio_original_preflist_enabled = addon.getSetting('enableAudioOriginalPreflist') == 'true'
+      self.audio_original_preflist = addon.getSetting('AudioOriginalPreflist')
+      if self.audio_original_preflist and self.audio_original_preflist_enabled:
+          self.audio_original_preflist = self.audio_original_preflist.lower().split(',')
+      else:
+          self.audio_original_preflist = []
       self.sub_prefs_on = addon.getSetting('enableSub') == 'true'
       self.condsub_prefs_on = addon.getSetting('enableCondSub') == 'true'
       self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'
@@ -165,7 +158,7 @@ class settings():
                                   or self.condsub_prefs_on
                                   or self.useFilename or self.storeCustomMediaPreferences)
 
-      self.log(LOG_DEBUG, 'storeCustomMediaPreferences: {0}'.format(self.storeCustomMediaPreferences))
+      log(LOG_DEBUG, 'storeCustomMediaPreferences: {0}'.format(self.storeCustomMediaPreferences))
 
     def readCustomPrefs(self):
         addon = xbmcaddon.Addon()
@@ -212,9 +205,9 @@ class settings():
             return False
 
         if kodi_utils.is_movie(media_type):
-            self.log(LOG_DEBUG, 'Store user preference for movie: {0}'.format(self.movieOverrides))
+            log(LOG_DEBUG, 'Store user preference for movie: {0}'.format(self.movieOverrides))
             return self.movieOverrides
         elif kodi_utils.is_tv_show(media_type):
-            self.log(LOG_DEBUG, 'Store user preference for tv show: {0}'.format(self.tvShowOverrides))
+            log(LOG_DEBUG, 'Store user preference for tv show: {0}'.format(self.tvShowOverrides))
             return self.tvShowOverrides
         return False

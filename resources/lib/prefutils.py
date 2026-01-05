@@ -5,6 +5,7 @@ import time
 import xbmc, xbmcaddon, xbmcvfs
 
 from custom_media_preference import media_preference_manager, CustomMediaPreference
+from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
 
 import json as simplejson
 
@@ -12,22 +13,6 @@ from langcodes import *
 from prefsettings import settings
 
 settings = settings()
-
-LOG_NONE = 0
-LOG_ERROR = 1
-LOG_INFO = 2
-LOG_DEBUG = 3
-
-
-def log(level, msg):
-    if level <= settings.logLevel:
-        if level == LOG_ERROR:
-            l = xbmc.LOGERROR
-        elif level == LOG_INFO:
-            l = xbmc.LOGINFO
-        elif level == LOG_DEBUG:
-            l = xbmc.LOGDEBUG
-        xbmc.log("[Language Preference Manager]: " + str(msg), l)
 
 
 class LangPref_Monitor(xbmc.Monitor):
@@ -152,6 +137,9 @@ class LangPrefMan_Player(xbmc.Player):
 
                 if custom_preference is not None:
                     log(LOG_INFO, 'Custom media preferences found for current media - Applying them...')
+                    log(LOG_INFO, '       ... Audio {0} Subtitles {1} Enabled {2} .'.format(custom_preference.audio_language,
+                                                                                        custom_preference.subtitle_language,
+                                                                                        custom_preference.enable_subtitles))
                     if not custom_preference.apply_to_player(self):
                         log(LOG_INFO,
                             'Failed to apply custom media preferences for current media. Falling back to default preferences...')
@@ -300,7 +288,14 @@ class LangPrefMan_Player(xbmc.Player):
                 self.showSubtitles(False)
             if trackIndex == -2:
                 log(LOG_INFO,
-                    'Conditional subtitle: No matching preferences found for current audio stream. Doing nothing.')
+                    'Conditional subtitle: No matching preferences found for current audio stream.')
+                if settings.turn_subs_off:
+                    log(LOG_INFO,
+                        'Conditional subtitle: Disabling subs.')
+                    self.showSubtitles(False)
+                else:
+                    log(LOG_INFO,
+                        'Conditional subtitle: Doing nothing.')
             elif trackIndex >= 0:
                 self.setSubtitleStream(trackIndex)
                 if settings.turn_subs_on:
@@ -380,6 +375,16 @@ class LangPrefMan_Player(xbmc.Player):
         log(LOG_DEBUG, 'Evaluating audio preferences')
         log(LOG_DEBUG, 'Audio names containing the following keywords are blacklisted: {0}'.format(
             ','.join(settings.audio_keyword_blacklist)))
+        
+        log(LOG_DEBUG, 'Original Audio tracks to be preferred if present: {0}'.format(
+            ','.join(settings.audio_original_preflist)))
+        
+        if settings.audio_original_preflist_enabled and settings.audio_original_preflist:
+            AudioOriginalTrackIndex = self.get_original_audio_track_index()
+            # Audio Original tracks are preferred. If one is found we choose it and skip remaining preference evaluation.
+            if AudioOriginalTrackIndex is not None:
+                return AudioOriginalTrackIndex
+            
         i = 0
         for pref in audio_prefs:
             i += 1
@@ -608,14 +613,15 @@ class LangPrefMan_Player(xbmc.Player):
                                 # If our current subtitle is eligible for the condition, we will not change it
                                 if current_subtitle_index in to_chose_subtitle_indexes:
                                     log(LOG_INFO,
-                                        'CondSubs: already selected subtitle matches preference {0} ({1}:{2})'.format(
-                                            i, audio_name, sub_name))
+                                        'CondSubs : already selected subtitle matches preference {0} ({1}:{2}) with forced {3} & ss-tag {4}'.format(
+                                            i, audio_name, sub_name, forced, ss_tag))
                                     return current_subtitle_index
 
                                 if len(to_chose_subtitle_indexes) > 0:
                                     # if we have more than one subtitles, we will take the first one
                                     to_chose_subtitle_index = to_chose_subtitle_indexes[0]
-                                    log(LOG_INFO, 'CondSubs : Found {0} matching subtitles, using first at index {1}'.format(
+                                    log(LOG_INFO,
+                                        'CondSubs : Found {0} matching subtitles, using first at index {1}'.format(
                                         len(to_chose_subtitle_indexes), to_chose_subtitle_index))
 
                                     return to_chose_subtitle_index
@@ -623,11 +629,43 @@ class LangPrefMan_Player(xbmc.Player):
                                 nbr_sub_codes -= 1
                                 if nbr_sub_codes == 0:
                                     log(LOG_INFO,
-                                        'CondSubs : no match found for preference {0} ({1}:{2})'.format(i,
-                                                                                                                   audio_name,
-                                                                                                                   sub_name))
+                                        'CondSubs : no match found for preference {0} ({1}:{2}) with forced {3} & ss-tag {4}'.format(
+                                            i, audio_name, sub_name, forced, ss_tag))
                 i += 1
         return -2
+
+    def get_original_audio_track_index(self):
+        """
+        Get the audio track index that matches the original_preferred_list. If no audio track matches, return None.
+        The audio track is searched by language, checking for the isoriginal tag. If multiple original found (weird...) the first one is returned.
+
+        :return: The first audio track index tagged as isoriginal and that matches the original_preferred_list.
+                -1 if the current selected audio track is already correct (to avoid unnecessary audio change)
+                 None if no original audio track found or no match.       
+        """
+
+        # Find all 'isoriginal' audio tracks (index, language) that match one language code in the original preferred list
+        found_original_audio_languages = [[stream['index'],stream['language']] for stream in self.audiostreams if
+                                          ('index' in stream and 'language' in stream and 'isoriginal' in stream
+                                            and stream['language'] in settings.audio_original_preflist
+								            and stream['isoriginal'])]
+
+        if found_original_audio_languages:
+            if found_original_audio_languages[0][0] != self.selected_audio_stream['index']:
+                log(LOG_INFO,
+                    "Audio: Found at least one preferred original audio track among " + ",".join(settings.audio_original_preflist) +
+                    " . Picking first: " + found_original_audio_languages[0][1])
+                return found_original_audio_languages[0][0]
+            else:
+                # Found audio track is already the selected one - No need to change
+                log(LOG_INFO,
+                    "Audio: Selected audio track matches preferred original list " + ",".join(settings.audio_original_preflist) +
+                    " . Keeping it   : " + found_original_audio_languages[0][1])
+                return -1
+        log(LOG_INFO,
+            "Audio: No preferred original audio track found among " + ",".join(settings.audio_original_preflist) +
+            " . Continue preferences evaluation...")
+        return None
 
     def isInBlacklist(self, TrackName, TrackType):
         found = False

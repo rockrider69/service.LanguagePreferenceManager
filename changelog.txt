@@ -1,3 +1,13 @@
+--- Version 1.0.7
+
+- New option to always prefer Original audio tracks if present. Based on a list e.g: eng,ger,fre
+	If one is found we force activate it and skip usual audio preference evaluation. Uses 'isoriginal' tag.
+- Add Swedish translation in Addon.xml (Thanks to Yeager)
+- Custom Conditional Subs preferences : new -ff tag to prioritize Forced flagged subtitles e.g: Jpn:Eng-ff
+- Fix a bug in Custom Conditional Subs : when no preference matched, default subtitles stayed on despite option turn_subs_off
+- Avoid running multiple instances of the LPM addon
+- Use logger.py across all modules. Cleanup. Fix minor bug in settings.xml.
+
 --- Version 1.0.6
 
 - New option to store persistent media preferences on a per TVshow/Movie basis, based on user selection.

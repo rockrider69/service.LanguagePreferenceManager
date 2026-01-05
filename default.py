@@ -1,6 +1,5 @@
 import os, sys, re
-import xbmc, xbmcaddon, xbmcvfs
-
+import xbmc, xbmcaddon, xbmcvfs, xbmcgui
 import json as simplejson
 
 __addon__ = xbmcaddon.Addon()
@@ -17,24 +16,10 @@ from langcodes import *
 from prefsettings import settings
 from prefutils import LangPref_Monitor
 from prefutils import LangPrefMan_Player
+from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
 
 settings = settings()
 
-LOG_NONE = 0
-LOG_ERROR = 1
-LOG_INFO = 2
-LOG_DEBUG = 3
-
-
-def log(level, msg):
-    if level <= settings.logLevel:
-        if level == LOG_ERROR:
-            l = xbmc.LOGERROR
-        elif level == LOG_INFO:
-            l = xbmc.LOGINFO
-        elif level == LOG_DEBUG:
-            l = xbmc.LOGDEBUG
-        xbmc.log("[Language Preference Manager]: " + str(msg), l)
 
 
 class Main:
@@ -59,6 +44,11 @@ class Main:
 if len(sys.argv) > 1 and sys.argv[1] == 'show_overrides':
     from resources.lib.override_preference_dialog import *
 elif __name__ == "__main__":
-    log(LOG_INFO, 'service {0} version {1} started'.format(__addonname__, __addonversion__))
-    main = Main()
-    log(LOG_INFO, 'service {0} version {1} stopped'.format(__addonname__, __addonversion__))
+    if xbmcgui.Window(10000).getProperty(__addonid__ + '_isrunning') == 'True':
+        log(LOG_INFO, 'service {0} version {1} is already started. Doing nothing.'.format(__addonname__, __addonversion__))
+    else:
+        xbmcgui.Window(10000).setProperty(__addonid__ + '_isrunning', 'True')
+        log(LOG_INFO, 'service {0} version {1} started'.format(__addonname__, __addonversion__))
+        main = Main()
+        xbmcgui.Window(10000).setProperty(__addonid__ + '_isrunning', 'False')
+        log(LOG_INFO, 'service {0} version {1} stopped'.format(__addonname__, __addonversion__))
