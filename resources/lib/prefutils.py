@@ -48,10 +48,10 @@ class LangPrefWatcher(threading.Thread):
         This method runs in the background and periodically checks for subtitle changes.
         Possibly in the future, this method will also check for other stuff.
         """
-        while not self._stop_event.is_set() and not self.WatcherMonitor.AbortRequested():
+        while not self._stop_event.is_set() and not self.WatcherMonitor.abortRequested():
             if self.player.isPlayingVideo():
                 self.player.detect_subtitle_change()
-            self.WatcherMonitor.WaitForAbort(self.check_interval)
+            self.WatcherMonitor.waitForAbort(self.check_interval)
 
     def stop(self):
         """ Method to stop the thread gracefully """
