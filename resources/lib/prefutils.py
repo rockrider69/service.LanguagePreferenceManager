@@ -41,15 +41,17 @@ class LangPrefWatcher(threading.Thread):
         # Ensures the thread exits when the program ends
         self.daemon = True
 
+        self.WatcherMonitor = xbmc.Monitor()
+
     def run(self):
         """
         This method runs in the background and periodically checks for subtitle changes.
         Possibly in the future, this method will also check for other stuff.
         """
-        while not self._stop_event.is_set():
+        while not self._stop_event.is_set() and not self.WatcherMonitor.AbortRequested():
             if self.player.isPlayingVideo():
                 self.player.detect_subtitle_change()
-            time.sleep(self.check_interval)
+            self.WatcherMonitor.WaitForAbort(self.check_interval)
 
     def stop(self):
         """ Method to stop the thread gracefully """
