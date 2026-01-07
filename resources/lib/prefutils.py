@@ -52,10 +52,13 @@ class LangPrefWatcher(threading.Thread):
             if self.player.isPlayingVideo():
                 self.player.detect_subtitle_change()
             self.WatcherMonitor.waitForAbort(self.check_interval)
+        if self.WatcherMonitor.abortRequested():
+            log(LOG_DEBUG, 'Aborting Watcher Thread due to Kodi request')
 
     def stop(self):
         """ Method to stop the thread gracefully """
         self._stop_event.set()
+        log(LOG_DEBUG, 'Watcher Thread gracefully stopping')
         self.join()
 
 
@@ -756,4 +759,5 @@ class LangPrefMan_Player(xbmc.Player):
     def __del__(self):
         """ Ensure that the watcher thread is properly stopped when the object is deleted """
         if hasattr(self, 'lang_pref_watcher'):
+            log(LOG_DEBUG, '__del__ function called : request Watcher Thread to gracefully stop')
             self.lang_pref_watcher.stop()
