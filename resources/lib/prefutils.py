@@ -170,8 +170,10 @@ class LangPrefMan_Player(xbmc.Player):
                 log(LOG_DEBUG, "Delaying preferences evaluation by {0} ms".format(settings.delay))
                 xbmc.sleep(settings.delay)
 
-            previous_audio_index = self.selected_audio_stream['index']
-            previous_audio_language = self.selected_audio_stream['language']
+            previous_audio_index = self.getSelectedAudioIndex()
+            previous_audio_language = self.getSelectedAudioLanguage()
+            if previous_audio_index == -1:
+                log(LOG_INFO, "No Current Audio Stream activated so far for this video. Bizarre...")
 
             log(LOG_DEBUG, 'Getting video properties')
             self.getDetails()
