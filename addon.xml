@@ -2,7 +2,7 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="1.0.8Beta3"
+	version="1.0.8"
 	provider-name="ace20022/scott967/rockrider69"
 	>
 	<requires>
@@ -20,7 +20,9 @@
 		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
 		<disclaimer lang="sv_SE">För buggar, önskemål eller allmänna frågor, besök tråden Language Preference Manager på Kodi-forumet.</disclaimer>
 		<platform>all</platform>
-		<news>1.0.8 : - Fix addon not closing properly when "Store Preferences" is used (Kodi Freeze on Piers)
+		<news>1.0.8 : - Fix addon not closing properly when "Store Preferences" is used
+	(Kodi exit : freeze on Piers, thread error message on Omega)
+- Handle exception error in case video player reports no current audiostream activated
 			
 		</news>
 		<assets>
