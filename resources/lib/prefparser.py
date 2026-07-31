@@ -71,13 +71,13 @@ class PrefParser:
                     # Searching if a sub tag is present (like Eng:Jpn-ff to prioritize Forced tracks of another language)
                     if pref[1].endswith('-ff'):
                         ff_tag = True
-                        pref[1] = pref[1].rstrip('-ff')
+                        pref[1] = pref[1][:-3]
                     else:
                         ff_tag = False
                     # Searching if a sub tag is present (like Eng:Eng-ss to prioritize Signs&Songs tracks)
                     if pref[1].endswith('-ss'):
                         ss_tag = 'true'
-                        pref[1] = pref[1].rstrip('-ss')
+                        pref[1] = pref[1][:-3]
                     else:
                         ss_tag = 'false'
                     # Manage 2 or 3 digits language codes in custom rules

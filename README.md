@@ -6,6 +6,20 @@ A manager for audio and subtitle preferences
 
 This addon provides an easy way to set your preferred audio streams and subtitle languages in Kodi.
 
+Regional and script variants can be selected for English (US/UK), French
+(Canada/France), Spanish (Latin America/Spain), Portuguese (Brazil/Portugal),
+and Chinese (Simplified/Traditional). Selection prefers an exact BCP-47 tag
+reported by Kodi, then recognizes common region/script labels in track names.
+An exact variant ranks above an unlabelled track of the same language; an
+explicitly different variant does not match. Generic language preferences
+continue to match all their variants. Equally ranked tracks keep the current
+selection when possible, otherwise the first eligible track is selected.
+
+For custom audio, subtitle and conditional preferences, use `en-us`, `en-gb`,
+`fr-ca`, `fr-fr`, `es-419`, `es-es`, `pt-br`, `pt-pt`, `zh-hans` or `zh-hant`.
+For example, `any:fr-fr>any:eng` prefers French (France) subtitles, then English.
+Existing forced/signs flags and keyword exclusions still apply.
+
 You can select which audio tracks and subtitles to automatically activate based on your priorities, and define simple conditional rules like "if audio is xxx then activate subtitles yyy" via drop/down lists.
 More advanced custom rules can be defined as well (see changelog for more on the syntax. Note that custom rules always take precedence over others).
 
