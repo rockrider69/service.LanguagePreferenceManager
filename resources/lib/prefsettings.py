@@ -37,6 +37,7 @@ class settings():
                  'cond subs on: {3}\n' \
                  'turn subs on: {4}, turn subs off: {5}\n' \
                  'signs: {15}\n' \
+                 'regex sub filter: {20}\n' \
                  'blacklisted keywords (subtitles): {16}\n' \
                  'blacklisted keywords (audio): {17}\n' \
                  'audio original pref list: {19}\n' \
@@ -58,7 +59,8 @@ class settings():
                          ','.join(self.subtitle_keyword_blacklist),
                          ','.join(self.audio_keyword_blacklist),
                          self.fast_subs_display,
-                         ','.join(self.audio_original_preflist)
+                         ','.join(self.audio_original_preflist),
+                         self.regex_sub_filter_enabled
                         )
                  )
       
@@ -79,6 +81,16 @@ class settings():
       self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'
       self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
       self.ignore_signs_on = addon.getSetting('signs') == 'true'
+      self.regex_sub_filter_enabled = addon.getSetting('regexSubFilter') == 'true'
+      self.regex_sub_pattern = addon.getSetting('regexSubPattern')
+      if self.regex_sub_filter_enabled and self.regex_sub_pattern:
+          try:
+              self.regex_sub_filter = re.compile(self.regex_sub_pattern)
+          except re.error as e:
+              log(LOG_ERROR, 'Invalid regex pattern: {0} - {1}'.format(self.regex_sub_pattern, str(e)))
+              self.regex_sub_filter = None
+      else:
+          self.regex_sub_filter = None
       self.subtitle_keyword_blacklist_enabled = addon.getSetting('enableSubtitleKeywordBlacklist') == 'true'
       self.subtitle_keyword_blacklist = addon.getSetting('SubtitleKeywordBlacklist')
       if self.subtitle_keyword_blacklist and self.subtitle_keyword_blacklist_enabled:
@@ -97,7 +109,6 @@ class settings():
       if self.useFilename:
           self.reg = re.compile(self.filenameRegex, re.IGNORECASE)
           self.split = re.compile(r'[_|.|-]*', re.IGNORECASE)
-
 
       
       self.CondSubTag = 'false'
