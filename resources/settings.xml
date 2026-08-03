@@ -55,6 +55,22 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="regexSubFilter" label="30146" type="boolean">
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting label="30147" type="string" id="regexSubPattern">
+                    <default>(?i:s[\s._+\-\/\\]*(?:&amp;|\+)?[\s._+\-\/\\]*s|forced|foreign|songs?|signs?|only|non|parts?|titles?|alien|navi|dothraki)</default>
+                    <constraints>
+                        <allowempty>false</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>30147</heading>
+                    </control>
+                    <dependencies>
+                        <dependency type="visible" setting="regexSubFilter" operator="is">true</dependency>
+                    </dependencies>
+                </setting>
             </group>
             <group id="3">
                 <setting id="enableSubtitleKeywordBlacklist" label="30125" type="boolean">
@@ -838,7 +854,6 @@
                             <option label="30210">9</option>
                             <option label="30211">10</option>
                             <option label="30212">11</option>
-                            <option label="30213">12</option>
                             <option label="30214">13</option>
                             <option label="30215">14</option>
                             <option label="30216">15</option>
