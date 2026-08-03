@@ -156,6 +156,30 @@ class settings():
               languageTranslate(addon.getSetting('CondSubLang03'), 4, 3),
               addon.getSetting('CondSubForced03'),
               self.CondSubTag
+          ),
+          (
+              languageTranslate(addon.getSetting('CondAudioLang04'), 4, 0),
+              languageTranslate(addon.getSetting('CondAudioLang04'), 4, 3),
+              languageTranslate(addon.getSetting('CondSubLang04'), 4, 0),
+              languageTranslate(addon.getSetting('CondSubLang04'), 4, 3),
+              addon.getSetting('CondSubForced04'),
+              self.CondSubTag
+          ),
+          (
+              languageTranslate(addon.getSetting('CondAudioLang05'), 4, 0),
+              languageTranslate(addon.getSetting('CondAudioLang05'), 4, 3),
+              languageTranslate(addon.getSetting('CondSubLang05'), 4, 0),
+              languageTranslate(addon.getSetting('CondSubLang05'), 4, 3),
+              addon.getSetting('CondSubForced05'),
+              self.CondSubTag
+          ),
+          (
+              languageTranslate(addon.getSetting('CondAudioLang06'), 4, 0),
+              languageTranslate(addon.getSetting('CondAudioLang06'), 4, 3),
+              languageTranslate(addon.getSetting('CondSubLang06'), 4, 0),
+              languageTranslate(addon.getSetting('CondSubLang06'), 4, 3),
+              addon.getSetting('CondSubForced06'),
+              self.CondSubTag
           )]
       )]
 
@@ -208,7 +232,7 @@ class settings():
 
     def is_store_user_preference(self, media_type):
         """
-        Check if the user preference is supposed to be stored. That means that the custom preferences are stored for the media type.
+        Check if the user preference is supposed to be stored. That means that the custom.preferences are stored for the media type.
         :param media_type:  The media type string
         :return: True if the user preference is supposed to be stored, False otherwise
         """
