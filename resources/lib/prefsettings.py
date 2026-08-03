@@ -119,7 +119,13 @@ class settings():
           (languageTranslate(addon.getSetting('AudioLang02'), 4, 0) ,
            languageTranslate(addon.getSetting('AudioLang02'), 4, 3)),
           (languageTranslate(addon.getSetting('AudioLang03'), 4, 0) ,
-           languageTranslate(addon.getSetting('AudioLang03'), 4, 3))]
+           languageTranslate(addon.getSetting('AudioLang03'), 4, 3)),
+          (languageTranslate(addon.getSetting('AudioLang04'), 4, 0),
+           languageTranslate(addon.getSetting('AudioLang04'), 4, 3)),
+          (languageTranslate(addon.getSetting('AudioLang05'), 4, 0),
+           languageTranslate(addon.getSetting('AudioLang05'), 4, 3)),
+          (languageTranslate(addon.getSetting('AudioLang06'), 4, 0),
+           languageTranslate(addon.getSetting('AudioLang06'), 4, 3))]
       )]
       self.SubtitlePrefs = [(set(), [
           (languageTranslate(addon.getSetting('SubLang01'), 4, 0) ,
