@@ -14,7 +14,6 @@ from prefsettings import settings
 
 settings = settings()
 
-
 class LangPref_Monitor(xbmc.Monitor):
 
     def __init__(self):
@@ -23,7 +22,6 @@ class LangPref_Monitor(xbmc.Monitor):
     def onSettingsChanged(self):
         settings.init()
         settings.readSettings()
-
 
 class LangPrefWatcher(threading.Thread):
     """
@@ -55,7 +53,6 @@ class LangPrefWatcher(threading.Thread):
         """ Method to stop the thread gracefully """
         self._stop_event.set()
         self.join()
-
 
 class LangPrefMan_Player(xbmc.Player):
 
@@ -219,6 +216,18 @@ class LangPrefMan_Player(xbmc.Player):
         use_filename_audio = False
         use_filename_subs = False
 
+        # Regex-based subtitle selection — runs before normal subtitle preferences
+        if settings.regex_sub_filter_enabled and not self.LPM_initial_run_done:
+            regex_sub_index = self.evalRegexSubPrefs()
+            if regex_sub_index >= 0:
+                self.setSubtitleStream(regex_sub_index)
+                use_filename_subs = True  # Prevent normal sub prefs from overriding
+                if settings.turn_subs_on:
+                    log(LOG_INFO, 'Regex subtitle: enabling subs')
+                    self.showSubtitles(True)
+            else:
+                log(LOG_INFO, 'Regex subtitle: No match found, falling back to normal subtitle preferences')
+
         if settings.useFilename and not self.LPM_initial_run_done:
             audio, sub = self.evalFilenamePrefs()
             if (audio >= 0) and audio < len(self.audiostreams):
@@ -349,6 +358,29 @@ class LangPrefMan_Player(xbmc.Player):
 
         return -1
 
+    def evalRegexSubPrefs(self):
+        """
+        Evaluate regex subtitle preferences. Scan all subtitle streams and find
+        the first one whose name matches the configured regex pattern.
+        Returns the subtitle track index if a match is found, -2 if no match.
+        """
+        log(LOG_DEBUG, 'Evaluating regex subtitle preferences')
+        if not settings.regex_sub_filter_enabled or settings.regex_sub_filter is None:
+            return -2
+
+        for sub in self.subtitles:
+            sub_name = sub.get('name', '')
+            try:
+                if settings.regex_sub_filter.search(sub_name):
+                    log(LOG_INFO, 'Regex subtitle preference: Match found - selecting subtitle track {0} ({1})'.format(
+                        sub['index'], sub_name))
+                    return sub['index']
+            except Exception as e:
+                log(LOG_ERROR, 'Regex search error on subtitle "{0}": {1}'.format(sub_name, str(e)))
+
+        log(LOG_INFO, 'Regex subtitle preference: No matching subtitle track found')
+        return -2
+
     def evalFilenamePrefs(self):
         log(LOG_DEBUG, 'Evaluating filename preferences')
         audio = -1
@@ -476,7 +508,7 @@ class LangPrefMan_Player(xbmc.Player):
                                     'SubPrefs : one subtitle track is found matching Keyword Blacklist : {0}. Skipping it.'.format(
                                         ','.join(settings.subtitle_keyword_blacklist)))
                                 continue
-                            if (settings.ignore_signs_on and self.isSignsSub(sub['name'])):
+                            if settings.ignore_signs_on and self.isSignsSub(sub['name']):
                                 log(LOG_INFO,
                                     'SubPrefs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
                                 continue
@@ -582,14 +614,6 @@ class LangPrefMan_Player(xbmc.Player):
                                     # Consider empty subtitle language code as und/Undefined so it can still be prioritized in rules, not just ignored
                                     if sub['language'] == "":
                                         sub['language'] = "und"
-                                    # take into account -ss tag to prioritize specific Signs&Songs subtitles track
-                                    if (sub_code == sub['language']) or (sub_name == sub['language']):
-                                        if ss_tag == 'true' and self.isSignsSub(sub['name']):
-                                            log(LOG_INFO,
-                                                'CondSubs : Language of subtitle {0} matches conditional preference {1} ({2}:{3}) SubTag {4}'.format(
-                                                    (sub['index'] + 1), i, audio_name, sub_name, ss_tag))
-                                            to_chose_subtitle_indexes.append(sub['index'])
-                                            # return sub['index']
                                     # filter out subtitles to be ignored via Signs&Songs Toggle or matching Keywords Blacklist
                                     if self.isInBlacklist(sub['name'], 'Subtitle'):
                                         log(LOG_INFO,
@@ -600,6 +624,14 @@ class LangPrefMan_Player(xbmc.Player):
                                         log(LOG_INFO,
                                             'CondSubs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
                                         continue
+                                    # take into account -ss tag to prioritize specific Signs&Songs subtitles track
+                                    if (sub_code == sub['language']) or (sub_name == sub['language']):
+                                        if ss_tag == 'true' and self.isSignsSub(sub['name']):
+                                            log(LOG_INFO,
+                                                'CondSubs : Language of subtitle {0} matches conditional preference {1} ({2}:{3}) SubTag {4}'.format(
+                                                    (sub['index'] + 1), i, audio_name, sub_name, ss_tag))
+                                            to_chose_subtitle_indexes.append(sub['index'])
+                                            # return sub['index']
                                     if (sub_code == sub['language']) or (sub_name == sub['language']):
                                         if (ss_tag == 'false' and self.testForcedFlag(forced, sub['name'],
                                                                                       sub['isforced'])):
