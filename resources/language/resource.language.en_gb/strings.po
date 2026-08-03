@@ -193,6 +193,14 @@ msgctxt "#30144"
 msgid "Audio Original Preference List:"
 msgstr ""
 
+msgctxt "#30146"
+msgid "Use regex pattern to filter subtitles"
+msgstr ""
+
+msgctxt "#30147"
+msgid "Regex pattern for subtitle filtering"
+msgstr ""
+
 msgctxt "#30201"
 msgid "Albanian"
 msgstr ""
