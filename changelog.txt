@@ -1,3 +1,21 @@
+--- Version 2.0
+
+- feat: Add regex-based subtitle stream selector with fallback support
+- Added new toggle "Use regex pattern to filter subtitles" in General settings
+- Added editable regex pattern field (conditionally visible when toggle is enabled)
+- New evalRegexSubPrefs() method scans all subtitle streams and selects first match
+- Runs early in evalPrefs() before normal subtitle preferences
+- Falls back to Conditional Subtitle Preferences if no regex match found
+- Sets use_filename_subs flag to prevent subsequent prefs from overriding matched track
+- Added error handling for invalid regex patterns
+- Updated strings.po with two new label entries (#30146, #30147)
+
+--- Version 1.0.8
+
+- Fix addon not closing properly when "Store Preferences" is used
+(Kodi exit : freeze on Piers, thread error message on Omega)
+- Handle exception error in case video player reports no current audiostream activated
+
 --- Version 1.0.7
 
 - New option to always prefer Original audio tracks if present. Based on a list e.g: eng,ger,fre
