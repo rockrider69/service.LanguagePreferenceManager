@@ -238,7 +238,7 @@ class settings():
 
     def is_store_user_preference(self, media_type):
         """
-        Check if the user preference is supposed to be stored. That means that the custom.preferences are stored for the media type.
+        Check if the user preference is supposed to be stored. That means that the custom preferences are stored for the media type.
         :param media_type:  The media type string
         :return: True if the user preference is supposed to be stored, False otherwise
         """
