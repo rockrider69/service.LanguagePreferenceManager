@@ -55,12 +55,16 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="signs" label="30123" type="boolean">
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
                 <setting id="regexSubFilter" label="30146" type="boolean">
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
                 <setting label="30147" type="string" id="regexSubPattern">
-                    <default>(?m:s[ \t._+\-\/\\]*(?:&|&amp;|\+)?[ \t._+\-\/\\]*s|forced|foreign|songs?|signs?|only|non|parts?|(?<!sub)(?<!sub[ \t._+\-\/\\])(?<!sub[ \t._+\-\/\\]{2})titl(?:e|es)|alien|navi|dothraki)</default>
+                    <default>(?i:s[\s._+\-\/\\]*(?:&amp;|\+)?[\s._+\-\/\\]*s|forced|foreign|songs?|signs?|only|non|parts?|alien|navi|dothraki|titles?)</default>
                     <constraints>
                         <allowempty>false</allowempty>
                     </constraints>
@@ -69,6 +73,25 @@
                     </control>
                     <dependencies>
                         <dependency type="visible" setting="regexSubFilter" operator="is">true</dependency>
+                    </dependencies>
+                </setting>
+                <setting id="regexSubExclusionEnabled" label="30149" type="boolean">
+                    <default>false</default>
+                    <control type="toggle"/>
+                    <dependencies>
+                        <dependency type="visible" setting="regexSubFilter" operator="is">true</dependency>
+                    </dependencies>
+                </setting>
+                <setting id="regexSubExclusion" label="30148" type="string">
+                    <default>sub[\s._+\-\/\\]*titl</default>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>30148</heading>
+                    </control>
+                    <dependencies>
+                        <dependency type="visible" setting="regexSubExclusionEnabled" operator="is">true</dependency>
                     </dependencies>
                 </setting>
             </group>
