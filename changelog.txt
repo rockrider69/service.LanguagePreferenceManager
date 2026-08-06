@@ -15,6 +15,7 @@
 like full subtitles. added negative look back for search ‘sub’ before ‘title’
 - dubtitles & dub titles still pass through just not subtitles. 
 - changed to full line search not string only search 
+- Implement a two-stage subtitle regex filtering mechanism to improve accuracy when selecting special subtitle tracks (forced, signs, songs) while avoiding false positives on regular subtitle files.
 
 
 
