@@ -201,6 +201,14 @@ msgctxt "#30147"
 msgid "Regex pattern for subtitle filtering"
 msgstr ""
 
+msgctxt "#30148"
+msgid "Regex exclusion pattern for subtitle filtering"
+msgstr ""
+
+msgctxt "#30149"
+msgid "Use regex exclusion pattern to filter out false positives"
+msgstr ""
+
 msgctxt "#30201"
 msgid "Albanian"
 msgstr ""
