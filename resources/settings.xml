@@ -60,7 +60,7 @@
                     <control type="toggle"/>
                 </setting>
                 <setting label="30147" type="string" id="regexSubPattern">
-                    <default>(?i:s[\s._+\-\/\\]*(?:&amp;|\+)?[\s._+\-\/\\]*s|forced|foreign|songs?|signs?|only|non|parts?|titles?|alien|navi|dothraki)</default>
+                    <default>(?m:s[ \t._+\-\/\\]*(?:&|&amp;|\+)?[ \t._+\-\/\\]*s|forced|foreign|songs?|signs?|only|non|parts?|(?<!sub)(?<!sub[ \t._+\-\/\\])(?<!sub[ \t._+\-\/\\]{2})titl(?:e|es)|alien|navi|dothraki)</default>
                     <constraints>
                         <allowempty>false</allowempty>
                     </constraints>
