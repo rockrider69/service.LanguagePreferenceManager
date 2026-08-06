@@ -216,7 +216,7 @@ class LangPrefMan_Player(xbmc.Player):
         use_filename_audio = False
         use_filename_subs = False
 
-        # Regex-based subtitle selection — runs before normal subtitle preferences
+        # Regex-based subtitle selection â runs before normal subtitle preferences
         if settings.regex_sub_filter_enabled and not self.LPM_initial_run_done:
             regex_sub_index = self.evalRegexSubPrefs()
             if regex_sub_index >= 0:
@@ -360,18 +360,26 @@ class LangPrefMan_Player(xbmc.Player):
 
     def evalRegexSubPrefs(self):
         """
-        Evaluate regex subtitle preferences. Scan all subtitle streams and find
-        the first one whose name matches the configured regex pattern.
-        Returns the subtitle track index if a match is found, -2 if no match.
+        Evaluate regex subtitle preferences using two-step approach:
+        1. Match known keywords (title, forced, songs, signs, etc.)
+        2. Exclude if exclusion pattern matches (e.g. "subtitle")
+        
+        Returns the subtitle track index if a match is found after exclusion filter, -2 if no match.
         """
-        log(LOG_DEBUG, 'Evaluating regex subtitle preferences')
+        log(LOG_DEBUG, 'Evaluating regex subtitle preferences with two-step filtering')
         if not settings.regex_sub_filter_enabled or settings.regex_sub_filter is None:
             return -2
-
+        
         for sub in self.subtitles:
             sub_name = sub.get('name', '')
             try:
+                # Step 1: Check if core pattern matches
                 if settings.regex_sub_filter.search(sub_name):
+                    # Step 2: If exclusion is enabled, check exclusion pattern
+                    if settings.regex_sub_exclusion and settings.regex_sub_exclusion.search(sub_name):
+                        log(LOG_DEBUG, 'Regex subtitle: Excluded via exclusion pattern: {0}'.format(sub_name))
+                        continue
+                    
                     log(LOG_INFO, 'Regex subtitle preference: Match found - selecting subtitle track {0} ({1})'.format(
                         sub['index'], sub_name))
                     return sub['index']
@@ -717,7 +725,7 @@ class LangPrefMan_Player(xbmc.Player):
 
     def testForcedFlag(self, forced, subName, subForcedTag):
         test = subName.lower()
-        matches = ['forced', 'forcés']
+        matches = ['forced', 'forcÃ©s']
         found = any(x in test for x in matches)
         # Only when looking for forced subs :
         #   in case the sub name is plain empty or not well documented, 
