@@ -645,9 +645,10 @@ class LangPrefMan_Player(xbmc.Player):
         """
 
         # Find all 'isoriginal' audio tracks (index, language) that match one language code in the original preferred list
+		# If the orginal preferred list is empty or 'any', all 'isoriginal' audio tracks (index, language) are found
         found_original_audio_languages = [[stream['index'],stream['language']] for stream in self.audiostreams if
                                           ('index' in stream and 'language' in stream and 'isoriginal' in stream
-                                            and stream['language'] in settings.audio_original_preflist
+                                            and (settings.audio_original_preflist[0] == 'any' or settings.audio_original_preflist[0] == '' or stream['language'] in settings.audio_original_preflist)
 								            and stream['isoriginal'])]
 
         if found_original_audio_languages:
