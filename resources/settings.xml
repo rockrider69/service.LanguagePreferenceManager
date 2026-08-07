@@ -64,7 +64,7 @@
                     <control type="toggle"/>
                 </setting>
                 <setting label="30147" type="string" id="regexSubPattern">
-                    <default>(?i:s[\s._+\-\/\\]*(?:&amp;|\+)?[\s._+\-\/\\]*s|forced|foreign|songs?|signs?|only|non|parts?|alien|navi|dothraki|titles?)</default>
+                    <default>(?i:s[\s._+\-\/\\]*(?:&amp;|\+)?[\s._+\-\/\\]*s|forced|foreign|songs?|signs?|only|non|parts?|alien|navi|dothraki|elvish|titles?)</default>
                     <constraints>
                         <allowempty>false</allowempty>
                     </constraints>
