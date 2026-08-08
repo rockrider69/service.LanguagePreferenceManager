@@ -651,7 +651,7 @@ class LangPrefMan_Player(xbmc.Player):
 		# If the orginal preferred list is empty or 'any', all 'isoriginal' audio tracks (index, language) are found
         found_original_audio_languages = [[stream['index'],stream['language']] for stream in self.audiostreams if
                                           ('index' in stream and 'language' in stream and 'isoriginal' in stream
-                                            and (settings.audio_original_preflist[0] == 'any' or settings.audio_original_preflist[0] == '' 
+                                            and (settings.audio_original_preflist == 'any' or settings.audio_original_preflist == '' 
 												 or stream['language'] in settings.audio_original_preflist) 
 										   and stream['isoriginal'])]
 
@@ -685,7 +685,7 @@ class LangPrefMan_Player(xbmc.Player):
         # Find all 'isdefault' audio tracks (index, language)
         found_default_audio_languages = [[stream['index'],stream['language']] for stream in self.audiostreams if
                                           ('index' in stream and 'language' in stream and 'isdefault' in stream
-										   and (settings.audio_original_preflist == 'any' or settings.audio_original_preflist[0] == '' 
+										   and (settings.audio_original_preflist == 'any' or settings.audio_original_preflist == '' 
 												 or stream['language'] in settings.audio_original_preflist)								            
 										   and stream['isdefault'])]
 
