@@ -685,7 +685,7 @@ class LangPrefMan_Player(xbmc.Player):
         # Find all 'isdefault' audio tracks (index, language)
         found_default_audio_languages = [[stream['index'],stream['language']] for stream in self.audiostreams if
                                           ('index' in stream and 'language' in stream and 'isdefault' in stream
-										   and (settings.audio_original_preflist[0] == 'any' or settings.audio_original_preflist[0] == '' 
+										   and (settings.audio_original_preflist == 'any' or settings.audio_original_preflist[0] == '' 
 												 or stream['language'] in settings.audio_original_preflist)								            
 										   and stream['isdefault'])]
 
