@@ -17,14 +17,20 @@
 		<summary lang="sv_SE">Hanterare för språkinställningar</summary>
 		<summary lang="it_IT">Gestore delle preferenze linguistiche</summary>
 		<summary lang="ja_JP">言語設定マネージャー</summary>
+		<summary lang="de_DE">Sprachpräferenz-Manager</summary>
+		<summary lang="fr_FR">Gestionnaire des préférences linguistiques</summary>
 		<description lang="en_GB">Sets the audio and subtitle track according to your language preferences</description>
 		<description lang="sv_SE">Ställer in ljud- och undertextspår enligt dina språkinställningar</description>
 		<description lang="it_IT">Imposta le tracce audio e dei sottotitoli in base alle preferenze linguistiche.</description>
 		<description lang="ja_JP">言語設定に従って音声トラックと字幕トラックを設定します。</description>
+		<description lang="de_DE">Legt die Audio- und Untertitelspur entsprechend Ihren Spracheinstellungen fest</description>
+		<description lang="fr_FR">Définit les pistes audio et de sous-titres selon vos préférences linguistiques</description>
 		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
 		<disclaimer lang="sv_SE">För buggar, önskemål eller allmänna frågor, besök tråden Language Preference Manager på Kodi-forumet.</disclaimer>
 		<disclaimer lang="it_IT">Per bug, richieste o domande generali, visita il thread di Language Preference Manager sul forum Kodi.</disclaimer>
 		<disclaimer lang="ja_JP">バグ報告、要望、一般的な質問については、KodiフォーラムのLanguage Preference Managerスレッドをご覧ください。</disclaimer>
+		<disclaimer lang="de_DE">Bei Fehlern, Anfragen oder allgemeinen Fragen besuchen Sie den Thread „Language Preference Manager“ im Kodi-Forum.</disclaimer>
+		<disclaimer lang="fr_FR">Pour signaler des bugs, faire des demandes ou poser des questions générales, consultez le fil « Language Preference Manager » sur le forum Kodi.</disclaimer>
 		<platform>all</platform>
 		<news>
 --- Version 2.0
