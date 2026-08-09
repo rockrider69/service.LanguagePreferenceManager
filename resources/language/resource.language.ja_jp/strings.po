@@ -1,0 +1,436 @@
+# Kodi Media Center language file
+# Addon Name: Language Preference Manager
+# Addon id: service.languagepreferencemanager
+# Addon Provider: ace20022
+# Addon Updater: PP to fix languages codes not correct in string.po and langcodes.py, and not aligned
+msgid ""
+msgstr ""
+"Project-Id-Version: Kodi Addons\n"
+"Report-Msgid-Bugs-To: https://forum.kodi.tv/\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Kodi Translation Team\n"
+"Language-Team: Team-Kodi
+"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: {"it":"it_IT","de":"de_DE","ja":"ja_JP"}[lang]
+"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30100"
+msgid "Languages"
+msgstr "言語"
+
+msgctxt "#30101"
+msgid "Primary Language"
+msgstr "第1言語"
+
+msgctxt "#30102"
+msgid "Secondary Language"
+msgstr "第2言語"
+
+msgctxt "#30103"
+msgid "Third Language"
+msgstr "第3言語"
+
+msgctxt "#29999"
+msgid "Fourth Language"
+msgstr "第4言語"
+
+msgctxt "#29998"
+msgid "Fifth Language"
+msgstr "第5言語"
+
+msgctxt "#29997"
+msgid "Sixth Language"
+msgstr "第6言語"
+
+msgctxt "#30104"
+msgid "Audio Preferences"
+msgstr "音声設定"
+
+msgctxt "#30105"
+msgid "Subtitle Preferences"
+msgstr "字幕設定"
+
+msgctxt "#30106"
+msgid "Conditional Subtitle Preferences"
+msgstr "条件付き字幕設定"
+
+msgctxt "#30107"
+msgid "Enable Preference"
+msgstr "設定を有効化"
+
+msgctxt "#30108"
+msgid "Enable Language Preference Manager"
+msgstr "言語設定マネージャーを有効化"
+
+msgctxt "#30109"
+msgid "Pause while evaluating preferences"
+msgstr "設定の評価中に一時停止"
+
+msgctxt "#30110"
+msgid "If audio language is "
+msgstr "音声言語が"
+
+msgctxt "#30111"
+msgid "then display subtitles with language"
+msgstr "の場合、その言語の字幕を表示"
+
+msgctxt "#30112"
+msgid "Delay the evaluation by the following value [ms]"
+msgstr "評価を次の値 [ms] だけ遅延"
+
+msgctxt "#30113"
+msgid "Turn on subtitles if a subtitle matches in any setting globally"
+msgstr "いずれかのグローバル設定に字幕が一致した場合、字幕をオンにする"
+
+msgctxt "#30114"
+msgid "Turn off subtitles if no subtitle preference matched"
+msgstr "字幕設定に一致しない場合、字幕をオフにする"
+
+msgctxt "#30115"
+msgid "Advanced/Custom settings"
+msgstr "詳細/カスタム設定"
+
+msgctxt "#30116"
+msgid "Try to set the audio and/or subtitle track from the filename first"
+msgstr "まずファイル名から音声および/または字幕トラックの設定を試みる"
+
+msgctxt "#30117"
+msgid "Regular expression for filename based preferences"
+msgstr "ファイル名に基づく設定用の正規表現"
+
+msgctxt "#30118"
+msgid "Use custom pref, e.g. eng>ger>fin :"
+msgstr "カスタム設定を使用（例: eng>ger>fin）:"
+
+msgctxt "#30119"
+msgid "Use custom pref, e.g. eng>ger>fin :"
+msgstr "カスタム設定を使用（例: eng>ger>fin）:"
+
+msgctxt "#30120"
+msgid "Forced"
+msgstr "強制"
+
+msgctxt "#30121"
+msgid "Use custom pref, e.g. jpn:eng>eng:ger :"
+msgstr "カスタム設定を使用（例: jpn:eng>eng:ger）:"
+
+msgctxt "#30122"
+msgid "General"
+msgstr "一般"
+
+msgctxt "#30123"
+msgid "Ignore all Signs and Songs subtitles tracks"
+msgstr "看板・歌詞の字幕トラックをすべて無視"
+
+msgctxt "#30125"
+msgid "Enable Subtitle Keyword Blacklist"
+msgstr "字幕キーワードのブラックリストを有効化"
+
+msgctxt "#30126"
+msgid "Enter a comma-separated list of keywords to blacklist in subtitle names"
+msgstr "字幕名で除外するキーワードをカンマ区切りで入力"
+
+msgctxt "#30127"
+msgid "Subtitle Keyword List:"
+msgstr "字幕キーワード一覧:"
+
+msgctxt "#30128"
+msgid "Enable Audio Keyword Blacklist"
+msgstr "音声キーワードのブラックリストを有効化"
+
+msgctxt "#30129"
+msgid "Enter a comma-separated list of keywords to blacklist in audio names"
+msgstr "音声名で除外するキーワードをカンマ区切りで入力"
+
+msgctxt "#30130"
+msgid "Audio Keyword List:"
+msgstr "音声キーワード一覧:"
+
+msgctxt "#30131"
+msgid "Fast Subtitles Display:"
+msgstr "字幕の高速表示:"
+
+msgctxt "#30132"
+msgid "Disabled"
+msgstr "無効"
+
+msgctxt "#30133"
+msgid "New Start only"
+msgstr "新規開始時のみ"
+
+msgctxt "#30134"
+msgid "Start & Resume"
+msgstr "開始時と再開時"
+
+msgctxt "#30135"
+msgid "Stored Preferences"
+msgstr "保存済み設定"
+
+msgctxt "#30136"
+msgid "Store Pref. Movies"
+msgstr "映画の設定を保存"
+
+msgctxt "#30137"
+msgid "Store Pref. TV Shows"
+msgstr "テレビ番組の設定を保存"
+
+msgctxt "#30138"
+msgid "Changed audio/subt. override config pref. next time for the same movie/series?"
+msgstr "同じ映画/シリーズで次回再生時に、音声/字幕の上書き設定を変更しますか？"
+
+msgctxt "#30139"
+msgid "If enabled, manually selected audio/subtitle tracks during playback will be stored and restored next time for the same movie/whole series."
+msgstr "有効にすると、再生中に手動で選択した音声/字幕トラックが保存され、次回同じ映画/シリーズ全体で復元されます。"
+
+msgctxt "#30140"
+msgid "Edit Overrides"
+msgstr "上書き設定を編集"
+
+msgctxt "#30141"
+msgid "A new label"
+msgstr "新しいラベル"
+
+msgctxt "#30142"
+msgid "Enable Audio Original Preferences"
+msgstr "オリジナル音声設定を有効化"
+
+msgctxt "#30143"
+msgid "Enter a comma-separated list of codes (e.g eng,ger,fre)"
+msgstr "コードをカンマ区切りで入力（例: eng,ger,fre）"
+
+msgctxt "#30144"
+msgid "Audio Original Preference List:"
+msgstr "オリジナル音声設定一覧:"
+
+msgctxt "#30146"
+msgid "Use regex pattern to filter subtitles"
+msgstr "正規表現パターンを使用して字幕をフィルター"
+
+msgctxt "#30147"
+msgid "Regex pattern for subtitle filtering"
+msgstr "字幕フィルター用の正規表現パターン"
+
+msgctxt "#30148"
+msgid "Regex exclusion pattern for subtitle filtering"
+msgstr "字幕フィルター用の正規表現除外パターン"
+
+msgctxt "#30149"
+msgid "Use regex exclusion pattern to filter out false positives"
+msgstr "正規表現の除外パターンを使用して誤検出を除外"
+
+msgctxt "#30201"
+msgid "Albanian"
+msgstr "アルバニア語"
+
+msgctxt "#30202"
+msgid "Arabic"
+msgstr "アラビア語"
+
+msgctxt "#30203"
+msgid "Belarusian"
+msgstr "ベラルーシ語"
+
+msgctxt "#30204"
+msgid "Bosnian (Latin)"
+msgstr "ボスニア語（ラテン文字）"
+
+msgctxt "#30205"
+msgid "Bulgarian"
+msgstr "ブルガリア語"
+
+msgctxt "#30206"
+msgid "Catalan"
+msgstr "カタルーニャ語"
+
+msgctxt "#30207"
+msgid "Chinese"
+msgstr "中国語"
+
+msgctxt "#30208"
+msgid "Croatian"
+msgstr "クロアチア語"
+
+msgctxt "#30209"
+msgid "Czech"
+msgstr "チェコ語"
+
+msgctxt "#30210"
+msgid "Danish"
+msgstr "デンマーク語"
+
+msgctxt "#30211"
+msgid "Dutch"
+msgstr "オランダ語"
+
+msgctxt "#30212"
+msgid "English"
+msgstr "英語"
+
+msgctxt "#30213"
+msgid "Estonian"
+msgstr "エストニア語"
+
+msgctxt "#30214"
+msgid "Farsi"
+msgstr "ペルシャ語"
+
+msgctxt "#30215"
+msgid "Finnish"
+msgstr "フィンランド語"
+
+msgctxt "#30216"
+msgid "French"
+msgstr "フランス語"
+
+msgctxt "#30217"
+msgid "German"
+msgstr "ドイツ語"
+
+msgctxt "#30218"
+msgid "Greek"
+msgstr "ギリシャ語"
+
+msgctxt "#30219"
+msgid "Hebrew"
+msgstr "ヘブライ語"
+
+msgctxt "#30220"
+msgid "Hindi"
+msgstr "ヒンディー語"
+
+msgctxt "#30221"
+msgid "Hungarian"
+msgstr "ハンガリー語"
+
+msgctxt "#30222"
+msgid "Icelandic"
+msgstr "アイスランド語"
+
+msgctxt "#30223"
+msgid "Indonesian"
+msgstr "インドネシア語"
+
+msgctxt "#30224"
+msgid "Italian"
+msgstr "イタリア語"
+
+msgctxt "#30225"
+msgid "Japanese"
+msgstr "日本語"
+
+msgctxt "#30226"
+msgid "Korean"
+msgstr "韓国語"
+
+msgctxt "#30227"
+msgid "Latvian"
+msgstr "ラトビア語"
+
+msgctxt "#30228"
+msgid "Lithuanian"
+msgstr "リトアニア語"
+
+msgctxt "#30229"
+msgid "Macedonian"
+msgstr "マケドニア語"
+
+msgctxt "#30230"
+msgid "Norwegian"
+msgstr "ノルウェー語"
+
+msgctxt "#30231"
+msgid "Persian"
+msgstr "ペルシャ語"
+
+msgctxt "#30232"
+msgid "Polish"
+msgstr "ポーランド語"
+
+msgctxt "#30233"
+msgid "Portuguese"
+msgstr "ポルトガル語"
+
+msgctxt "#30234"
+msgid "Portuguese (Brazil)"
+msgstr "ポルトガル語（ブラジル）"
+
+msgctxt "#30235"
+msgid "Romanian"
+msgstr "ルーマニア語"
+
+msgctxt "#30236"
+msgid "Russian"
+msgstr "ロシア語"
+
+msgctxt "#30237"
+msgid "Serbian"
+msgstr "セルビア語"
+
+msgctxt "#30238"
+msgid "Slovak"
+msgstr "スロバキア語"
+
+msgctxt "#30239"
+msgid "Slovenian"
+msgstr "スロベニア語"
+
+msgctxt "#30240"
+msgid "Spanish"
+msgstr "スペイン語"
+
+msgctxt "#30241"
+msgid "Swedish"
+msgstr "スウェーデン語"
+
+msgctxt "#30242"
+msgid "Thai"
+msgstr "タイ語"
+
+msgctxt "#30243"
+msgid "Turkish"
+msgstr "トルコ語"
+
+msgctxt "#30244"
+msgid "Ukrainian"
+msgstr "ウクライナ語"
+
+msgctxt "#30245"
+msgid "Vietnamese"
+msgstr "ベトナム語"
+
+msgctxt "#30248"
+msgid "English Middle"
+msgstr "中英語"
+
+msgctxt "#30249"
+msgid "Norwegian Bokmal"
+msgstr "ノルウェー語（ブークモール）"
+
+msgctxt "#30250"
+msgid "New Norwegian"
+msgstr "新ノルウェー語"
+
+msgctxt "#30200"
+msgid "None"
+msgstr "なし"
+
+msgctxt "#30300"
+msgid "Any"
+msgstr "任意"
+
+msgctxt "#30350"
+msgid "Undefined"
+msgstr "未定義"
+
+msgctxt "#30400"
+msgid "Unknown"
+msgstr "不明"
+
+msgctxt "#30500"
+msgid "Original"
+msgstr "オリジナル"
