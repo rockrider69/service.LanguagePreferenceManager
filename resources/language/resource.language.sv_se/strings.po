@@ -1,4 +1,3 @@
-# Kodi Media Center Swedishlanguage file
 # Addon Name: Language Preference Manager
 # Addon id: service.languagepreferencemanager
 # Addon Provider: ace20022
@@ -71,8 +70,8 @@ msgid "Delay the evaluation by the following value [ms]"
 msgstr "Fördröj utvärderingen med följande värde [ms]"
 
 msgctxt "#30113"
-msgid "Turn on subtitles if a subtitle preference matched"
-msgstr "Slå på undertexter om en undertextsinställning matchas"
+msgid "Turn on subtitles if a subtitle matches in any setting globally"
+msgstr "Aktivera undertexter om en undertext matchar globalt i någon inställning"
 
 msgctxt "#30114"
 msgid "Turn off subtitles if no subtitle preference matched"
@@ -101,11 +100,11 @@ msgstr "Använd anpassad inställning, t.ex. eng>swer>fin :"
 
 msgctxt "#30120"
 msgid "Forced"
-msgstr "Tvingad"
+msgstr "Tvungen"
 
 msgctxt "#30121"
 msgid "Use custom pref, e.g. jpn:eng>eng:ger :"
-msgstr "Använd anpassad inställning, t.ex. jpn:swe>eng:swe :"
+msgstr "Använd anpassad inställning, t.ex. jpn:swe>swe:ger :"
 
 msgctxt "#30122"
 msgid "General"
@@ -205,6 +204,22 @@ msgstr "Ange en kommaseparerad lista över koder (t.ex swe,eng,ger)"
 msgctxt "#30144"
 msgid "Audio Original Preference List:"
 msgstr "Lista över föredragna originalljud:"
+
+msgctxt "#30146"
+msgid "Use regex pattern to filter subtitles"
+msgstr "Använd regex-mönster för att filtrera undertexter"
+
+msgctxt "#30147"
+msgid "Regex pattern for subtitle filtering"
+msgstr "Regex-mönster för undertextsfiltrering"
+
+msgctxt "#30148"
+msgid "Regex exclusion pattern for subtitle filtering"
+msgstr "Regex-exkluderingsmönster för undertextsfiltrering"
+
+msgctxt "#30149"
+msgid "Use regex exclusion pattern to filter out false positives"
+msgstr "Använd regex-exkluderingsmönster för att filtrera bort falska positiva"
 
 msgctxt "#30201"
 msgid "Albanian"
@@ -372,7 +387,7 @@ msgstr "Svenska"
 
 msgctxt "#30242"
 msgid "Thai"
-msgstr "Thai"
+msgstr "Thailändska"
 
 msgctxt "#30243"
 msgid "Turkish"
@@ -388,7 +403,7 @@ msgstr "Vietnamesiska"
 
 msgctxt "#30248"
 msgid "English Middle"
-msgstr "Engelska mellan"
+msgstr "Engelska medeltida"
 
 msgctxt "#30249"
 msgid "Norwegian Bokmal"
@@ -404,8 +419,16 @@ msgstr "Ingen"
 
 msgctxt "#30300"
 msgid "Any"
-msgstr "Alla"
+msgstr "Valfri"
 
 msgctxt "#30350"
 msgid "Undefined"
 msgstr "Odefinierad"
+
+msgctxt "#30400"
+msgid "Unknown"
+msgstr "Okänd"
+
+msgctxt "#30500"
+msgid "Original"
+msgstr "Original"
