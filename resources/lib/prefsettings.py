@@ -8,6 +8,9 @@ from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
 
 class settings():
 
+    # Special language codes that should pass through languageTranslate untouched
+    SPECIAL_CODES = {'org', 'unk', 'und', 'any', 'Any', 'non', 'None', 'none'}
+
     def init(self):
         addon = xbmcaddon.Addon()
         self.logLevel = addon.getSetting('log_level')
@@ -26,6 +29,30 @@ class settings():
     def __init__( self ):
         self.init()
         
+    def safeTranslate(self, value, from_type, to_type):
+        """
+        Wrapper around languageTranslate that passes through special codes
+        (org, unk, und, any, non) without attempting translation.
+        These codes don't exist in the ISO language database and would return None.
+        
+        :param value: The language value to translate
+        :param from_type: The source type for languageTranslate
+        :param to_type: The target type for languageTranslate
+        :return: The translated value, or the original special code if it's a special code
+        """
+        if value is None:
+            return None
+        # Pass special codes through untouched
+        if value in self.SPECIAL_CODES:
+            return value
+        result = languageTranslate(value, from_type, to_type)
+        # If translation fails, return the original value rather than None
+        if result is None:
+            log(LOG_INFO, 'Language translate returned None for value: {0} (from {1} to {2}). Using original.'.format(
+                value, from_type, to_type))
+            return value
+        return result
+
     def readSettings(self):
         self.readPrefs()
         self.readCustomPrefs()
@@ -127,77 +154,97 @@ class settings():
         self.CondSubTag = 'false'
 
         self.AudioPrefs = [(set(), [
-            (languageTranslate(addon.getSetting('AudioLang01'), 4, 0) ,
-             languageTranslate(addon.getSetting('AudioLang01'), 4, 3)),
-            (languageTranslate(addon.getSetting('AudioLang02'), 4, 0) ,
-             languageTranslate(addon.getSetting('AudioLang02'), 4, 3)),
-            (languageTranslate(addon.getSetting('AudioLang03'), 4, 0) ,
-             languageTranslate(addon.getSetting('AudioLang03'), 4, 3)),
-            (languageTranslate(addon.getSetting('AudioLang04'), 4, 0),
-             languageTranslate(addon.getSetting('AudioLang04'), 4, 3)),
-            (languageTranslate(addon.getSetting('AudioLang05'), 4, 0),
-             languageTranslate(addon.getSetting('AudioLang05'), 4, 3)),
-            (languageTranslate(addon.getSetting('AudioLang06'), 4, 0),
-             languageTranslate(addon.getSetting('AudioLang06'), 4, 3))]
+            (self.safeTranslate(addon.getSetting('AudioLang01'), 4, 0) ,
+             self.safeTranslate(addon.getSetting('AudioLang01'), 4, 3)),
+            (self.safeTranslate(addon.getSetting('AudioLang02'), 4, 0) ,
+             self.safeTranslate(addon.getSetting('AudioLang02'), 4, 3)),
+            (self.safeTranslate(addon.getSetting('AudioLang03'), 4, 0) ,
+             self.safeTranslate(addon.getSetting('AudioLang03'), 4, 3)),
+            (self.safeTranslate(addon.getSetting('AudioLang04'), 4, 0),
+             self.safeTranslate(addon.getSetting('AudioLang04'), 4, 3)),
+            (self.safeTranslate(addon.getSetting('AudioLang05'), 4, 0),
+             self.safeTranslate(addon.getSetting('AudioLang05'), 4, 3)),
+            (self.safeTranslate(addon.getSetting('AudioLang06'), 4, 0),
+             self.safeTranslate(addon.getSetting('AudioLang06'), 4, 3)),
+            (self.safeTranslate(addon.getSetting('AudioLang07'), 4, 0),
+             self.safeTranslate(addon.getSetting('AudioLang07'), 4, 3)),
+            (self.safeTranslate(addon.getSetting('AudioLang08'), 4, 0),
+             self.safeTranslate(addon.getSetting('AudioLang08'), 4, 3))]
         )]
         self.SubtitlePrefs = [(set(), [
-            (languageTranslate(addon.getSetting('SubLang01'), 4, 0) ,
-             languageTranslate(addon.getSetting('SubLang01'), 4, 3),
+            (self.safeTranslate(addon.getSetting('SubLang01'), 4, 0) ,
+             self.safeTranslate(addon.getSetting('SubLang01'), 4, 3),
              addon.getSetting('SubForced01')),
-            (languageTranslate(addon.getSetting('SubLang02'), 4, 0) ,
-             languageTranslate(addon.getSetting('SubLang02'), 4, 3),
+            (self.safeTranslate(addon.getSetting('SubLang02'), 4, 0) ,
+             self.safeTranslate(addon.getSetting('SubLang02'), 4, 3),
              addon.getSetting('SubForced02')),
-            (languageTranslate(addon.getSetting('SubLang03'), 4, 0) ,
-             languageTranslate(addon.getSetting('SubLang03'), 4, 3),
+            (self.safeTranslate(addon.getSetting('SubLang03'), 4, 0) ,
+             self.safeTranslate(addon.getSetting('SubLang03'), 4, 3),
              addon.getSetting('SubForced03'))]
         )]
         self.CondSubtitlePrefs = [(set(), [
             (
-                languageTranslate(addon.getSetting('CondAudioLang01'), 4, 0),
-                languageTranslate(addon.getSetting('CondAudioLang01'), 4, 3),
-                languageTranslate(addon.getSetting('CondSubLang01'), 4, 0),
-                languageTranslate(addon.getSetting('CondSubLang01'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondAudioLang01'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondAudioLang01'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondSubLang01'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondSubLang01'), 4, 3),
                 addon.getSetting('CondSubForced01'),
                 self.CondSubTag
             ),
             (
-                languageTranslate(addon.getSetting('CondAudioLang02'), 4, 0),
-                languageTranslate(addon.getSetting('CondAudioLang02'), 4, 3),
-                languageTranslate(addon.getSetting('CondSubLang02'), 4, 0),
-                languageTranslate(addon.getSetting('CondSubLang02'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondAudioLang02'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondAudioLang02'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondSubLang02'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondSubLang02'), 4, 3),
                 addon.getSetting('CondSubForced02'),
                 self.CondSubTag
             ),
             (
-                languageTranslate(addon.getSetting('CondAudioLang03'), 4, 0),
-                languageTranslate(addon.getSetting('CondAudioLang03'), 4, 3),
-                languageTranslate(addon.getSetting('CondSubLang03'), 4, 0),
-                languageTranslate(addon.getSetting('CondSubLang03'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondAudioLang03'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondAudioLang03'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondSubLang03'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondSubLang03'), 4, 3),
                 addon.getSetting('CondSubForced03'),
                 self.CondSubTag
             ),
             (
-                languageTranslate(addon.getSetting('CondAudioLang04'), 4, 0),
-                languageTranslate(addon.getSetting('CondAudioLang04'), 4, 3),
-                languageTranslate(addon.getSetting('CondSubLang04'), 4, 0),
-                languageTranslate(addon.getSetting('CondSubLang04'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondAudioLang04'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondAudioLang04'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondSubLang04'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondSubLang04'), 4, 3),
                 addon.getSetting('CondSubForced04'),
                 self.CondSubTag
             ),
             (
-                languageTranslate(addon.getSetting('CondAudioLang05'), 4, 0),
-                languageTranslate(addon.getSetting('CondAudioLang05'), 4, 3),
-                languageTranslate(addon.getSetting('CondSubLang05'), 4, 0),
-                languageTranslate(addon.getSetting('CondSubLang05'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondAudioLang05'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondAudioLang05'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondSubLang05'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondSubLang05'), 4, 3),
                 addon.getSetting('CondSubForced05'),
                 self.CondSubTag
             ),
             (
-                languageTranslate(addon.getSetting('CondAudioLang06'), 4, 0),
-                languageTranslate(addon.getSetting('CondAudioLang06'), 4, 3),
-                languageTranslate(addon.getSetting('CondSubLang06'), 4, 0),
-                languageTranslate(addon.getSetting('CondSubLang06'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondAudioLang06'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondAudioLang06'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondSubLang06'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondSubLang06'), 4, 3),
                 addon.getSetting('CondSubForced06'),
+                self.CondSubTag
+            ),
+            (
+                self.safeTranslate(addon.getSetting('CondAudioLang07'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondAudioLang07'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondSubLang07'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondSubLang07'), 4, 3),
+                addon.getSetting('CondSubForced07'),
+                self.CondSubTag
+            ),
+            (
+                self.safeTranslate(addon.getSetting('CondAudioLang08'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondAudioLang08'), 4, 3),
+                self.safeTranslate(addon.getSetting('CondSubLang08'), 4, 0),
+                self.safeTranslate(addon.getSetting('CondSubLang08'), 4, 3),
+                addon.getSetting('CondSubForced08'),
                 self.CondSubTag
             )]
         )]
@@ -240,7 +287,7 @@ class settings():
 
     def is_store_user_preference_for_player(self, player):
         """
-        Check if the player is playing a video and if the store user preference is enabled for the media type of the video (e.g. movie, tv show).
+        Check if the player is playing a video and if the store user preferences is enabled for the media type of the video (e.g. movie, tv show).
         :param player: The player object
         :return: True if the player is playing a video and the store user preference is enabled for the media type, False otherwise
         """

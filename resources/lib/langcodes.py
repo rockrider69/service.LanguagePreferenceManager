@@ -59,7 +59,10 @@ LANGUAGES      = (
     ("New Norwegian"              , "3",        "nn",            "nno",                 "49",                    30250  ),
     ("None"                       , "-1",       "",              "non",                 "45",                    30200  ),
     ("Any"                        , "-2",       "",              "any",                 "46",                    30300  ),
-    ("Undefined"                  , "-3",       "",              "und",                 "50",                    30350  ) )
+    ("Undefined"                  , "-3",       "",              "und",                 "50",                    30350  ),
+    ("Unknown"                  , "-4",       "",              "unk",                 "51",                    30400  ),
+    ("Original"                  , "-5",       "",              "org",                 "52",                    30500  ))
+    
 
 def languageTranslate(lang, lang_from, lang_to):
   for x in LANGUAGES:
