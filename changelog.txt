@@ -9,14 +9,21 @@
 - Sets use_filename_subs flag to prevent subsequent prefs from overriding matched track
 - Added error handling for invalid regex patterns
 - Updated strings.po with two new label entries (#30146, #30147)
-- Added support for 6 conditional subtitle preference sets (up from 3)
+- Added support for 8 conditional subtitle preference sets (up from 3)
 - Added support for 6 audio preference sets (up from 3)
 - mistakenly included complete wording subtitles
 like full subtitles. added negative look back for search ‘sub’ before ‘title’
 - dubtitles & dub titles still pass through just not subtitles. 
 - changed to full line search not string only search 
 - Implement a two-stage subtitle regex filtering mechanism to improve accuracy when selecting special subtitle tracks (forced, signs, songs) while avoiding false positives on regular subtitle files.
-
+- User selects "Original" in settings → spinner value 52 → languageTranslate("52", 4, 3) returns "org" → stored in AudioPrefs/SubtitlePrefs/CondSubtitlePrefs tuples as the code "org".
+- During playback evaluation (evalAudioPrefs/evalSubPrefs/evalCondSubPrefs): when code == "org", the stream_matches_language helper checks stream.get('isoriginal', False) for audio tracks, or "original" in sub_name for subtitle tracks. When code == "unk", it checks for empty or "unk" language strings.
+- When storing manual overrides (from_player): if the selected audio track has isoriginal=True, the preference stores "org" as the language. If a subtitle has "original" in its name, it stores "org".
+- When restoring overrides (get_audio_track_index/get_subtitle_track_index): the same special-case matching applies — isoriginal for audio, name-based for subtitles.
+- strings.po provides the UI labels (30500 → "Original", 30400 → "Unknown") that the settings spinner displays.
+- Changed "turn on subtitles if subtitle preference if found" and it's logic to "Turn on subtitles if a subtitle matches in any setting globally"
+- Added Japanese, French, German and Italian language options for UI, English & Swedish were already there.
+- Added "Unknown, Undefined, None, Original" language & subtitle codes and updated logic for finding and filtering them within all settings.
 
 
 --- Version 1.0.8
@@ -157,4 +164,3 @@ typos
 --- Version 0.0.1
 
 First version of Language Preference Manager.
-
