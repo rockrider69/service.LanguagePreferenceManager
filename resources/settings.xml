@@ -55,10 +55,6 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="signs" label="30123" type="boolean">
-                    <default>false</default>
-                    <control type="toggle"/>
-                </setting>
                 <setting id="regexSubFilter" label="30146" type="boolean">
                     <default>false</default>
                     <control type="toggle"/>
@@ -234,7 +230,8 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
-                            
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -296,6 +293,8 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -357,13 +356,15 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
                 </setting>
             </group>
             <group id="5">
-                <setting id="AudioLang04" type="integer" label="30103">
+                <setting id="AudioLang04" type="integer" label="29999">
                     <default>45</default>
                     <constraints>
                         <options>
@@ -418,13 +419,15 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
                 </setting>
             </group>
             <group id="6">
-                <setting id="AudioLang05" type="integer" label="30103">
+                <setting id="AudioLang05" type="integer" label="29998">
                     <default>45</default>
                     <constraints>
                         <options>
@@ -479,13 +482,15 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
                 </setting>
             </group>
             <group id="7">
-                <setting id="AudioLang06" type="integer" label="30103">
+                <setting id="AudioLang06" type="integer" label="29997">
                     <default>45</default>
                     <constraints>
                         <options>
@@ -540,6 +545,8 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -650,6 +657,8 @@
                             <option label="30250">49</option>
                             <option label="30200">45</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -714,6 +723,8 @@
                             <option label="30250">49</option>
                             <option label="30200">45</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -778,6 +789,8 @@
                             <option label="30250">49</option>
                             <option label="30200">45</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -862,6 +875,8 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -921,6 +936,8 @@
                             <option label="30200">45</option>
                             <option label="30350">50</option>
                             <option label="30300">46</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -986,6 +1003,8 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -1045,6 +1064,8 @@
                             <option label="30200">45</option>
                             <option label="30350">50</option>
                             <option label="30300">46</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -1071,7 +1092,7 @@
                             <option label="30210">9</option>
                             <option label="30211">10</option>
                             <option label="30212">11</option>
-                            <option label="30213">12</option>        
+                            <option label="30213">12</option>
                             <option label="30214">13</option>
                             <option label="30215">14</option>
                             <option label="30216">15</option>
@@ -1110,6 +1131,8 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -1169,6 +1192,8 @@
                             <option label="30200">45</option>
                             <option label="30350">50</option>
                             <option label="30300">46</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -1195,7 +1220,7 @@
                             <option label="30210">9</option>
                             <option label="30211">10</option>
                             <option label="30212">11</option>
-                            <option label="30213">12</option>        
+                            <option label="30213">12</option>
                             <option label="30214">13</option>
                             <option label="30215">14</option>
                             <option label="30216">15</option>
@@ -1234,6 +1259,8 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -1293,6 +1320,8 @@
                             <option label="30200">45</option>
                             <option label="30350">50</option>
                             <option label="30300">46</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -1319,7 +1348,7 @@
                             <option label="30210">9</option>
                             <option label="30211">10</option>
                             <option label="30212">11</option>
-                            <option label="30213">12</option>        
+                            <option label="30213">12</option>
                             <option label="30214">13</option>
                             <option label="30215">14</option>
                             <option label="30216">15</option>
@@ -1358,6 +1387,8 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -1417,6 +1448,8 @@
                             <option label="30200">45</option>
                             <option label="30350">50</option>
                             <option label="30300">46</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -1443,7 +1476,7 @@
                             <option label="30210">9</option>
                             <option label="30211">10</option>
                             <option label="30212">11</option>
-                            <option label="30213">12</option>        
+                            <option label="30213">12</option>
                             <option label="30214">13</option>
                             <option label="30215">14</option>
                             <option label="30216">15</option>
@@ -1482,6 +1515,8 @@
                             <option label="30200">45</option>
                             <option label="30300">46</option>
                             <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -1541,6 +1576,8 @@
                             <option label="30200">45</option>
                             <option label="30350">50</option>
                             <option label="30300">46</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -1551,6 +1588,262 @@
                 </setting>
             </group>
             <group id="8">
+                <setting id="CondAudioLang07" type="integer" label="30110">
+                    <default>11</default>
+                    <constraints>
+                        <options>
+                            <option label="30201">0</option>
+                            <option label="30202">1</option>
+                            <option label="30203">2</option>
+                            <option label="30204">3</option>
+                            <option label="30205">4</option>
+                            <option label="30206">5</option>
+                            <option label="30207">6</option>
+                            <option label="30208">7</option>
+                            <option label="30209">8</option>
+                            <option label="30210">9</option>
+                            <option label="30211">10</option>
+                            <option label="30212">11</option>
+                            <option label="30213">12</option>
+                            <option label="30214">13</option>
+                            <option label="30215">14</option>
+                            <option label="30216">15</option>
+                            <option label="30217">16</option>
+                            <option label="30218">17</option>
+                            <option label="30219">18</option>
+                            <option label="30220">19</option>
+                            <option label="30221">20</option>
+                            <option label="30222">21</option>
+                            <option label="30223">22</option>
+                            <option label="30224">23</option>
+                            <option label="30225">24</option>
+                            <option label="30226">25</option>
+                            <option label="30227">26</option>
+                            <option label="30228">27</option>
+                            <option label="30229">28</option>
+                            <option label="30230">29</option>
+                            <option label="30231">30</option>
+                            <option label="30232">31</option>
+                            <option label="30233">32</option>
+                            <option label="30234">33</option>
+                            <option label="30235">34</option>
+                            <option label="30236">35</option>
+                            <option label="30237">36</option>
+                            <option label="30238">37</option>
+                            <option label="30239">38</option>
+                            <option label="30240">39</option>
+                            <option label="30241">40</option>
+                            <option label="30242">41</option>
+                            <option label="30243">42</option>
+                            <option label="30244">43</option>
+                            <option label="30245">44</option>
+                            <option label="30248">47</option>
+                            <option label="30249">48</option>
+                            <option label="30250">49</option>
+                            <option label="30200">45</option>
+                            <option label="30300">46</option>
+                            <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="CondSubLang07" type="integer" label="30111">
+                    <default>11</default>
+                    <constraints>
+                        <options>
+                            <option label="30201">0</option>
+                            <option label="30202">1</option>
+                            <option label="30203">2</option>
+                            <option label="30204">3</option>
+                            <option label="30205">4</option>
+                            <option label="30206">5</option>
+                            <option label="30207">6</option>
+                            <option label="30208">7</option>
+                            <option label="30209">8</option>
+                            <option label="30210">9</option>
+                            <option label="30211">10</option>
+                            <option label="30212">11</option>
+                            <option label="30213">12</option>
+                            <option label="30214">13</option>
+                            <option label="30215">14</option>
+                            <option label="30216">15</option>
+                            <option label="30217">16</option>
+                            <option label="30218">17</option>
+                            <option label="30219">18</option>
+                            <option label="30220">19</option>
+                            <option label="30221">20</option>
+                            <option label="30222">21</option>
+                            <option label="30223">22</option>
+                            <option label="30224">23</option>
+                            <option label="30225">24</option>
+                            <option label="30226">25</option>
+                            <option label="30227">26</option>
+                            <option label="30228">27</option>
+                            <option label="30229">28</option>
+                            <option label="30230">29</option>
+                            <option label="30231">30</option>
+                            <option label="30232">31</option>
+                            <option label="30233">32</option>
+                            <option label="30234">33</option>
+                            <option label="30235">34</option>
+                            <option label="30236">35</option>
+                            <option label="30237">36</option>
+                            <option label="30238">37</option>
+                            <option label="30239">38</option>
+                            <option label="30240">39</option>
+                            <option label="30241">40</option>
+                            <option label="30242">41</option>
+                            <option label="30243">42</option>
+                            <option label="30244">43</option>
+                            <option label="30245">44</option>
+                            <option label="30248">47</option>
+                            <option label="30249">48</option>
+                            <option label="30250">49</option>
+                            <option label="30200">45</option>
+                            <option label="30350">50</option>
+                            <option label="30300">46</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="CondSubForced07" type="boolean" label="30120">
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+            <group id="9">
+                <setting id="CondAudioLang08" type="integer" label="30110">
+                    <default>11</default>
+                    <constraints>
+                        <options>
+                            <option label="30201">0</option>
+                            <option label="30202">1</option>
+                            <option label="30203">2</option>
+                            <option label="30204">3</option>
+                            <option label="30205">4</option>
+                            <option label="30206">5</option>
+                            <option label="30207">6</option>
+                            <option label="30208">7</option>
+                            <option label="30209">8</option>
+                            <option label="30210">9</option>
+                            <option label="30211">10</option>
+                            <option label="30212">11</option>
+                            <option label="30213">12</option>
+                            <option label="30214">13</option>
+                            <option label="30215">14</option>
+                            <option label="30216">15</option>
+                            <option label="30217">16</option>
+                            <option label="30218">17</option>
+                            <option label="30219">18</option>
+                            <option label="30220">19</option>
+                            <option label="30221">20</option>
+                            <option label="30222">21</option>
+                            <option label="30223">22</option>
+                            <option label="30224">23</option>
+                            <option label="30225">24</option>
+                            <option label="30226">25</option>
+                            <option label="30227">26</option>
+                            <option label="30228">27</option>
+                            <option label="30229">28</option>
+                            <option label="30230">29</option>
+                            <option label="30231">30</option>
+                            <option label="30232">31</option>
+                            <option label="30233">32</option>
+                            <option label="30234">33</option>
+                            <option label="30235">34</option>
+                            <option label="30236">35</option>
+                            <option label="30237">36</option>
+                            <option label="30238">37</option>
+                            <option label="30239">38</option>
+                            <option label="30240">39</option>
+                            <option label="30241">40</option>
+                            <option label="30242">41</option>
+                            <option label="30243">42</option>
+                            <option label="30244">43</option>
+                            <option label="30245">44</option>
+                            <option label="30248">47</option>
+                            <option label="30249">48</option>
+                            <option label="30250">49</option>
+                            <option label="30200">45</option>
+                            <option label="30300">46</option>
+                            <option label="30350">50</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="CondSubLang08" type="integer" label="30111">
+                    <default>11</default>
+                    <constraints>
+                        <options>
+                            <option label="30201">0</option>
+                            <option label="30202">1</option>
+                            <option label="30203">2</option>
+                            <option label="30204">3</option>
+                            <option label="30205">4</option>
+                            <option label="30206">5</option>
+                            <option label="30207">6</option>
+                            <option label="30208">7</option>
+                            <option label="30209">8</option>
+                            <option label="30210">9</option>
+                            <option label="30211">10</option>
+                            <option label="30212">11</option>
+                            <option label="30213">12</option>
+                            <option label="30214">13</option>
+                            <option label="30215">14</option>
+                            <option label="30216">15</option>
+                            <option label="30217">16</option>
+                            <option label="30218">17</option>
+                            <option label="30219">18</option>
+                            <option label="30220">19</option>
+                            <option label="30221">20</option>
+                            <option label="30222">21</option>
+                            <option label="30223">22</option>
+                            <option label="30224">23</option>
+                            <option label="30225">24</option>
+                            <option label="30226">25</option>
+                            <option label="30227">26</option>
+                            <option label="30228">27</option>
+                            <option label="30229">28</option>
+                            <option label="30230">29</option>
+                            <option label="30231">30</option>
+                            <option label="30232">31</option>
+                            <option label="30233">32</option>
+                            <option label="30234">33</option>
+                            <option label="30235">34</option>
+                            <option label="30236">35</option>
+                            <option label="30237">36</option>
+                            <option label="30238">37</option>
+                            <option label="30239">38</option>
+                            <option label="30240">39</option>
+                            <option label="30241">40</option>
+                            <option label="30242">41</option>
+                            <option label="30243">42</option>
+                            <option label="30244">43</option>
+                            <option label="30245">44</option>
+                            <option label="30248">47</option>
+                            <option label="30249">48</option>
+                            <option label="30250">49</option>
+                            <option label="30200">45</option>
+                            <option label="30350">50</option>
+                            <option label="30300">46</option>
+                            <option label="30400">51</option>
+                            <option label="30500">52</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="CondSubForced08" type="boolean" label="30120">
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+            <group id="10">
                 <setting label="30121" type="string" id="CustomCondSub">
                     <default></default>
                     <constraints>
@@ -1563,7 +1856,7 @@
             </group>
         </category>
         <category id="Overrides" label="30135">
-            <group id="9" label="30138">
+            <group id="11" label="30138">
                 <setting id="movieOverrides" type="boolean" label="30136" help="30139">
                     <default>false</default>
                     <control type="toggle"/>
