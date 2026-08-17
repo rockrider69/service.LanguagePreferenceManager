@@ -9,7 +9,7 @@
 - Sets use_filename_subs flag to prevent subsequent prefs from overriding matched track
 - Added error handling for invalid regex patterns
 - Updated strings.po with two new label entries (#30146, #30147)
-- Added support for 8 conditional subtitle preference sets (up from 3)
+- Added support for 12 conditional subtitle preference sets (up from 3)
 - Added support for 6 audio preference sets (up from 3)
 - mistakenly included complete wording subtitles
 like full subtitles. added negative look back for search ‘sub’ before ‘title’
