@@ -5,7 +5,7 @@ import json as simplejson
 __user_data_path__ = xbmcvfs.translatePath("special://profile/addon_data/service.languagepreferencemanager/")
 
 from resources.lib import kodi_utils
-
+from langcodes import *
 
 class MediaPreferenceManager:
 
@@ -123,6 +123,73 @@ class CustomMediaPreference:
         self.subtitle_track_id = -1
         self.enable_subtitles = False
 
+    def get_language_code_from_name(self, language_name):
+        """
+        Get the ISO 639-1 or 639-2 language code from a language name (e.g., "English" → "eng").
+        Uses the langcodes database.
+        
+        :param language_name: The language name (e.g., "English", "French", "German")
+        :return: The language code (e.g., "eng", "fre", "ger"), or None if not found
+        """
+        if not language_name:
+            return None
+        
+        name_lower = language_name.lower().strip()
+        
+        # Search through LANGUAGES tuple to find matching name
+        for lang_entry in LANGUAGES:
+            # lang_entry[0] = Full Language name, e.g., "English"
+            # lang_entry[3] = ISO 639-3 code, e.g., "eng"
+            if lang_entry[0].lower() == name_lower:
+                return lang_entry[3].split(',')[0]  # Return first code if multiple exist
+        
+        return None
+
+    def stream_matches_language(self, code, stream, track_type='Audio'):
+        """
+        Check if a language preference code matches a stream's language.
+        Matches by: direct code, language name in stream name, or special codes (org/unk/und/any).
+        
+        :param code: The language code from preferences (e.g., 'eng', 'org', 'unk', 'any')
+        :param stream: The audio or subtitle stream dict from Kodi
+        :param track_type: 'Audio' or 'Subtitle'
+        :return: True if the stream matches the code, False otherwise
+        """
+        stream_lang = stream.get('language', '')
+        stream_name = stream.get('name', '').lower()
+        
+        # Any: matches ALL language codes and tags
+        if code == "any" or code == "Any":
+            return True
+        elif code == "org":
+            # Original: for audio, check the isoriginal flag; for subtitles, check name/language
+            if track_type == 'Audio':
+                return stream.get('isoriginal', False) or stream_lang == "org"
+            else:
+                return stream_lang == "org" or "original" in stream_name
+        elif code == "unk":
+            # Unknown: match tracks with unknown/empty language
+            return stream_lang == "unk" or stream_lang == ""
+        elif code == "und":
+            # Undefined: match empty or "und" language
+            return stream_lang == "und" or stream_lang == ""
+        
+        # Normal code: try direct match FIRST
+        if code == stream_lang:
+            return True
+        
+        # Then try checking if code appears in the stream name (case-insensitive)
+        # e.g., code="eng", name="English" → "eng" in "english" → True
+        if code and code.lower() in stream_name:
+            return True
+        
+        # Also check if language name matches via langcodes lookup
+        name_as_code = self.get_language_code_from_name(stream_name.title())
+        if name_as_code and code == name_as_code:
+            return True
+        
+        return False
+
     def apply_to_player(self, player):
         """
         Apply the custom media preference to the player. This will set the audio and subtitle streams according to the preference.
@@ -170,9 +237,23 @@ class CustomMediaPreference:
         :return: The audio track index that matches the custom media preference, or None if no audio track matches
         """
 
-        # Find all audio tracks (index) that match the language code
-        found_audio_languages = [stream['index'] for stream in player.audiostreams if
-                                 stream['language'] == self.audio_language]
+        # Find all audio tracks (index) that match the language code using new matching logic
+        if self.audio_language == "org":
+            # Original: match tracks flagged as isoriginal, or with language "org"
+            found_audio_languages = [stream['index'] for stream in player.audiostreams if
+                                     stream.get('isoriginal', False) or stream.get('language', '') == "org"]
+        elif self.audio_language == "unk":
+            # Unknown: match tracks with unknown/empty language
+            found_audio_languages = [stream['index'] for stream in player.audiostreams if
+                                     stream.get('language', '') == "unk" or stream.get('language', '') == ""]
+        elif self.audio_language == "und":
+            # Undefined: match empty or "und" language
+            found_audio_languages = [stream['index'] for stream in player.audiostreams if
+                                     stream.get('language', '') == "und" or stream.get('language', '') == ""]
+        else:
+            # Use stream_matches_language for proper name/code matching
+            found_audio_languages = [stream['index'] for stream in player.audiostreams if
+                                     self.stream_matches_language(self.audio_language, stream, 'Audio')]
 
         if found_audio_languages:
             if len(found_audio_languages) == 1:
@@ -195,7 +276,7 @@ class CustomMediaPreference:
         if found_audio_languages:
             log(LOG_DEBUG,
                 "Multiple audio tracks found for language " + self.audio_language + " for file " + player.getPlayingFile() + " and no set index. Picking first.")
-            return found_audio_languages
+            return found_audio_languages[0]
 
         return None
 
@@ -208,9 +289,27 @@ class CustomMediaPreference:
         :return: The subtitle track index that matches the custom media preference, or None if no subtitle track matches
         """
 
-        # Find all subtitle tracks (index) that match the language code
-        found_language_subtitles = [subtitle['index'] for subtitle in player.subtitles if
-                                    subtitle['language'] == self.subtitle_language]
+        # Find all subtitle tracks (index) that match the language code using new matching logic
+        if self.subtitle_language == "org":
+            # Original: match tracks with language "org" or "original" in name
+            found_language_subtitles = [subtitle['index'] for subtitle in player.subtitles if
+                                        subtitle.get('language', '') == "org" or
+                                        "original" in subtitle.get('name', '').lower()]
+        elif self.subtitle_language == "unk":
+            # Unknown: match tracks with unknown/empty language or "unknown" in name
+            found_language_subtitles = [subtitle['index'] for subtitle in player.subtitles if
+                                        subtitle.get('language', '') == "unk" or
+                                        subtitle.get('language', '') == "" or
+                                        "unknown" in subtitle.get('name', '').lower()]
+        elif self.subtitle_language == "und":
+            # Undefined: match empty or "und" language
+            found_language_subtitles = [subtitle['index'] for subtitle in player.subtitles if
+                                        subtitle.get('language', '') == "und" or
+                                        subtitle.get('language', '') == ""]
+        else:
+            # Use stream_matches_language for proper name/code matching
+            found_language_subtitles = [subtitle['index'] for subtitle in player.subtitles if
+                                        self.stream_matches_language(self.subtitle_language, subtitle, 'Subtitle')]
 
         if found_language_subtitles:
             if len(found_language_subtitles) == 1:
@@ -292,8 +391,20 @@ class CustomMediaPreference:
         custom_media_preference.selector = MediaSelector.from_playing_item(player)
 
         custom_media_preference.audio_language = player.getSelectedAudioLanguage()
+        # If the selected audio track is flagged as original, store "org" as the language
+        if hasattr(player, 'selected_audio_stream') and player.selected_audio_stream and \
+                player.selected_audio_stream.get('isoriginal', False):
+            custom_media_preference.audio_language = "org"
         custom_media_preference.audio_track_id = player.getSelectedAudioIndex()
+
         custom_media_preference.subtitle_language = player.getSelectedSubtitleLanguage()
+        # If the selected subtitle track has "original" or "unknown" in its name, store the special code
+        if hasattr(player, 'selected_sub') and player.selected_sub:
+            sub_name_lower = player.selected_sub.get('name', '').lower()
+            if "original" in sub_name_lower:
+                custom_media_preference.subtitle_language = "org"
+            elif "unknown" in sub_name_lower or player.selected_sub.get('language', '') == "unk":
+                custom_media_preference.subtitle_language = "unk"
         custom_media_preference.subtitle_track_id = player.getSelectedSubtitleIndex()
         custom_media_preference.enable_subtitles = player.selected_sub_enabled
 

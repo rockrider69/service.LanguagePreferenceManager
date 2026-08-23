@@ -6,6 +6,9 @@ from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
 
 class PrefParser:
     
+    # Special language codes that should pass through languageTranslate untouched
+    SPECIAL_CODES = {'org', 'unk', 'und', 'any', 'Any', 'non', 'None', 'none'}
+    
     def __init__( self ):
         addon = xbmcaddon.Addon()
         self.logLevel = addon.getSetting('log_level')
@@ -18,7 +21,29 @@ class PrefParser:
         self.custom_g_t_pref_delim = r'#'
         self.custom_g_t_delim = r','
         self.custom_condSub_delim = r':'
+    
+    def safeTranslate(self, value, from_type, to_type):
+        """
+        Wrapper around languageTranslate that passes through special codes
+        (org, unk, und, any, non) without attempting translation.
+        These codes don't exist in the ISO language database and would return None.
         
+        :param value: The language value to translate
+        :param from_type: The source type for languageTranslate
+        :param to_type: The target type for languageTranslate
+        :return: The translated value, or the original special code if it's a special code
+        """
+        if value is None:
+            return None
+        if value in self.SPECIAL_CODES:
+            return value
+        result = languageTranslate(value, from_type, to_type)
+        if result is None:
+            log(LOG_INFO, 'Language translate returned None for value: {0} (from {1} to {2}). Using original.'.format(
+                value, from_type, to_type))
+            return value
+        return result
+
     def parsePrefString(self, pref_string):
         preferences = []
         if not pref_string:
@@ -65,7 +90,7 @@ class PrefParser:
                 if len(pref) != 2:
                             log(LOG_INFO, 'Custom cond subs prefs parse error: {0}'.format(pref))
                 else:
-                    temp_a = (languageTranslate(pref[0], 3, 0), pref[0])
+                    temp_a = (self.safeTranslate(pref[0], 3, 0), pref[0])
                      # Searching if a sub tag is present (like Eng:Jpn-ff to prioritize Forced tracks of another language)
                     if pref[1].endswith('-ff'):
                         ff_tag = True
@@ -78,7 +103,7 @@ class PrefParser:
                         pref[1] = pref[1].rstrip('-ss')
                     else:
                         ss_tag = 'false'
-                    temp_s = (languageTranslate(pref[1], 3, 0), pref[1])
+                    temp_s = (self.safeTranslate(pref[1], 3, 0), pref[1])
                     if (temp_a[0] and temp_a[1] and temp_s[0] and temp_s[1]):
                         if (temp_s[1] == 'non' or ff_tag):
                             forced_tag = 'true'
@@ -90,7 +115,7 @@ class PrefParser:
                                  ' Please report this: {0}:{1}'.format(temp_a, temp_s))
             # custom audio or subtitle pref                            
             else:
-                temp_pref = (languageTranslate(pref, 3, 0), pref)
+                temp_pref = (self.safeTranslate(pref, 3, 0), pref)
                 if temp_pref[0]:
                     lang_prefs.append(temp_pref)
                 else:

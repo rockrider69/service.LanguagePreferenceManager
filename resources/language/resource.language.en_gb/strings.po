@@ -33,6 +33,18 @@ msgctxt "#30103"
 msgid "Third Language"
 msgstr ""
 
+msgctxt "#29999"
+msgid "Fourth Language"
+msgstr ""
+
+msgctxt "#29998"
+msgid "Fifth Language"
+msgstr ""
+
+msgctxt "#29997"
+msgid "Sixth Language"
+msgstr ""
+
 msgctxt "#30104"
 msgid "Audio Preferences"
 msgstr ""
@@ -70,7 +82,7 @@ msgid "Delay the evaluation by the following value [ms]"
 msgstr ""
 
 msgctxt "#30113"
-msgid "Turn on subtitles if a subtitle preference matched"
+msgid "Turn on subtitles if a subtitle matches in any setting globally"
 msgstr ""
 
 msgctxt "#30114"
@@ -191,6 +203,22 @@ msgstr ""
 
 msgctxt "#30144"
 msgid "Audio Original Preference List:"
+msgstr ""
+
+msgctxt "#30146"
+msgid "Use regex pattern to filter subtitles"
+msgstr ""
+
+msgctxt "#30147"
+msgid "Regex pattern for subtitle filtering"
+msgstr ""
+
+msgctxt "#30148"
+msgid "Regex exclusion pattern for subtitle filtering"
+msgstr ""
+
+msgctxt "#30149"
+msgid "Use regex exclusion pattern to filter out false positives"
 msgstr ""
 
 msgctxt "#30201"
@@ -395,4 +423,12 @@ msgstr ""
 
 msgctxt "#30350"
 msgid "Undefined"
+msgstr ""
+
+msgctxt "#30400"
+msgid "Unknown"
+msgstr ""
+
+msgctxt "#30500"
+msgid "Original"
 msgstr ""

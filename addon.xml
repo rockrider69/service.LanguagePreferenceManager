@@ -2,7 +2,7 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="1.0.7"
+	version="2.0"
 	provider-name="ace20022/scott967/rockrider69"
 	>
 	<requires>
@@ -15,19 +15,50 @@
 	<extension point="xbmc.addon.metadata">
 		<summary lang="en_GB">Language Preference Manager</summary>
 		<summary lang="sv_SE">Hanterare för språkinställningar</summary>
+		<summary lang="it_IT">Gestore delle preferenze linguistiche</summary>
+		<summary lang="ja_JP">言語設定マネージャー</summary>
+		<summary lang="de_DE">Sprachpräferenz-Manager</summary>
+		<summary lang="fr_FR">Gestionnaire des préférences linguistiques</summary>
 		<description lang="en_GB">Sets the audio and subtitle track according to your language preferences</description>
 		<description lang="sv_SE">Ställer in ljud- och undertextspår enligt dina språkinställningar</description>
+		<description lang="it_IT">Imposta le tracce audio e dei sottotitoli in base alle preferenze linguistiche.</description>
+		<description lang="ja_JP">言語設定に従って音声トラックと字幕トラックを設定します。</description>
+		<description lang="de_DE">Legt die Audio- und Untertitelspur entsprechend Ihren Spracheinstellungen fest</description>
+		<description lang="fr_FR">Définit les pistes audio et de sous-titres selon vos préférences linguistiques</description>
 		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
 		<disclaimer lang="sv_SE">För buggar, önskemål eller allmänna frågor, besök tråden Language Preference Manager på Kodi-forumet.</disclaimer>
+		<disclaimer lang="it_IT">Per bug, richieste o domande generali, visita il thread di Language Preference Manager sul forum Kodi.</disclaimer>
+		<disclaimer lang="ja_JP">バグ報告、要望、一般的な質問については、KodiフォーラムのLanguage Preference Managerスレッドをご覧ください。</disclaimer>
+		<disclaimer lang="de_DE">Bei Fehlern, Anfragen oder allgemeinen Fragen besuchen Sie den Thread „Language Preference Manager“ im Kodi-Forum.</disclaimer>
+		<disclaimer lang="fr_FR">Pour signaler des bugs, faire des demandes ou poser des questions générales, consultez le fil « Language Preference Manager » sur le forum Kodi.</disclaimer>
 		<platform>all</platform>
-		<news>1.0.7 : - New option to always prefer Original audio tracks if present. Based on a list e.g: eng,ger,fre
-	If one is found we force activate it and skip usual audio preference evaluation. Uses 'isoriginal' tag.
-- Add Swedish translation in Addon.xml (Thanks to Yeager)
-- Custom Conditional Subs preferences : new -ff tag to prioritize Forced flagged subtitles e.g: Jpn:Eng-ff
-- Fix a bug in Custom Conditional Subs : when no preference matched, default subtitles stayed on despite option turn_subs_off
-- Avoid running multiple instances of the LPM addon
-- Use logger.py across all modules. Cleanup. Fix minor bug in settings.xml.
-			
+		<news>
+--- Version 2.0
+
+- feat: Add regex-based subtitle stream selector with fallback support
+- Added new toggle "Use regex pattern to filter subtitles" in General settings
+- Added editable regex pattern field (conditionally visible when toggle is enabled)
+- New evalRegexSubPrefs() method scans all subtitle streams and selects first match
+- Runs early in evalPrefs() before normal subtitle preferences
+- Falls back to Conditional Subtitle Preferences if no regex match found
+- Sets use_filename_subs flag to prevent subsequent prefs from overriding matched track
+- Added error handling for invalid regex patterns
+- Updated strings.po with two new label entries (#30146, #30147)
+- Added support for 12 conditional subtitle preference sets (up from 3)
+- Added support for 6 audio preference sets (up from 3)
+- mistakenly included complete wording subtitles
+like full subtitles. added negative look back for search ‘sub’ before ‘title’
+- dubtitles & dub titles still pass through just not subtitles. 
+- changed to full line search not string only search 
+- Implement a two-stage subtitle regex filtering mechanism to improve accuracy when selecting special subtitle tracks (forced, signs, songs) while avoiding false positives on regular subtitle files.
+- User selects "Original" in settings → spinner value 52 → languageTranslate("52", 4, 3) returns "org" → stored in AudioPrefs/SubtitlePrefs/CondSubtitlePrefs tuples as the code "org".
+- During playback evaluation (evalAudioPrefs/evalSubPrefs/evalCondSubPrefs): when code == "org", the stream_matches_language helper checks stream.get('isoriginal', False) for audio tracks, or "original" in sub_name for subtitle tracks. When code == "unk", it checks for empty or "unk" language strings.
+- When storing manual overrides (from_player): if the selected audio track has isoriginal=True, the preference stores "org" as the language. If a subtitle has "original" in its name, it stores "org".
+- When restoring overrides (get_audio_track_index/get_subtitle_track_index): the same special-case matching applies — isoriginal for audio, name-based for subtitles.
+- strings.po provides the UI labels (30500 → "Original", 30400 → "Unknown") that the settings spinner displays.
+- Changed "turn on subtitles if subtitle preference if found" and it's logic to "Turn on subtitles if a subtitle matches in any setting globally"
+- Added Japanese, French, German and Italian language options for UI, English & Swedish were already there.
+- Added "Unknown, Undefined, None, Original" language & subtitle codes and updated logic for finding and filtering them within all settings.
 		</news>
 		<assets>
 			<icon>resources/icon.png</icon>
