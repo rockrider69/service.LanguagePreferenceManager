@@ -383,10 +383,10 @@ class LangPrefMan_Player(xbmc.Player):
             AudioOriginalTrackIndex = self.get_original_audio_track_index()
             # Audio Original tracks are preferred. If one is found we choose it and skip remaining preference evaluation. Else, fallback to Audio default track
 			if AudioOriginalTrackIndex is None:
-                AudioOriginalTrackIndex = self.get_default_audio_track_index()
+				AudioOriginalTrackIndex = self.get_default_audio_track_index()
             # Audio Original tracks are preferred. If one is found we choose it and skip remaining preference evaluation.
 			if AudioOriginalTrackIndex is not None:
-                return AudioOriginalTrackIndex
+				return AudioOriginalTrackIndex
             
         i = 0
         for pref in audio_prefs:
