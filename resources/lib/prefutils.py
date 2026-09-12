@@ -649,11 +649,21 @@ class LangPrefMan_Player(xbmc.Player):
 
         # Find all 'isoriginal' audio tracks (index, language) that match one language code in the original preferred list
 		# If the orginal preferred list is empty or 'any', all 'isoriginal' audio tracks (index, language) are found
-        found_original_audio_languages = [[stream['index'],stream['language']] for stream in self.audiostreams if
-                                          ('index' in stream and 'language' in stream and 'isoriginal' in stream
-                                            and (settings.audio_original_preflist == 'any' or settings.audio_original_preflist == '' 
-												 or stream['language'] in settings.audio_original_preflist) 
-										   and stream['isoriginal'])]
+        found_original_audio_languages = [
+			[stream['index'],stream['language']] 
+			for stream in self.audiostreams 
+			if (
+				'index' in stream 
+				and 'language' in stream 
+				and 'isoriginal' in stream 
+				and (
+					settings.audio_original_preflist == 'any' 
+					or settings.audio_original_preflist == '' 
+					or stream['language'] in settings.audio_original_preflist
+				) 
+				and stream['isoriginal']
+			)
+		]
 
         if found_original_audio_languages:
             if found_original_audio_languages[0][0] != self.selected_audio_stream['index']:
@@ -683,11 +693,20 @@ class LangPrefMan_Player(xbmc.Player):
         """
 
         # Find all 'isdefault' audio tracks (index, language)
-        found_default_audio_languages = [[stream['index'],stream['language']] for stream in self.audiostreams if
-                                          ('index' in stream and 'language' in stream and 'isdefault' in stream
-										   and (settings.audio_original_preflist == 'any' or settings.audio_original_preflist == '' 
-												 or stream['language'] in settings.audio_original_preflist)								            
-										   and stream['isdefault'])]
+        found_default_audio_languages = [
+			[stream['index'],stream['language']] 
+			for stream in self.audiostreams if (
+				'index' in stream 
+				and 'language' in stream 
+				and 'isdefault' in stream 
+				and (
+					settings.audio_original_preflist == 'any' 
+					or settings.audio_original_preflist == '' 
+					or stream['language'] in settings.audio_original_preflist
+				)
+				and stream['isdefault']
+			)
+		]
 
         if found_default_audio_languages:
             if found_default_audio_languages[0][0] != self.selected_audio_stream['index']:
