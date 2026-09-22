@@ -41,19 +41,24 @@ class LangPrefWatcher(threading.Thread):
         # Ensures the thread exits when the program ends
         self.daemon = True
 
+        self.WatcherMonitor = xbmc.Monitor()
+
     def run(self):
         """
         This method runs in the background and periodically checks for subtitle changes.
         Possibly in the future, this method will also check for other stuff.
         """
-        while not self._stop_event.is_set():
+        while not self._stop_event.is_set() and not self.WatcherMonitor.abortRequested():
             if self.player.isPlayingVideo():
                 self.player.detect_subtitle_change()
-            time.sleep(self.check_interval)
+            self.WatcherMonitor.waitForAbort(self.check_interval)
+        if self.WatcherMonitor.abortRequested():
+            log(LOG_DEBUG, 'Aborting Watcher Thread due to Kodi request')
 
     def stop(self):
         """ Method to stop the thread gracefully """
         self._stop_event.set()
+        log(LOG_DEBUG, 'Watcher Thread gracefully stopping')
         self.join()
 
 
@@ -165,8 +170,10 @@ class LangPrefMan_Player(xbmc.Player):
                 log(LOG_DEBUG, "Delaying preferences evaluation by {0} ms".format(settings.delay))
                 xbmc.sleep(settings.delay)
 
-            previous_audio_index = self.selected_audio_stream['index']
-            previous_audio_language = self.selected_audio_stream['language']
+            previous_audio_index = self.getSelectedAudioIndex()
+            previous_audio_language = self.getSelectedAudioLanguage()
+            if previous_audio_index == -1:
+                log(LOG_INFO, "No Current Audio Stream activated so far for this video. Bizarre...")
 
             log(LOG_DEBUG, 'Getting video properties')
             self.getDetails()
@@ -412,7 +419,7 @@ class LangPrefMan_Player(xbmc.Player):
                             not self.isInBlacklist(self.selected_audio_stream['name'], 'Audio') and
                             (code == self.selected_audio_stream['language'] or name == self.selected_audio_stream[
                                 'language'])):
-                        log(LOG_INFO, 'Selected audio language matches preference {0} ({1})'.format(i, name))
+                        log(LOG_INFO, 'Selected audio language matches preference {0} ({1}:{2})'.format(i, name, code))
                         return -1
                     else:
                         for stream in self.audiostreams:
@@ -423,8 +430,8 @@ class LangPrefMan_Player(xbmc.Player):
                                         ','.join(settings.audio_keyword_blacklist)))
                                 continue
                             if ((code == stream['language']) or (name == stream['language'])):
-                                log(LOG_INFO, 'Language of Audio track {0} matches preference {1} ({2})'.format(
-                                    (stream['index'] + 1), i, name))
+                                log(LOG_INFO, 'Language of Audio track {0} matches preference {1} ({2}:{3})'.format(
+                                    (stream['index'] + 1), i, name, code))
                                 return stream['index']
                         log(LOG_INFO, 'Audio: preference {0} ({1}:{2}) not available'.format(i, name, code))
                 i += 1
@@ -464,7 +471,7 @@ class LangPrefMan_Player(xbmc.Player):
                             ((code == self.selected_sub['language'] or name == self.selected_sub[
                                 'language']) and self.testForcedFlag(forced, self.selected_sub['name'],
                                                                      self.selected_sub['isforced']))):
-                        log(LOG_INFO, 'SubPrefs : Selected subtitle language matches preference {0} ({1})'.format(i, name))
+                        log(LOG_INFO, 'SubPrefs : Selected subtitle language matches preference {0} ({1}:{2})'.format(i, name, code))
                         return -1
                     else:
                         to_chose_subtitle_indexes = []
@@ -484,8 +491,8 @@ class LangPrefMan_Player(xbmc.Player):
                                     'SubPrefs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
                                 continue
                             if (code == sub['language'] or name == sub['language']) and self.testForcedFlag(forced, sub['name'], sub['isforced']):
-                                log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2})'.format(
-                                    (sub['index'] + 1), i, name))
+                                log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2}:{3})'.format(
+                                    (sub['index'] + 1), i, name, code))
                                 to_chose_subtitle_indexes.append(sub['index'])
 
                         current_subtitle_index = self.getSelectedSubtitleIndex()
@@ -493,8 +500,8 @@ class LangPrefMan_Player(xbmc.Player):
                         # If our current subtitle is eligible for the condition, we will not change it
                         if current_subtitle_index in to_chose_subtitle_indexes:
                             log(LOG_INFO,
-                                'SubPrefs : already selected subtitle {0} matches preference {1} ({2})'.format(
-                                    (current_subtitle_index + 1), i, name))
+                                'SubPrefs : already selected subtitle {0} matches preference {1} ({2}:{3})'.format(
+                                    (current_subtitle_index + 1), i, name, code))
                             return current_subtitle_index
 
                         if len(to_chose_subtitle_indexes) > 0:
@@ -641,29 +648,42 @@ class LangPrefMan_Player(xbmc.Player):
         """
         Get the audio track index that matches the original_preferred_list. If no audio track matches, return None.
         The audio track is searched by language, checking for the isoriginal tag. If multiple original found (weird...) the first one is returned.
+        Blacklisted original audio tracks, if any, are excluded.
 
-        :return: The first audio track index tagged as isoriginal and that matches the original_preferred_list.
+        :return: The first audio track index tagged as isoriginal, that matches the original_preferred_list, and is not blacklisted.
                 -1 if the current selected audio track is already correct (to avoid unnecessary audio change)
                  None if no original audio track found or no match.       
         """
 
         # Find all 'isoriginal' audio tracks (index, language) that match one language code in the original preferred list
-		# If the orginal preferred list is empty or 'any', all 'isoriginal' audio tracks (index, language) are found
+		    # If the original preferred list is empty or 'any', all 'isoriginal' audio tracks (index, language) are found
         found_original_audio_languages = [
-			[stream['index'],stream['language']] 
-			for stream in self.audiostreams 
-			if (
-				'index' in stream 
-				and 'language' in stream 
-				and 'isoriginal' in stream 
-				and (
-					settings.audio_original_preflist == 'any' 
-					or settings.audio_original_preflist == '' 
-					or stream['language'] in settings.audio_original_preflist
-				) 
-				and stream['isoriginal']
-			)
-		]
+			    [stream['index'],stream['language']] 
+			    for stream in self.audiostreams 
+			    if (
+				    'index' in stream 
+				    and 'language' in stream 
+				    and 'isoriginal' in stream 
+				    and (
+					    settings.audio_original_preflist == 'any' 
+					    or settings.audio_original_preflist == '' 
+					    or stream['language'] in settings.audio_original_preflist
+				        ) 
+				    and stream['isoriginal']
+			        )   
+        ]
+        
+        # Find all blacklisted audio tracks (index, language)
+        blacklisted_audio_languages = [[stream['index'],stream['language']] for stream in self.audiostreams if
+                                          ('index' in stream and 'language' in stream and 'name' in stream
+                                            and self.isInBlacklist(stream['name'],'Audio'))]
+        # ... and ignore them if any 'isoriginal'
+        for indexlang in blacklisted_audio_languages:
+	        if indexlang in found_original_audio_languages:
+                 found_original_audio_languages.remove(indexlang)
+                 log(LOG_INFO,
+                    "Audio: one Original audio track matches Keyword Blacklist : {0}. Skipping it.".format(
+                            ','.join(settings.audio_keyword_blacklist)))
 
         if found_original_audio_languages:
             if found_original_audio_languages[0][0] != self.selected_audio_stream['index']:
@@ -694,19 +714,19 @@ class LangPrefMan_Player(xbmc.Player):
 
         # Find all 'isdefault' audio tracks (index, language)
         found_default_audio_languages = [
-			[stream['index'],stream['language']] 
-			for stream in self.audiostreams if (
-				'index' in stream 
-				and 'language' in stream 
-				and 'isdefault' in stream 
-				and (
-					settings.audio_original_preflist == 'any' 
-					or settings.audio_original_preflist == '' 
-					or stream['language'] in settings.audio_original_preflist
-				)
-				and stream['isdefault']
-			)
-		]
+			  [stream['index'],stream['language']] 
+			  for stream in self.audiostreams if (
+				  'index' in stream 
+				  and 'language' in stream 
+				  and 'isdefault' in stream 
+				  and (
+					  settings.audio_original_preflist == 'any' 
+					  or settings.audio_original_preflist == '' 
+					  or stream['language'] in settings.audio_original_preflist
+				      )
+				  and stream['isdefault']
+			  )
+		    ]
 
         if found_default_audio_languages:
             if found_default_audio_languages[0][0] != self.selected_audio_stream['index']:
@@ -780,8 +800,7 @@ class LangPrefMan_Player(xbmc.Player):
             self.subtitles = json_response['result']['subtitles']
         log(LOG_DEBUG, json_response)
 
-        if (
-                not settings.custom_condsub_prefs_on and not settings.custom_audio_prefs_on and not settings.custom_sub_prefs_on):
+        if (not settings.custom_condsub_prefs_on and not settings.custom_audio_prefs_on and not settings.custom_sub_prefs_on):
             log(LOG_DEBUG, 'No custom prefs used at all, skipping extra Video tags/genres JSON query.')
             self.genres_and_tags = set()
             return
@@ -809,4 +828,5 @@ class LangPrefMan_Player(xbmc.Player):
     def __del__(self):
         """ Ensure that the watcher thread is properly stopped when the object is deleted """
         if hasattr(self, 'lang_pref_watcher'):
+            log(LOG_DEBUG, '__del__ function called : request Watcher Thread to gracefully stop')
             self.lang_pref_watcher.stop()
