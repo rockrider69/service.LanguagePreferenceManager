@@ -1,6 +1,7 @@
 --- Version 1.0.9Beta2
 
 - Fix audio blacklist was not considered when searching for Original audio tracks
+- Support 2digits languages codes in addition to 3digits (Required from Kodi22 and move to BCP47)
 
 --- Version 1.0.8
 

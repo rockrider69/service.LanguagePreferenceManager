@@ -416,7 +416,7 @@ class LangPrefMan_Player(xbmc.Player):
                             not self.isInBlacklist(self.selected_audio_stream['name'], 'Audio') and
                             (code == self.selected_audio_stream['language'] or name == self.selected_audio_stream[
                                 'language'])):
-                        log(LOG_INFO, 'Selected audio language matches preference {0} ({1})'.format(i, name))
+                        log(LOG_INFO, 'Selected audio language matches preference {0} ({1}:{2})'.format(i, name, code))
                         return -1
                     else:
                         for stream in self.audiostreams:
@@ -427,8 +427,8 @@ class LangPrefMan_Player(xbmc.Player):
                                         ','.join(settings.audio_keyword_blacklist)))
                                 continue
                             if ((code == stream['language']) or (name == stream['language'])):
-                                log(LOG_INFO, 'Language of Audio track {0} matches preference {1} ({2})'.format(
-                                    (stream['index'] + 1), i, name))
+                                log(LOG_INFO, 'Language of Audio track {0} matches preference {1} ({2}:{3})'.format(
+                                    (stream['index'] + 1), i, name, code))
                                 return stream['index']
                         log(LOG_INFO, 'Audio: preference {0} ({1}:{2}) not available'.format(i, name, code))
                 i += 1
@@ -468,7 +468,7 @@ class LangPrefMan_Player(xbmc.Player):
                             ((code == self.selected_sub['language'] or name == self.selected_sub[
                                 'language']) and self.testForcedFlag(forced, self.selected_sub['name'],
                                                                      self.selected_sub['isforced']))):
-                        log(LOG_INFO, 'SubPrefs : Selected subtitle language matches preference {0} ({1})'.format(i, name))
+                        log(LOG_INFO, 'SubPrefs : Selected subtitle language matches preference {0} ({1}:{2})'.format(i, name, code))
                         return -1
                     else:
                         to_chose_subtitle_indexes = []
@@ -488,8 +488,8 @@ class LangPrefMan_Player(xbmc.Player):
                                     'SubPrefs : ignore_signs toggle is on and one such subtitle track is found. Skipping it.')
                                 continue
                             if (code == sub['language'] or name == sub['language']) and self.testForcedFlag(forced, sub['name'], sub['isforced']):
-                                log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2})'.format(
-                                    (sub['index'] + 1), i, name))
+                                log(LOG_INFO, 'Subtitle language of subtitle {0} matches preference {1} ({2}:{3})'.format(
+                                    (sub['index'] + 1), i, name, code))
                                 to_chose_subtitle_indexes.append(sub['index'])
 
                         current_subtitle_index = self.getSelectedSubtitleIndex()
@@ -497,8 +497,8 @@ class LangPrefMan_Player(xbmc.Player):
                         # If our current subtitle is eligible for the condition, we will not change it
                         if current_subtitle_index in to_chose_subtitle_indexes:
                             log(LOG_INFO,
-                                'SubPrefs : already selected subtitle {0} matches preference {1} ({2})'.format(
-                                    (current_subtitle_index + 1), i, name))
+                                'SubPrefs : already selected subtitle {0} matches preference {1} ({2}:{3})'.format(
+                                    (current_subtitle_index + 1), i, name, code))
                             return current_subtitle_index
 
                         if len(to_chose_subtitle_indexes) > 0:
