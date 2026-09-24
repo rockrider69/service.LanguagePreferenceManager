@@ -662,7 +662,7 @@ class LangPrefMan_Player(xbmc.Player):
 				    and 'language' in stream 
 				    and 'isoriginal' in stream 
 				    and (
-					    settings.audio_original_preflist == 'any'  
+					    settings.audio_original_preflist == ['any']  
 					    or stream['language'] in settings.audio_original_preflist
 				        ) 
 				    and stream['isoriginal']
