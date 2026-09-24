@@ -2,7 +2,7 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="1.0.9Beta2"
+	version="1.0.9Beta3"
 	provider-name="ace20022/scott967/rockrider69"
 	>
 	<requires>
@@ -20,7 +20,8 @@
 		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
 		<disclaimer lang="sv_SE">För buggar, önskemål eller allmänna frågor, besök tråden Language Preference Manager på Kodi-forumet.</disclaimer>
 		<platform>all</platform>
-		<news>1.0.9Beta2 : - Fix audio blacklist was not considered when searching for Original audio tracks
+		<news>1.0.9Beta3 : - 'Any' in Original Preference list will activate the first found Original audio track whatever the language
+		1.0.9Beta2 : - Fix audio blacklist was not considered when searching for Original audio tracks
 		- Support 2digits languages codes in addition to 3digits (Required from Kodi22 and move to BCP47)
 			
 		</news>

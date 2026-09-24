@@ -1,3 +1,7 @@
+--- Version 1.0.9Beta3
+
+- 'Any' as Original Preference list will activate the first found Original audio track whatever the language
+
 --- Version 1.0.9Beta2
 
 - Fix audio blacklist was not considered when searching for Original audio tracks
