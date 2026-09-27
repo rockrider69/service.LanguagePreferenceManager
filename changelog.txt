@@ -1,3 +1,7 @@
+--- Version 1.0.9Beta4
+
+- Only perform seek back if a subtitle is active
+
 --- Version 1.0.9Beta3
 
 - 'Any' as Original Preference list will activate the first found Original audio track whatever the language

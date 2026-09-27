@@ -312,9 +312,12 @@ class LangPrefMan_Player(xbmc.Player):
         # Workaround to an old Kodi bug creating 10-15 sec latency when activating a subtitle track.
         # Force a short rewind to avoid 10-15sec delay and first few subtitles lines potentially lost
         #       but if we are very close to beginning, then restart from time 0
-        # Ignore this workaround if fast_subs_display option is disabled (default = 0)
+        #  Ignore this workaround if fast_subs_display option is disabled (default = 0) or no subs to be displayed
         current_time = self.getTime()
-        if (settings.fast_subs_display == 0):
+        if (not self.selected_sub_enabled):
+            # Only perform seek back if a subtitle is active
+            log(LOG_DEBUG, 'No subtitles activated - no need for workaround seekback.')
+        elif (settings.fast_subs_display == 0):
             # Default is no seek back, which sometimes generate restart or freeze on slower systems
             log(LOG_DEBUG, 'Fast Subs Display disabled - Subs display will be slightly delayed 8-10sec.')
         elif (current_time <= 10 and settings.fast_subs_display >= 1):
