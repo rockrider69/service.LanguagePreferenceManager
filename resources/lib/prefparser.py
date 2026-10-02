@@ -63,14 +63,12 @@ class PrefParser:
             if (pref.find(self.custom_condSub_delim) > 0):
                 pref = pref.split(self.custom_condSub_delim)
                 if len(pref) != 2:
-                            log(LOG_INFO, 'Custom cond subs prefs parse error: {0}'.format(pref))
+                    log(LOG_INFO, 'Custom cond subs prefs parse error: {0}'.format(pref))
                 else:
                     # Manage 2 or 3 digits language codes in custom rules
-                    if len(pref[0]) == 2:
-                        temp_a = (languageTranslate(pref[0], 2, 0), pref[0]+','+languageTranslate(pref[0], 2, 3))
-                    else:
-                        temp_a = (languageTranslate(pref[0], 3, 0), pref[0]+','+languageTranslate(pref[0], 3, 2))
-                     # Searching if a sub tag is present (like Eng:Jpn-ff to prioritize Forced tracks of another language)
+                    temp_a = multicode_languageTranslate(pref[0])
+
+                    # Searching if a sub tag is present (like Eng:Jpn-ff to prioritize Forced tracks of another language)
                     if pref[1].endswith('-ff'):
                         ff_tag = True
                         pref[1] = pref[1].rstrip('-ff')
@@ -83,29 +81,26 @@ class PrefParser:
                     else:
                         ss_tag = 'false'
                     # Manage 2 or 3 digits language codes in custom rules
-                    if len(pref[1]) == 2:
-                        temp_s = (languageTranslate(pref[1], 2, 0), pref[1]+','+languageTranslate(pref[1], 2, 3))
-                    else:
-                        temp_s = (languageTranslate(pref[1], 3, 0), pref[1]+','+languageTranslate(pref[1], 3, 2))
-                    if (temp_a[0] and temp_a[1] and temp_s[0] and temp_s[1]):
-                        if (temp_s[1] == 'non,non' or ff_tag):
-                            forced_tag = 'true'
-                        else:
-                            forced_tag = 'false'
-                        lang_prefs.append((temp_a[0], temp_a[1], temp_s[0], temp_s[1], forced_tag, ss_tag))
+                    temp_s = multicode_languageTranslate(pref[1])
+
+                    if temp_a and temp_s:
+                        if (temp_a[0] and temp_a[1] and temp_s[0] and temp_s[1]):
+                            if (temp_s[1] == 'non,non' or ff_tag):
+                                forced_tag = 'true'
+                            else:
+                                forced_tag = 'false'
+                            lang_prefs.append((temp_a[0], temp_a[1], temp_s[0], temp_s[1], forced_tag, ss_tag))
                     else:
                         log(LOG_INFO, 'Custom cond sub prefs: lang code not found in db!'\
-                                 ' Please report this: {0}:{1}'.format(temp_a, temp_s))
+                             ' Please report this: {0}:{1}'.format(pref[0], pref[1]))
             # custom audio or subtitle pref                            
             else:
                 # Manage 2 or 3 digits language codes in custom rules
-                if len(pref) == 2:
-                    temp_pref = (languageTranslate(pref, 2, 0), pref+','+languageTranslate(pref, 2, 3))
-                else:
-                    temp_pref = (languageTranslate(pref, 3, 0), pref+','+languageTranslate(pref, 3, 2))
-                if temp_pref[0]:
+                temp_pref = multicode_languageTranslate(pref)
+
+                if temp_pref:
                     lang_prefs.append(temp_pref)
                 else:
-                    log(LOG_INFO, 'Custom audio prefs: lang code {0} not found in db!'\
+                    log(LOG_INFO, 'Custom audio or sub prefs: lang code {0} not found in db!'\
                              ' Please report this'.format(pref))
         return lang_prefs

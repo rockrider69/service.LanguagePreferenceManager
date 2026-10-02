@@ -1,3 +1,7 @@
+--- Version 1.1.0
+
+- More robust code in 2digits/3digits ISO639 languages codes support (request1 from greptile KODI automated tests)
+
 --- Version 1.0.9
 
 - Support 2digits ISO639 languages codes in addition to 3digits so far

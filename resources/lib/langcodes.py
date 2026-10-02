@@ -67,3 +67,20 @@ def languageTranslate(lang, lang_from, lang_to):
     for code in codes:
       if lang == code :
         return x[lang_to]
+
+def multicode_languageTranslate(lang):
+  """
+  Wrapper to languageTranslate to support multi language codes in custom preferences and in Kodi reported track language.
+  (Can evolve later to support more codes like BCP47 : en-US, en-GB, fr-FR, Fr-CA, etc...)
+
+  :return: The full language name and the comma separated list of corresponding ISO 639 codes.
+          None if no full match found in above LANGUAGES DB
+  """
+
+  multi_pref = []
+  if len(lang) == 2 and languageTranslate(lang, 2, 0) and languageTranslate(lang, 2, 3):
+      multi_pref = (languageTranslate(lang, 2, 0), lang+','+languageTranslate(lang, 2, 3))
+  elif len(lang) == 3 and languageTranslate(lang, 3, 0) and languageTranslate(lang, 3, 2):
+      multi_pref = (languageTranslate(lang, 3, 0), lang+','+languageTranslate(lang, 3, 2))
+  return multi_pref
+
