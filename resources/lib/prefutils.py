@@ -243,12 +243,14 @@ class LangPrefMan_Player(xbmc.Player):
                 if settings.turn_subs_on:
                     log(LOG_DEBUG, 'Subtitle: enabling subs')
                     self.showSubtitles(True)
+                    self.subtitlesActivated = True
             else:
                 log(LOG_INFO,
                     'Filename preference: No match found for subtitle track ({0})'.format(self.getPlayingFile()))
                 if settings.turn_subs_off:
                     log(LOG_INFO, 'Subtitle: disabling subs')
                     self.showSubtitles(False)
+                    self.subtitlesActivated = False
 
         if settings.audio_prefs_on and not use_filename_audio and not self.LPM_initial_run_done:
             if settings.custom_audio_prefs_on:
@@ -273,16 +275,19 @@ class LangPrefMan_Player(xbmc.Player):
                 if settings.turn_subs_off:
                     log(LOG_INFO, 'Subtitle: disabling subs')
                     self.showSubtitles(False)
+                    self.subtitlesActivated = False
             if trackIndex == -1:
                 log(LOG_INFO, 'Subtitle: Preferred subtitle is selected but might not be enabled')
                 if settings.turn_subs_on and not self.selected_sub_enabled:
                     log(LOG_INFO, 'Subtitle: enabling subs because selected sub is not enabled')
                     self.showSubtitles(True)
+                    self.subtitlesActivated = True
             elif trackIndex >= 0:
                 self.setSubtitleStream(trackIndex)
                 if settings.turn_subs_on:
                     log(LOG_INFO, 'Subtitle: enabling subs')
                     self.showSubtitles(True)
+                    self.subtitlesActivated = True
 
         if settings.condsub_prefs_on and not use_filename_subs:
             if settings.custom_condsub_prefs_on:
@@ -293,6 +298,7 @@ class LangPrefMan_Player(xbmc.Player):
             if trackIndex == -1:
                 log(LOG_INFO, 'Conditional subtitle: disabling subs')
                 self.showSubtitles(False)
+                self.subtitlesActivated = False
             if trackIndex == -2:
                 log(LOG_INFO,
                     'Conditional subtitle: No matching preferences found for current audio stream.')
@@ -300,6 +306,7 @@ class LangPrefMan_Player(xbmc.Player):
                     log(LOG_INFO,
                         'Conditional subtitle: Disabling subs.')
                     self.showSubtitles(False)
+                    self.subtitlesActivated = False
                 else:
                     log(LOG_INFO,
                         'Conditional subtitle: Doing nothing.')
@@ -308,13 +315,14 @@ class LangPrefMan_Player(xbmc.Player):
                 if settings.turn_subs_on:
                     log(LOG_DEBUG, 'Subtitle: enabling subs')
                     self.showSubtitles(True)
+                    self.subtitlesActivated = True
 
         # Workaround to an old Kodi bug creating 10-15 sec latency when activating a subtitle track.
         # Force a short rewind to avoid 10-15sec delay and first few subtitles lines potentially lost
         #       but if we are very close to beginning, then restart from time 0
         #  Ignore this workaround if fast_subs_display option is disabled (default = 0) or no subs to be displayed
         current_time = self.getTime()
-        if (not self.selected_sub_enabled):
+        if (not self.subtitlesActivated):
             # Only perform seek back if a subtitle is active
             log(LOG_DEBUG, 'No subtitles activated - no need for workaround seekback.')
         elif (settings.fast_subs_display == 0):
