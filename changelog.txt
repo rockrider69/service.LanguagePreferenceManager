@@ -1,6 +1,9 @@
 --- Version 1.1.0
 
-- More robust code in 2digits/3digits ISO639 languages codes support (request1 from greptile KODI automated tests)
+- More robust code in 2digits/3digits ISO639 languages codes support
+	        (as requested from greptile KODI automated tests)
+	- Proper handling & reporting of incorrect lang codes in Custom Prefs and Original Prefs
+	- Refine "Only peform seekback if subtitle active"
 
 --- Version 1.0.9
 

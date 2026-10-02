@@ -21,6 +21,9 @@
 		<disclaimer lang="sv_SE">För buggar, önskemål eller allmänna frågor, besök tråden Language Preference Manager på Kodi-forumet.</disclaimer>
 		<platform>all</platform>
 		<news>1.1.0 : - More robust code in 2digits/3digits ISO639 languages codes support
+	        (as requested from greptile KODI automated tests)
+	- Proper handling and reporting of incorrect lang codes in Custom Prefs and Original Prefs
+	- Refine "Only peform seekback if subtitle active"
 		1.0.9 : - Support 2digits ISO639 languages codes in addition to 3digits so far
 	(Required for Kodi22-Piers and first step toward BCP47 codes)
 - Fix audio blacklist was not considered when searching for Original audio tracks
