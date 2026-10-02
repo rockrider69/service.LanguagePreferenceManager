@@ -71,7 +71,17 @@ class settings():
       self.audio_original_preflist_enabled = addon.getSetting('enableAudioOriginalPreflist') == 'true'
       self.audio_original_preflist = addon.getSetting('AudioOriginalPreflist')
       if self.audio_original_preflist and self.audio_original_preflist_enabled:
-          self.audio_original_preflist = self.audio_original_preflist.lower().split(',')
+            self.audio_original_preflist = self.audio_original_preflist.lower().split(',')
+            # Expand the user original preferred list with 2 and 3 digits equivalent codes
+            expanded_audio_original_preflist = []
+            for code in self.audio_original_preflist:
+                expanded_codes = multicode_languageTranslate(code)
+                if len(expanded_codes) == 2:
+                    expanded_audio_original_preflist.extend(expanded_codes[1].split(','))
+                else:
+                    log(LOG_INFO, 'Original pref list: lang code not found in db!'\
+                     ' Please report this: {0}'.format(code))
+            self.audio_original_preflist = expanded_audio_original_preflist
       else:
           self.audio_original_preflist = []
       self.sub_prefs_on = addon.getSetting('enableSub') == 'true'
