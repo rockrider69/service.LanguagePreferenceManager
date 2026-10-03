@@ -80,7 +80,7 @@ def multicode_languageTranslate(lang):
   multi_pref = []
   if len(lang) == 2 and languageTranslate(lang, 2, 0) and languageTranslate(lang, 2, 3):
       multi_pref = (languageTranslate(lang, 2, 0), lang+','+languageTranslate(lang, 2, 3))
-  elif len(lang) == 3 and languageTranslate(lang, 3, 0) and languageTranslate(lang, 3, 2):
+  elif len(lang) >= 3 and languageTranslate(lang, 3, 0) and languageTranslate(lang, 3, 2):
       multi_pref = (languageTranslate(lang, 3, 0), lang+','+languageTranslate(lang, 3, 2))
   return multi_pref
 

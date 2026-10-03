@@ -67,6 +67,7 @@ class LangPrefMan_Player(xbmc.Player):
     def __init__(self):
         self.LPM_initial_run_done = False
         self.selected_sub_enabled = False
+        self.subtitlesActivated = False
 
         self.ignore_audio_change_index_list = []
 
@@ -660,26 +661,26 @@ class LangPrefMan_Player(xbmc.Player):
 
         :return: The first audio track index tagged as isoriginal, that matches the original_preferred_list, and is not blacklisted.
                 -1 if the current selected audio track is already correct (to avoid unnecessary audio change)
-                 None if no original audio track found or no match.       
+                 None if no original audio track found or no match.
         """
 
         # Find all 'isoriginal' audio tracks (index, language) that match one language code in the original preferred list
 		# If the original preferred list is 'any', all 'isoriginal' audio tracks (index, language) are found
         found_original_audio_languages = [
-			    [stream['index'],stream['language']] 
-			    for stream in self.audiostreams 
+			    [stream['index'],stream['language']]
+			    for stream in self.audiostreams
 			    if (
-				    'index' in stream 
-				    and 'language' in stream 
-				    and 'isoriginal' in stream 
+				    'index' in stream
+				    and 'language' in stream
+				    and 'isoriginal' in stream
 				    and (
-					    settings.audio_original_preflist == ['any']  
+					    settings.audio_original_preflist == ['any' , 'any']
 					    or stream['language'] in settings.audio_original_preflist
-				        ) 
+				        )
 				    and stream['isoriginal']
-			        )   
+			        )
         ]
-        
+
         # Find all blacklisted audio tracks (index, language)
         blacklisted_audio_languages = [[stream['index'],stream['language']] for stream in self.audiostreams if
                                           ('index' in stream and 'language' in stream and 'name' in stream
