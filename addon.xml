@@ -14,10 +14,13 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<summary lang="en_GB">Language Preference Manager</summary>
+		<summary lang="zh_CN">语言偏好管理器</summary>
 		<summary lang="sv_SE">Hanterare för språkinställningar</summary>
 		<description lang="en_GB">Sets the audio and subtitle track according to your language preferences</description>
+		<description lang="zh_CN">根据你的语言偏好自动选择音轨与字幕轨道</description>
 		<description lang="sv_SE">Ställer in ljud- och undertextspår enligt dina språkinställningar</description>
 		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
+		<disclaimer lang="zh_CN">如遇到 Bug、功能需求或相关问题，请前往 Kodi 论坛的语言偏好管理器主题帖反馈。</disclaimer>
 		<disclaimer lang="sv_SE">För buggar, önskemål eller allmänna frågor, besök tråden Language Preference Manager på Kodi-forumet.</disclaimer>
 		<platform>all</platform>
 		<news>1.0.8 : - Fix addon not closing properly when "Store Preferences" is used
