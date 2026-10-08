@@ -71,7 +71,7 @@ msgstr "延迟解析偏好（单位：毫秒）"
 
 msgctxt "#30113"
 msgid "Turn on subtitles if a subtitle preference matched"
-msgstr "匹配字幕偏好时自动开启字幕"
+msgstr "有匹配字幕偏好时自动开启字幕"
 
 msgctxt "#30114"
 msgid "Turn off subtitles if no subtitle preference matched"
