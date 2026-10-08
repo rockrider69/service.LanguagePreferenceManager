@@ -1,0 +1,398 @@
+# Kodi Media Center language file
+# Addon Name: Language Preference Manager
+# Addon id: service.languagepreferencemanager
+# Addon Provider: ace20022
+# Addon Updater: PP to fix languages codes not correct in string.po and langcodes.py, and not aligned
+msgid ""
+msgstr ""
+"Project-Id-Version: Kodi Addons\n"
+"Report-Msgid-Bugs-To: https://forum.kodi.tv/\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Kodi Translation Team\n"
+"Language-Team: wabisabi926\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: zh_CN\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30100"
+msgid "Languages"
+msgstr "语言"
+
+msgctxt "#30101"
+msgid "Primary Language"
+msgstr "首选语言"
+
+msgctxt "#30102"
+msgid "Secondary Language"
+msgstr "次选语言"
+
+msgctxt "#30103"
+msgid "Third Language"
+msgstr "第三语言"
+
+msgctxt "#30104"
+msgid "Audio Preferences"
+msgstr "音轨偏好"
+
+msgctxt "#30105"
+msgid "Subtitle Preferences"
+msgstr "字幕偏好"
+
+msgctxt "#30106"
+msgid "Conditional Subtitle Preferences"
+msgstr "条件字幕偏好"
+
+msgctxt "#30107"
+msgid "Enable Preference"
+msgstr "启用偏好设置"
+
+msgctxt "#30108"
+msgid "Enable Language Preference Manager"
+msgstr "启用语言偏好管理器"
+
+msgctxt "#30109"
+msgid "Pause while evaluating preferences"
+msgstr "解析偏好时暂停播放"
+
+msgctxt "#30110"
+msgid "If audio language is "
+msgstr "如果音轨语言为"
+
+msgctxt "#30111"
+msgid "then display subtitles with language"
+msgstr "则显示该语言字幕"
+
+msgctxt "#30112"
+msgid "Delay the evaluation by the following value [ms]"
+msgstr "延迟解析偏好（单位：毫秒）"
+
+msgctxt "#30113"
+msgid "Turn on subtitles if a subtitle preference matched"
+msgstr "匹配字幕偏好时自动开启字幕"
+
+msgctxt "#30114"
+msgid "Turn off subtitles if no subtitle preference matched"
+msgstr "无匹配字幕偏好时自动关闭字幕"
+
+msgctxt "#30115"
+msgid "Advanced/Custom settings"
+msgstr "高级/自定义设置"
+
+msgctxt "#30116"
+msgid "Try to set the audio and/or subtitle track from the filename first"
+msgstr "优先尝试根据文件名匹配音轨/字幕"
+
+msgctxt "#30117"
+msgid "Regular expression for filename based preferences"
+msgstr "基于文件名偏好的正则表达式"
+
+msgctxt "#30118"
+msgid "Use custom pref, e.g. eng>ger>fin :"
+msgstr "使用自定义偏好，例：eng>ger>fin："
+
+msgctxt "#30119"
+msgid "Use custom pref, e.g. eng>ger>fin :"
+msgstr "使用自定义偏好，例：eng>ger>fin："
+
+msgctxt "#30120"
+msgid "Forced"
+msgstr "强制字幕"
+
+msgctxt "#30121"
+msgid "Use custom pref, e.g. jpn:eng>eng:ger :"
+msgstr "使用自定义偏好，例：jpn:eng>eng:ger："
+
+msgctxt "#30122"
+msgid "General"
+msgstr "常规"
+
+msgctxt "#30123"
+msgid "Ignore all Signs and Songs subtitles tracks"
+msgstr "忽略全部歌曲/标识类字幕轨道"
+
+msgctxt "#30125"
+msgid "Enable Subtitle Keyword Blacklist"
+msgstr "启用字幕关键词黑名单"
+
+msgctxt "#30126"
+msgid "Enter a comma-separated list of keywords to blacklist in subtitle names"
+msgstr "输入字幕名称黑名单关键词，逗号分隔"
+
+msgctxt "#30127"
+msgid "Subtitle Keyword List:"
+msgstr "字幕关键词列表："
+
+msgctxt "#30128"
+msgid "Enable Audio Keyword Blacklist"
+msgstr "启用音轨关键词黑名单"
+
+msgctxt "#30129"
+msgid "Enter a comma-separated list of keywords to blacklist in audio names"
+msgstr "输入音轨名称黑名单关键词，逗号分隔"
+
+msgctxt "#30130"
+msgid "Audio Keyword List:"
+msgstr "音轨关键词列表："
+
+msgctxt "#30131"
+msgid "Fast Subtitles Display:"
+msgstr "字幕快速显示："
+
+msgctxt "#30132"
+msgid "Disabled"
+msgstr "禁用"
+
+msgctxt "#30133"
+msgid "New Start only"
+msgstr "仅新播放时"
+
+msgctxt "#30134"
+msgid "Start & Resume"
+msgstr "播放与续播"
+
+msgctxt "#30135"
+msgid "Stored Preferences"
+msgstr "已保存偏好"
+
+msgctxt "#30136"
+msgid "Store Pref. Movies"
+msgstr "保存电影偏好"
+
+msgctxt "#30137"
+msgid "Store Pref. TV Shows"
+msgstr "保存剧集偏好"
+
+msgctxt "#30138"
+msgid "Changed audio/subt. override config pref. next time for the same movie/series?"
+msgstr "手动修改音轨/字幕，下次播放同一影片/剧集是否覆盖配置偏好？"
+
+msgctxt "#30139"
+msgid "If enabled, manually selected audio/subtitle tracks during playback will be stored and restored next time for the same movie/whole series."
+msgstr "启用后，播放时手动选择的音轨/字幕会保存，下次播放同一影片/整套剧集自动恢复。"
+
+msgctxt "#30140"
+msgid "Edit Overrides"
+msgstr "编辑覆盖规则"
+
+msgctxt "#30141"
+msgid "A new label"
+msgstr "新建标签"
+
+msgctxt "#30142"
+msgid "Enable Audio Original Preferences"
+msgstr "启用原声音轨偏好"
+
+msgctxt "#30143"
+msgid "Enter a comma-separated list of codes (e.g eng,ger,fre)"
+msgstr "输入语言代码列表，逗号分隔（例：eng,ger,fre）"
+
+msgctxt "#30144"
+msgid "Audio Original Preference List:"
+msgstr "原声音轨偏好列表："
+
+msgctxt "#30201"
+msgid "Albanian"
+msgstr "阿尔巴尼亚语"
+
+msgctxt "#30202"
+msgid "Arabic"
+msgstr "阿拉伯语"
+
+msgctxt "#30203"
+msgid "Belarusian"
+msgstr "白俄罗斯语"
+
+msgctxt "#30204"
+msgid "Bosnian (Latin)"
+msgstr "波斯尼亚语（拉丁字母）"
+
+msgctxt "#30205"
+msgid "Bulgarian"
+msgstr "保加利亚语"
+
+msgctxt "#30206"
+msgid "Catalan"
+msgstr "加泰罗尼亚语"
+
+msgctxt "#30207"
+msgid "Chinese"
+msgstr "中文"
+
+msgctxt "#30208"
+msgid "Croatian"
+msgstr "克罗地亚语"
+
+msgctxt "#30209"
+msgid "Czech"
+msgstr "捷克语"
+
+msgctxt "#30210"
+msgid "Danish"
+msgstr "丹麦语"
+
+msgctxt "#30211"
+msgid "Dutch"
+msgstr "荷兰语"
+
+msgctxt "#30212"
+msgid "English"
+msgstr "英语"
+
+msgctxt "#30213"
+msgid "Estonian"
+msgstr "爱沙尼亚语"
+
+msgctxt "#30214"
+msgid "Farsi"
+msgstr "波斯语"
+
+msgctxt "#30215"
+msgid "Finnish"
+msgstr "芬兰语"
+
+msgctxt "#30216"
+msgid "French"
+msgstr "法语"
+
+msgctxt "#30217"
+msgid "German"
+msgstr "德语"
+
+msgctxt "#30218"
+msgid "Greek"
+msgstr "希腊语"
+
+msgctxt "#30219"
+msgid "Hebrew"
+msgstr "希伯来语"
+
+msgctxt "#30220"
+msgid "Hindi"
+msgstr "印地语"
+
+msgctxt "#30221"
+msgid "Hungarian"
+msgstr "匈牙利语"
+
+msgctxt "#30222"
+msgid "Icelandic"
+msgstr "冰岛语"
+
+msgctxt "#30223"
+msgid "Indonesian"
+msgstr "印尼语"
+
+msgctxt "#30224"
+msgid "Italian"
+msgstr "意大利语"
+
+msgctxt "#30225"
+msgid "Japanese"
+msgstr "日语"
+
+msgctxt "#30226"
+msgid "Korean"
+msgstr "韩语"
+
+msgctxt "#30227"
+msgid "Latvian"
+msgstr "拉脱维亚语"
+
+msgctxt "#30228"
+msgid "Lithuanian"
+msgstr "立陶宛语"
+
+msgctxt "#30229"
+msgid "Macedonian"
+msgstr "马其顿语"
+
+msgctxt "#30230"
+msgid "Norwegian"
+msgstr "挪威语"
+
+msgctxt "#30231"
+msgid "Persian"
+msgstr "波斯语"
+
+msgctxt "#30232"
+msgid "Polish"
+msgstr "波兰语"
+
+msgctxt "#30233"
+msgid "Portuguese"
+msgstr "葡萄牙语"
+
+msgctxt "#30234"
+msgid "Portuguese (Brazil)"
+msgstr "葡萄牙语（巴西）"
+
+msgctxt "#30235"
+msgid "Romanian"
+msgstr "罗马尼亚语"
+
+msgctxt "#30236"
+msgid "Russian"
+msgstr "俄语"
+
+msgctxt "#30237"
+msgid "Serbian"
+msgstr "塞尔维亚语"
+
+msgctxt "#30238"
+msgid "Slovak"
+msgstr "斯洛伐克语"
+
+msgctxt "#30239"
+msgid "Slovenian"
+msgstr "斯洛文尼亚语"
+
+msgctxt "#30240"
+msgid "Spanish"
+msgstr "西班牙语"
+
+msgctxt "#30241"
+msgid "Swedish"
+msgstr "瑞典语"
+
+msgctxt "#30242"
+msgid "Thai"
+msgstr "泰语"
+
+msgctxt "#30243"
+msgid "Turkish"
+msgstr "土耳其语"
+
+msgctxt "#30244"
+msgid "Ukrainian"
+msgstr "乌克兰语"
+
+msgctxt "#30245"
+msgid "Vietnamese"
+msgstr "越南语"
+
+msgctxt "#30248"
+msgid "English Middle"
+msgstr "英式英语"
+
+msgctxt "#30249"
+msgid "Norwegian Bokmal"
+msgstr "挪威语博克马尔文"
+
+msgctxt "#30250"
+msgid "New Norwegian"
+msgstr "新挪威语"
+
+msgctxt "#30200"
+msgid "None"
+msgstr "无"
+
+msgctxt "#30300"
+msgid "Any"
+msgstr "任意"
+
+msgctxt "#30350"
+msgid "Undefined"
+msgstr "未定义"
