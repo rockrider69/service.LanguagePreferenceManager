@@ -1,9 +1,11 @@
---- Version 1.1.1
+--- Version 1.1.1Beta1
 
 - Add regional/script language preferences for English, French, Spanish,
-  Portuguese and Chinese, grouped with their base language in settings.
+  Portuguese and Chinese, grouped with their base language in settings (Thanks to Hugs11).
 - Prefer exact BCP-47 tags or recognized track-title variants, then unlabelled
-  tracks of the same language; preserve generic language preferences.
+  tracks of the same language; preserve generic language preferences (Thanks to Hugs11).
+- Add Chinese translation (Thanks to wabisabi926).
+- Avoid some wrong seekback decisions in subtitles delayed workaround.
 
 --- Version 1.1.0
 

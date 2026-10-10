@@ -68,7 +68,6 @@ class LangPrefMan_Player(xbmc.Player):
     def __init__(self):
         self.LPM_initial_run_done = False
         self.selected_sub_enabled = False
-        self.subtitlesActivated = False
 
         self.ignore_audio_change_index_list = []
 
@@ -130,6 +129,8 @@ class LangPrefMan_Player(xbmc.Player):
         if settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
             log(LOG_DEBUG, 'Playback started')
             self.audio_changed = False
+            # Reset the flag at each new video start to secure proper seekback decision in delayed subtitles workaround
+            self.subtitlesActivated = False
             # switching an audio track to early leads to a reopen -> start at the beginning
             if settings.delay > 0:
                 log(LOG_DEBUG, "Delaying preferences evaluation by {0} ms".format(settings.delay))
@@ -283,7 +284,7 @@ class LangPrefMan_Player(xbmc.Player):
                 if settings.turn_subs_on and not self.selected_sub_enabled:
                     log(LOG_INFO, 'Subtitle: enabling subs because selected sub is not enabled')
                     self.showSubtitles(True)
-                    self.subtitlesActivated = True
+                self.subtitlesActivated = True
             elif trackIndex >= 0:
                 self.setSubtitleStream(trackIndex)
                 if settings.turn_subs_on:

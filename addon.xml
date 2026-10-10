@@ -2,7 +2,7 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="1.1.0"
+	version="1.1.1Beta1"
 	provider-name="ace20022/scott967/rockrider69"
 	>
 	<requires>
@@ -23,15 +23,12 @@
 		<disclaimer lang="zh_CN">如遇到 Bug、功能需求或相关问题，请前往 Kodi 论坛的语言偏好管理器主题帖反馈。</disclaimer>
 		<disclaimer lang="sv_SE">För buggar, önskemål eller allmänna frågor, besök tråden Language Preference Manager på Kodi-forumet.</disclaimer>
 		<platform>all</platform>
-		<news>1.1.0 : - More robust code in 2digits/3digits ISO639 languages codes support
-	        (as requested from greptile KODI automated tests)
-	- Proper handling and reporting of incorrect lang codes in Custom Prefs and Original Prefs
-	- Refine "Only peform seekback if subtitle active"
-		1.0.9 : - Support 2digits ISO639 languages codes in addition to 3digits so far
-	(Required for Kodi22-Piers and first step toward BCP47 codes)
-- Fix audio blacklist was not considered when searching for Original audio tracks
-- 'Any' as Original Preference list will activate the first found Original audio track whatever the language
-- Only perform seek back if a subtitle is active
+		<news>1.1.1Beta1 : - Add regional/script language preferences for English, French, Spanish,
+  Portuguese and Chinese, grouped with their base language in settings (Thanks to Hugs11).
+- Prefer exact BCP-47 tags or recognized track-title variants, then unlabelled
+  tracks of the same language; preserve generic language preferences (Thanks to Hugs11).
+- Add Chinese translation (Thanks to wabisabi926).
+- Avoid some wrong seekback decisions in subtitles delayed workaround.
 			
 		</news>
 		<assets>

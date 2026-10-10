@@ -45,3 +45,5 @@ Special Thanks
 - @KnappeGEIL for ideas how to ignore 'Signs and Songs' subtitles
 
 - @SgtJalau for the complete feature to store specific/overriding preferences per Movie / TVshow
+
+- @Hugs11 for the complete support of regional and script languages variant (BCP47)
