@@ -33,6 +33,18 @@ msgctxt "#30103"
 msgid "Third Language"
 msgstr ""
 
+msgctxt "#29999"
+msgid "Fourth Language"
+msgstr ""
+
+msgctxt "#29998"
+msgid "Fifth Language"
+msgstr ""
+
+msgctxt "#29997"
+msgid "Sixth Language"
+msgstr ""
+
 msgctxt "#30104"
 msgid "Audio Preferences"
 msgstr ""
@@ -70,7 +82,7 @@ msgid "Delay the evaluation by the following value [ms]"
 msgstr ""
 
 msgctxt "#30113"
-msgid "Turn on subtitles if a subtitle preference matched"
+msgid "Turn on subtitles if a subtitle matches in any setting globally"
 msgstr ""
 
 msgctxt "#30114"
@@ -186,11 +198,27 @@ msgid "Enable Audio Original Preferences"
 msgstr ""
 
 msgctxt "#30143"
-msgid "Enter a comma-separated list of codes (e.g eng,ger,fre)"
+msgid "Enter a comma-separated list of language codes, 2 or 3 letters (e.g. en,jpn,ger,fr)"
 msgstr ""
 
 msgctxt "#30144"
 msgid "Audio Original Preference List:"
+msgstr ""
+
+msgctxt "#30146"
+msgid "Use regex pattern to filter subtitles"
+msgstr ""
+
+msgctxt "#30147"
+msgid "Regex pattern for subtitle filtering"
+msgstr ""
+
+msgctxt "#30148"
+msgid "Regex exclusion pattern for subtitle filtering"
+msgstr ""
+
+msgctxt "#30149"
+msgid "Use regex exclusion pattern to filter out false positives"
 msgstr ""
 
 msgctxt "#30201"
@@ -385,6 +413,70 @@ msgctxt "#30250"
 msgid "New Norwegian"
 msgstr ""
 
+msgctxt "#30251"
+msgid "English (UK)"
+msgstr ""
+
+msgctxt "#30252"
+msgid "English (US)"
+msgstr ""
+
+msgctxt "#30253"
+msgid "English (Australia)"
+msgstr ""
+
+msgctxt "#30254"
+msgid "Spanish (Spain)"
+msgstr ""
+
+msgctxt "#30255"
+msgid "Spanish (Latin America)"
+msgstr ""
+
+msgctxt "#30256"
+msgid "French (Canada)"
+msgstr ""
+
+msgctxt "#30257"
+msgid "Portuguese (Portugal)"
+msgstr ""
+
+msgctxt "#30258"
+msgid "Chinese (Simplified)"
+msgstr ""
+
+msgctxt "#30259"
+msgid "Chinese (Traditional)"
+msgstr ""
+
+msgctxt "#30260"
+msgid "English (India)"
+msgstr ""
+
+msgctxt "#30261"
+msgid "English (Canada)"
+msgstr ""
+
+msgctxt "#30262"
+msgid "German (Switzerland)"
+msgstr ""
+
+msgctxt "#30263"
+msgid "German (Austria)"
+msgstr ""
+
+msgctxt "#30264"
+msgid "French (Belgium)"
+msgstr ""
+
+msgctxt "#30265"
+msgid "French (Switzerland)"
+msgstr ""
+
+msgctxt "#30266"
+msgid "Dutch (Belgium)"
+msgstr ""
+
 msgctxt "#30200"
 msgid "None"
 msgstr ""
@@ -395,4 +487,56 @@ msgstr ""
 
 msgctxt "#30350"
 msgid "Undefined"
+msgstr ""
+
+msgctxt "#30400"
+msgid "Unknown"
+msgstr ""
+
+msgctxt "#30500"
+msgid "Original"
+msgstr ""
+
+msgctxt "#30600"
+msgid "Log level"
+msgstr ""
+
+msgctxt "#30601"
+msgid "None"
+msgstr ""
+
+msgctxt "#30602"
+msgid "Errors"
+msgstr ""
+
+msgctxt "#30603"
+msgid "Information"
+msgstr ""
+
+msgctxt "#30604"
+msgid "Debug"
+msgstr ""
+
+msgctxt "#30610"
+msgid "Delete confirmation"
+msgstr ""
+
+msgctxt "#30611"
+msgid "Do you want to remove the stored preference for {0}?"
+msgstr ""
+
+msgctxt "#30612"
+msgid "TV show"
+msgstr ""
+
+msgctxt "#30613"
+msgid "Movie"
+msgstr ""
+
+msgctxt "#30614"
+msgid "The stored preference could not be removed. Please try again."
+msgstr ""
+
+msgctxt "#30620"
+msgid "Sub converter (Japanese, Korean or Chinese audio when the selected subtitle is ASS/SSA: a copy with its styles, fonts and signs kept and the bottom lines moved to the top; other text formats other than SRT become plain yellow SRT at the top)"
 msgstr ""

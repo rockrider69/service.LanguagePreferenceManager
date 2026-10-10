@@ -2,7 +2,7 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="1.1.0"
+	version="2.0.15"
 	provider-name="ace20022/scott967/rockrider69"
 	>
 	<requires>
@@ -14,25 +14,87 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<summary lang="en_GB">Language Preference Manager</summary>
-		<summary lang="zh_CN">语言偏好管理器</summary>
 		<summary lang="sv_SE">Hanterare för språkinställningar</summary>
+		<summary lang="it_IT">Gestore delle preferenze linguistiche</summary>
+		<summary lang="ja_JP">言語設定マネージャー</summary>
+		<summary lang="de_DE">Sprachpräferenz-Manager</summary>
+		<summary lang="fr_FR">Gestionnaire des préférences linguistiques</summary>
 		<description lang="en_GB">Sets the audio and subtitle track according to your language preferences</description>
-		<description lang="zh_CN">根据你的语言偏好自动选择音轨与字幕轨道</description>
 		<description lang="sv_SE">Ställer in ljud- och undertextspår enligt dina språkinställningar</description>
+		<description lang="it_IT">Imposta le tracce audio e dei sottotitoli in base alle preferenze linguistiche.</description>
+		<description lang="ja_JP">言語設定に従って音声トラックと字幕トラックを設定します。</description>
+		<description lang="de_DE">Legt die Audio- und Untertitelspur entsprechend Ihren Spracheinstellungen fest</description>
+		<description lang="fr_FR">Définit les pistes audio et de sous-titres selon vos préférences linguistiques</description>
 		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
-		<disclaimer lang="zh_CN">如遇到 Bug、功能需求或相关问题，请前往 Kodi 论坛的语言偏好管理器主题帖反馈。</disclaimer>
 		<disclaimer lang="sv_SE">För buggar, önskemål eller allmänna frågor, besök tråden Language Preference Manager på Kodi-forumet.</disclaimer>
+		<disclaimer lang="it_IT">Per bug, richieste o domande generali, visita il thread di Language Preference Manager sul forum Kodi.</disclaimer>
+		<disclaimer lang="ja_JP">バグ報告、要望、一般的な質問については、KodiフォーラムのLanguage Preference Managerスレッドをご覧ください。</disclaimer>
+		<disclaimer lang="de_DE">Bei Fehlern, Anfragen oder allgemeinen Fragen besuchen Sie den Thread „Language Preference Manager“ im Kodi-Forum.</disclaimer>
+		<disclaimer lang="fr_FR">Pour signaler des bugs, faire des demandes ou poser des questions générales, consultez le fil « Language Preference Manager » sur le forum Kodi.</disclaimer>
 		<platform>all</platform>
-		<news>1.1.0 : - More robust code in 2digits/3digits ISO639 languages codes support
-	        (as requested from greptile KODI automated tests)
-	- Proper handling and reporting of incorrect lang codes in Custom Prefs and Original Prefs
-	- Refine "Only peform seekback if subtitle active"
-		1.0.9 : - Support 2digits ISO639 languages codes in addition to 3digits so far
-	(Required for Kodi22-Piers and first step toward BCP47 codes)
-- Fix audio blacklist was not considered when searching for Original audio tracks
-- 'Any' as Original Preference list will activate the first found Original audio track whatever the language
-- Only perform seek back if a subtitle is active
-			
+		<news>
+--- Version 2.0.15
+
+- change: sub converter keeps ASS/SSA styles, fonts, colours and sign positions (an .ass copy); only bottom lines move to the top
+
+--- Version 2.0.14
+
+- change: sub converter reads the video in large blocks: much faster over network and http playback
+
+--- Version 2.0.13
+
+- change: sub converter works with http(s) and add-on (plugin) playback; headers and passwords are kept out of its log and file names
+
+--- Version 2.0.12
+
+- fix: sub converter no longer blocks the detection of subtitle changes made while it reads the video
+
+--- Version 2.0.11
+
+- change: sub converter works for any text subtitle format except SRT (ASS/SSA, WebVTT); picture subtitles (PGS/SUP, VobSub) cannot be converted without OCR and are left alone
+
+--- Version 2.0.10
+
+- change: sub converter works when the selected subtitle is ASS (other formats may be present) and places positioned lines at their exact spot
+
+--- Version 2.0.9
+
+- change: sub converter keeps the position of ASS lines that are positioned and moves only the unpositioned ones to the top
+
+--- Version 2.0.8
+
+- new: Sub converter: plain yellow top subtitles for Japanese, Korean or Chinese audio with only ASS subtitles
+
+--- Version 2.0.7
+
+- change: regex subtitle filter takes the first match, prefers the first ASS track, and no longer excludes whole-word matches
+
+--- Version 2.0.6
+
+- fix: the regex subtitle filter no longer takes a "Russian" (or other title with "ss") subtitle for a Signs &amp; Songs track
+
+--- Version 2.0.5
+
+- change: Fast Subtitles Display is "Start &amp; Resume" by default
+
+--- Version 2.0.3
+
+- new: the language of external subtitles is read from their file names in the video's folder (en-IN, pt-BR ...)
+- fix: stored preferences are never lost when the dialog and the service save at once; a failed delete is reported
+- fix: regions in track titles (PT-BR, ES-419), the Original audio list and Kodi 19-21 file names read right
+- fix: custom rules accept -ff and -ss together in any order
+- fix: nothing is applied when playback stops during the start delay
+
+--- Version 2.0.2
+
+- new: regional language variants: English (UK / US / Australia), Spanish (Spain / Latin America), French (Canada), Portuguese (Portugal), Chinese (Simplified / Traditional) in the language lists; custom tags such as en-AU, es-419, zh-Hant. The region is read from the track's tag or title (Kodi 22 drops it)
+- fix: Portuguese (Brazil) matches on Kodi 22
+- fix: external subtitle files with a region in the name (Movie.pt-BR.srt, Movie.en-AU.srt) get the right language
+- fix: a subtitle Kodi pre-selected that matches the subtitle preferences is switched on and kept
+- fix: deleting a stored preference takes effect at once and is not written back
+- fix: a user switching back to the starting audio track after LPM changed it is stored
+- stored preferences save region and track title
+- translated: stored-preferences dialog, Log level setting; French and Swedish completed
 		</news>
 		<assets>
 			<icon>resources/icon.png</icon>

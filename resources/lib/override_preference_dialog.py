@@ -26,6 +26,8 @@ class OverridePreferenceDialog(xbmcgui.WindowXMLDialog):
         This will create a list item for each preference and add it to the list control.
         :return: None
         """
+        addon = xbmcaddon.Addon()
+        self.type_labels = {'tv_show': addon.getLocalizedString(30612), 'file': addon.getLocalizedString(30613)}
         items = self.get_all_preferences()
         for preference in items:
             type_name = preference.selector.get_type_name()
@@ -35,7 +37,8 @@ class OverridePreferenceDialog(xbmcgui.WindowXMLDialog):
                 display_name = os.path.basename(preference.selector.get_display_name())[0:34]
 
             log(LOG_DEBUG, f"Adding item: {type_name}")
-            li = xbmcgui.ListItem(label=type_name + ":" + display_name)
+            type_label = self.type_labels.get(type_name, type_name)
+            li = xbmcgui.ListItem(label=type_label + ": " + display_name)
             self.list_control.addItem(li)
 
             # We want to track the items by index, so we can get them later on
@@ -75,20 +78,34 @@ class OverridePreferenceDialog(xbmcgui.WindowXMLDialog):
             selected_item = self.list_control.getSelectedItem()
             # Ask for delete confirmation
             if selected_item:
-                result = xbmcgui.Dialog().yesno("Delete Confirmation",
-                                                f"Do you want to remove custom preference for {selected_item.getLabel()}?")
+                addon = xbmcaddon.Addon()
+                result = xbmcgui.Dialog().yesno(addon.getLocalizedString(30610),
+                                                addon.getLocalizedString(30611).format(selected_item.getLabel()))
                 if result:
                     preference = self.get_preference_by_index(self.list_control.getSelectedPosition())
 
                     if preference:
-                        # Remove the preference from the media preference manager
-                        media_preference_manager.remove_preference(preference)
-                        media_preference_manager.save_preferences()
+                        # Remove the preference from the media preference manager. The list is re-read first, and
+                        # the re-read list is what comes back when the save fails
+                        refreshed = media_preference_manager.refresh()
+                        before = list(media_preference_manager.preferences)
+                        if not (refreshed and media_preference_manager.remove_preference(preference)
+                                and media_preference_manager.save_preferences()):
+                            # the file could not be read or written: the preference is still stored, and stays in
+                            # the list so that a later save does not drop it unannounced
+                            media_preference_manager.preferences = before
+                            log(LOG_ERROR, f"Could not remove preference: {preference}")
+                            xbmcgui.Dialog().notification(addon.getLocalizedString(30610),
+                                                          addon.getLocalizedString(30614), xbmcgui.NOTIFICATION_ERROR)
+                            return
 
                         log(LOG_INFO, f"Removing preference: {preference}")
 
-                        # Remove the item from the list
-                        self.list_control.removeItem(self.list_control.getSelectedPosition())
+                        # Remove the item from the list, and from the list of preferences behind it (positions match)
+                        position = self.list_control.getSelectedPosition()
+                        self.list_control.removeItem(position)
+                        if 0 <= position < len(self.preference_list):
+                            self.preference_list.pop(position)
 
     @staticmethod
     def split_lines(text, max_length):

@@ -1,6 +1,6 @@
 import re
 import xbmc, xbmcaddon
-from langcodes import *
+import langutils
 from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
 
 
@@ -18,7 +18,7 @@ class PrefParser:
         self.custom_g_t_pref_delim = r'#'
         self.custom_g_t_delim = r','
         self.custom_condSub_delim = r':'
-        
+    
     def parsePrefString(self, pref_string):
         preferences = []
         if not pref_string:
@@ -52,6 +52,33 @@ class PrefParser:
         else:
             return (set(), self.parsePref(s_pref))
             
+    def lang_pref(self, value):
+        """Custom preference text -> (english name, canonical code), or (None, None) when empty.
+        Accepts 2-letter (en), 3-letter B/T (eng, ger, deu), BCP47-ish (pt-BR, en-AU, zh-Hant) codes and the
+        specials. A region or script is kept ('eng-AU'), see langutils.match_score()."""
+        code = langutils.canonical_tag(value)
+        if not code:
+            return (None, None)
+        base, region = langutils.parse_tag(code)
+        if region and not langutils.valid_region(region):
+            log(LOG_INFO, 'Custom prefs: {0} is not a region or script - using the language alone: {1}'.format(
+                region, value))
+            code = base
+        if not langutils.is_known(code):
+            log(LOG_INFO, 'Custom prefs: language code {0} is not in the Kodi language tables - using it as is'.format(value))
+        return (langutils.display_name(code), code)
+
+    @staticmethod
+    def split_tags(text):
+        """Remove the trailing option tags '-ff' (forced) and '-ss' (Signs & Songs), in any order and as exact
+        suffixes (never character stripping), so that they are never read as a region (en-ff-ss).
+        :return: (text, forced, signs)"""
+        found = set()
+        while text.lower().endswith(('-ff', '-ss')):
+            found.add(text[-2:].lower())
+            text = text[:-3]
+        return text, 'ff' in found, 'ss' in found
+
     def parsePref(self, prefs):
         lang_prefs = []
         if (prefs.find(self.custom_prefs_delim) > 0):
@@ -65,42 +92,33 @@ class PrefParser:
                 if len(pref) != 2:
                     log(LOG_INFO, 'Custom cond subs prefs parse error: {0}'.format(pref))
                 else:
-                    # Manage 2 or 3 digits language codes in custom rules
-                    temp_a = multicode_languageTranslate(pref[0])
-
-                    # Searching if a sub tag is present (like Eng:Jpn-ff to prioritize Forced tracks of another language)
-                    if pref[1].endswith('-ff'):
-                        ff_tag = True
-                        pref[1] = pref[1].rstrip('-ff')
+                    audio_text = pref[0].strip()
+                    sub_text = pref[1].strip()
+                    # Sub tags like Eng:Jpn-ff to prioritize Forced tracks of another language, Eng:Eng-ss to
+                    # prioritize Signs&Songs tracks
+                    sub_text, ff_tag, ss_found = self.split_tags(sub_text)
+                    ss_tag = 'true' if ss_found else 'false'
+                    temp_a = self.lang_pref(audio_text)
+                    temp_s = self.lang_pref(sub_text)
+                    if (temp_a[0] and temp_a[1] and temp_s[0] and temp_s[1]):
+                        if (temp_s[1] == langutils.NON or ff_tag):
+                            forced_tag = 'true'
+                        else:
+                            forced_tag = 'false'
+                        lang_prefs.append((temp_a[0], temp_a[1], temp_s[0], temp_s[1], forced_tag, ss_tag))
                     else:
-                        ff_tag = False
-                    # Searching if a sub tag is present (like Eng:Eng-ss to prioritize Signs&Songs tracks)
-                    if pref[1].endswith('-ss'):
-                        ss_tag = 'true'
-                        pref[1] = pref[1].rstrip('-ss')
-                    else:
-                        ss_tag = 'false'
-                    # Manage 2 or 3 digits language codes in custom rules
-                    temp_s = multicode_languageTranslate(pref[1])
-
-                    if temp_a and temp_s:
-                        if (temp_a[0] and temp_a[1] and temp_s[0] and temp_s[1]):
-                            if (temp_s[1] == 'non,non' or ff_tag):
-                                forced_tag = 'true'
-                            else:
-                                forced_tag = 'false'
-                            lang_prefs.append((temp_a[0], temp_a[1], temp_s[0], temp_s[1], forced_tag, ss_tag))
-                    else:
-                        log(LOG_INFO, 'Custom cond sub prefs: lang code not found in db!'\
-                             ' Please report this: {0}:{1}'.format(pref[0], pref[1]))
-            # custom audio or subtitle pref                            
+                        log(LOG_INFO, 'Custom cond sub prefs: lang code not found! '
+                                      'Please report this: {0}:{1}'.format(audio_text, sub_text))
+            # custom audio or subtitle pref
             else:
-                # Manage 2 or 3 digits language codes in custom rules
-                temp_pref = multicode_languageTranslate(pref)
-
-                if temp_pref:
+                text, ff_tag, ss_found = self.split_tags(pref.strip())
+                if ff_tag or ss_found:
+                    log(LOG_INFO, 'Custom prefs: the -ff / -ss tags only apply to conditional subtitle rules, '
+                                  'ignored in {0}'.format(pref))
+                temp_pref = self.lang_pref(text)
+                if temp_pref[0]:
                     lang_prefs.append(temp_pref)
                 else:
-                    log(LOG_INFO, 'Custom audio or sub prefs: lang code {0} not found in db!'\
-                             ' Please report this'.format(pref))
+                    log(LOG_INFO, 'Custom audio prefs: lang code {0} not found! '
+                                  'Please report this'.format(pref))
         return lang_prefs

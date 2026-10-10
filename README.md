@@ -31,3 +31,18 @@ Special Thanks
 - @KnappeGEIL for ideas how to ignore 'Signs and Songs' subtitles
 
 - @SgtJalau for the complete feature to store specific/overriding preferences per Movie / TVshow
+
+## Language codes (2.0.1)
+Everywhere a language code can be typed (custom preferences, Original audio list) you can use 2-letter (`en`, `ja`, `de`), 3-letter (`eng`, `jpn`, `ger` or `deu`) codes, or BCP47-style tags (`pt-BR`); they are all treated as the same language. Kodi 22 reports 2-letter codes for streams, older Kodi versions 3-letter ones - both are matched.
+
+## Selection priority
+Stored media preferences (`Store preferences`: the audio/subtitle tracks you chose manually for a movie or episode) rank above everything else and are the only thing that outranks the regex filter. What a stored preference applied is never changed by the rules below; if only part of it fits the file (e.g. its subtitle language is missing), only the other part falls through to them.
+
+Subtitles (initial run):
+1. Regex subtitle filter (if enabled) - nothing below can override a regex match
+2. Conditional subtitle preferences (if enabled) - used when the regex found nothing (they follow the audio track, also when you change it later)
+3. Normal subtitle preferences rank below the conditional rules and are skipped when the regex filter matched
+4. Subtitle tag in the file name (`Use filename`, e.g. `.subtitle-2`) - lowest preference, only if nothing above selected a track
+5. Default subtitle, else the first valid one - when nothing above selected a track (only with the regex filter or conditional subtitles enabled)
+
+Audio: audio preferences first; an audio tag in the file name (`.audiostream-1`) is only used when the audio preferences matched nothing.

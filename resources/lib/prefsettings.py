@@ -1,9 +1,13 @@
 import xbmc, xbmcaddon
 import re
-from langcodes import *
+import langutils
 from prefparser import PrefParser
 from resources.lib import kodi_utils
 from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
+
+# Signs & Songs part of the subtitle regex pattern ("S&S", "S + S", "S and S", "S.S"): the two s stand alone
+_OLD_SS_PATTERN = r's[\s._+\-\/\\]*(?:&|\+)?[\s._+\-\/\\]*s|'
+_SS_PATTERN = r'(?<![^\W\d_])s[\s._+\-\/\\]*(?:&|\+|and)?[\s._+\-\/\\]*s(?![^\W\d_])|'
 
 
 class settings():
@@ -26,6 +30,15 @@ class settings():
     def __init__( self ):
         self.init()
         
+    def spinner_lang(self, addon, setting_id):
+        """Language spinner setting -> (english name, canonical code). Empty/unknown -> ('None', 'non')."""
+        name, code = langutils.from_spinner(addon.getSetting(setting_id))
+        if not code:
+            log(LOG_INFO, 'Language setting {0} has no valid value ({1!r}) - treated as None'.format(
+                setting_id, addon.getSetting(setting_id)))
+            return ('None', langutils.NON)
+        return (name, code)
+
     def readSettings(self):
         self.readPrefs()
         self.readCustomPrefs()
@@ -37,6 +50,7 @@ class settings():
                  'cond subs on: {3}\n' \
                  'turn subs on: {4}, turn subs off: {5}\n' \
                  'signs: {15}\n' \
+                 'regex sub filter: {20}\n' \
                  'blacklisted keywords (subtitles): {16}\n' \
                  'blacklisted keywords (audio): {17}\n' \
                  'audio original pref list: {19}\n' \
@@ -58,117 +72,113 @@ class settings():
                          ','.join(self.subtitle_keyword_blacklist),
                          ','.join(self.audio_keyword_blacklist),
                          self.fast_subs_display,
-                         ','.join(self.audio_original_preflist)
+                         ','.join(self.audio_original_preflist),
+                         self.regex_sub_filter_enabled
                         )
                  )
-      
+
     def readPrefs(self):
-      addon = xbmcaddon.Addon()    
+        addon = xbmcaddon.Addon()    
 
-      self.service_enabled = addon.getSetting('enabled') == 'true'
-      self.delay = int(addon.getSetting('delay'))
-      self.audio_prefs_on = addon.getSetting('enableAudio') == 'true'
-      self.audio_original_preflist_enabled = addon.getSetting('enableAudioOriginalPreflist') == 'true'
-      self.audio_original_preflist = addon.getSetting('AudioOriginalPreflist')
-      if self.audio_original_preflist and self.audio_original_preflist_enabled:
-            self.audio_original_preflist = self.audio_original_preflist.lower().split(',')
-            # Expand the user original preferred list with 2 and 3 digits equivalent codes
-            expanded_audio_original_preflist = []
-            for code in self.audio_original_preflist:
-                expanded_codes = multicode_languageTranslate(code)
-                if len(expanded_codes) == 2:
-                    expanded_audio_original_preflist.extend(expanded_codes[1].split(','))
-                else:
-                    log(LOG_INFO, 'Original pref list: lang code not found in db!'\
-                     ' Please report this: {0}'.format(code))
-            self.audio_original_preflist = expanded_audio_original_preflist
-      else:
-          self.audio_original_preflist = []
-      self.sub_prefs_on = addon.getSetting('enableSub') == 'true'
-      self.condsub_prefs_on = addon.getSetting('enableCondSub') == 'true'
-      self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'
-      self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
-      self.ignore_signs_on = addon.getSetting('signs') == 'true'
-      self.subtitle_keyword_blacklist_enabled = addon.getSetting('enableSubtitleKeywordBlacklist') == 'true'
-      self.subtitle_keyword_blacklist = addon.getSetting('SubtitleKeywordBlacklist')
-      if self.subtitle_keyword_blacklist and self.subtitle_keyword_blacklist_enabled:
-          self.subtitle_keyword_blacklist = self.subtitle_keyword_blacklist.lower().split(',')
-      else:
-          self.subtitle_keyword_blacklist = []
-      self.audio_keyword_blacklist_enabled = addon.getSetting('enableAudioKeywordBlacklist') == 'true'
-      self.audio_keyword_blacklist = addon.getSetting('AudioKeywordBlacklist')
-      if self.audio_keyword_blacklist and self.audio_keyword_blacklist_enabled:
-          self.audio_keyword_blacklist = self.audio_keyword_blacklist.lower().split(',')
-      else:
-          self.audio_keyword_blacklist = []
-      self.fast_subs_display = int(addon.getSetting('FastSubsDisplay'))
-      self.useFilename = addon.getSetting('useFilename') == 'true'
-      self.filenameRegex = addon.getSetting('filenameRegex')
-      if self.useFilename:
-          self.reg = re.compile(self.filenameRegex, re.IGNORECASE)
-          self.split = re.compile(r'[_|.|-]*', re.IGNORECASE)
+        self.service_enabled = addon.getSetting('enabled') == 'true'
+        self.delay = int(addon.getSetting('delay'))
+        self.audio_prefs_on = addon.getSetting('enableAudio') == 'true'
+        self.audio_original_preflist_enabled = addon.getSetting('enableAudioOriginalPreflist') == 'true'
+        self.audio_original_preflist = addon.getSetting('AudioOriginalPreflist')
+        if self.audio_original_preflist and self.audio_original_preflist_enabled:
+            self.audio_original_preflist = [c.strip() for c in self.audio_original_preflist.lower().split(',') if c.strip()]
+        else:
+            self.audio_original_preflist = []
+        # canonical codes: 'ja', 'jpn' and 'JPN' are the same entry; 'any' accepts every original track
+        self.audio_original_langs = langutils.normalize_list(self.audio_original_preflist)
+        self.audio_original_any = langutils.ANY in self.audio_original_langs
+        self.sub_prefs_on = addon.getSetting('enableSub') == 'true'
+        self.condsub_prefs_on = addon.getSetting('enableCondSub') == 'true'
+        self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'
+        self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
+        self.ignore_signs_on = addon.getSetting('signs') == 'true'
+        self.sub_converter_on = addon.getSetting('subConverter') == 'true'
+        self.regex_sub_filter_enabled = addon.getSetting('regexSubFilter') == 'true'
+        self.regex_sub_pattern = addon.getSetting('regexSubPattern')
+        if _OLD_SS_PATTERN in self.regex_sub_pattern:
+            # the S&S part of the pattern up to 2.0.5 allowed nothing between the two s, so it matched the "ss" of
+            # any title (Russian, Swiss German, Classic ...): replace it in the stored setting too
+            self.regex_sub_pattern = self.regex_sub_pattern.replace(_OLD_SS_PATTERN, _SS_PATTERN)
+            log(LOG_INFO, 'Regex pattern: the Signs & Songs part matched any "ss" in a title, corrected to {0}'.format(
+                _SS_PATTERN))
+            try:
+                addon.setSetting('regexSubPattern', self.regex_sub_pattern)
+            except Exception as e:
+                log(LOG_ERROR, 'Could not store the corrected regex pattern: {0}'.format(e))
+        if self.regex_sub_filter_enabled and self.regex_sub_pattern:
+            try:
+                self.regex_sub_filter = re.compile(self.regex_sub_pattern)
+            except re.error as e:
+                log(LOG_ERROR, 'Invalid regex pattern: {0} - {1}'.format(self.regex_sub_pattern, str(e)))
+                self.regex_sub_filter = None
+        else:
+            self.regex_sub_filter = None
+
+        # Exclusion pattern
+        self.regex_sub_exclusion_enabled = addon.getSetting('regexSubExclusionEnabled') == 'true'
+        self.regex_sub_exclusion_pattern = addon.getSetting('regexSubExclusion')
+        if self.regex_sub_filter_enabled and self.regex_sub_exclusion_enabled and self.regex_sub_exclusion_pattern:
+            try:
+                self.regex_sub_exclusion = re.compile(self.regex_sub_exclusion_pattern, re.IGNORECASE)
+            except re.error as e:
+                log(LOG_ERROR, 'Invalid exclusion regex pattern: {0} - {1}'.format(self.regex_sub_exclusion_pattern, str(e)))
+                self.regex_sub_exclusion = None
+        else:
+            self.regex_sub_exclusion = None
+
+        self.subtitle_keyword_blacklist_enabled = addon.getSetting('enableSubtitleKeywordBlacklist') == 'true'
+        self.subtitle_keyword_blacklist = addon.getSetting('SubtitleKeywordBlacklist')
+        if self.subtitle_keyword_blacklist and self.subtitle_keyword_blacklist_enabled:
+            self.subtitle_keyword_blacklist = [k for k in self.subtitle_keyword_blacklist.lower().split(',') if k.strip()]
+        else:
+            self.subtitle_keyword_blacklist = []
+        self.audio_keyword_blacklist_enabled = addon.getSetting('enableAudioKeywordBlacklist') == 'true'
+        self.audio_keyword_blacklist = addon.getSetting('AudioKeywordBlacklist')
+        if self.audio_keyword_blacklist and self.audio_keyword_blacklist_enabled:
+            self.audio_keyword_blacklist = [k for k in self.audio_keyword_blacklist.lower().split(',') if k.strip()]
+        else:
+            self.audio_keyword_blacklist = []
+        self.fast_subs_display = int(addon.getSetting('FastSubsDisplay'))
+        self.useFilename = addon.getSetting('useFilename') == 'true'
+        self.filenameRegex = addon.getSetting('filenameRegex')
+        if self.useFilename:
+            self.reg = re.compile(self.filenameRegex, re.IGNORECASE)
+            self.split = re.compile(r'[_|.|-]+', re.IGNORECASE)
 
 
-      
-      self.CondSubTag = 'false'
-      
-      self.AudioPrefs = [(set(), [
-          (languageTranslate(addon.getSetting('AudioLang01'), 4, 0) ,
-           languageTranslate(addon.getSetting('AudioLang01'), 4, 2)+","+languageTranslate(addon.getSetting('AudioLang01'), 4, 3)),
-          (languageTranslate(addon.getSetting('AudioLang02'), 4, 0) ,
-           languageTranslate(addon.getSetting('AudioLang02'), 4, 2)+","+languageTranslate(addon.getSetting('AudioLang02'), 4, 3)),
-          (languageTranslate(addon.getSetting('AudioLang03'), 4, 0) ,
-           languageTranslate(addon.getSetting('AudioLang03'), 4, 2)+","+languageTranslate(addon.getSetting('AudioLang03'), 4, 3))]
-      )]
-      self.SubtitlePrefs = [(set(), [
-          (languageTranslate(addon.getSetting('SubLang01'), 4, 0) ,
-           languageTranslate(addon.getSetting('SubLang01'), 4, 2)+","+languageTranslate(addon.getSetting('SubLang01'), 4, 3),
-           addon.getSetting('SubForced01')),
-          (languageTranslate(addon.getSetting('SubLang02'), 4, 0) ,
-           languageTranslate(addon.getSetting('SubLang02'), 4, 2)+","+languageTranslate(addon.getSetting('SubLang02'), 4, 3),
-           addon.getSetting('SubForced02')),
-          (languageTranslate(addon.getSetting('SubLang03'), 4, 0) ,
-           languageTranslate(addon.getSetting('SubLang03'), 4, 2)+","+languageTranslate(addon.getSetting('SubLang03'), 4, 3),
-           addon.getSetting('SubForced03'))]
-      )]
-      self.CondSubtitlePrefs = [(set(), [
-          (
-              languageTranslate(addon.getSetting('CondAudioLang01'), 4, 0),
-              languageTranslate(addon.getSetting('CondAudioLang01'), 4, 2)+","+languageTranslate(addon.getSetting('CondAudioLang01'), 4, 3),
-              languageTranslate(addon.getSetting('CondSubLang01'), 4, 0),
-              languageTranslate(addon.getSetting('CondSubLang01'), 4, 2)+","+languageTranslate(addon.getSetting('CondSubLang01'), 4, 3),
-              addon.getSetting('CondSubForced01'),
-              self.CondSubTag
-          ),
-          (
-              languageTranslate(addon.getSetting('CondAudioLang02'), 4, 0),
-              languageTranslate(addon.getSetting('CondAudioLang02'), 4, 2)+","+languageTranslate(addon.getSetting('CondAudioLang02'), 4, 3),
-              languageTranslate(addon.getSetting('CondSubLang02'), 4, 0),
-              languageTranslate(addon.getSetting('CondSubLang02'), 4, 2)+","+languageTranslate(addon.getSetting('CondSubLang02'), 4, 3),
-              addon.getSetting('CondSubForced02'),
-              self.CondSubTag
-          ),
-          (
-              languageTranslate(addon.getSetting('CondAudioLang03'), 4, 0),
-              languageTranslate(addon.getSetting('CondAudioLang03'), 4, 2)+","+languageTranslate(addon.getSetting('CondAudioLang03'), 4, 3),
-              languageTranslate(addon.getSetting('CondSubLang03'), 4, 0),
-              languageTranslate(addon.getSetting('CondSubLang03'), 4, 2)+","+languageTranslate(addon.getSetting('CondSubLang03'), 4, 3),
-              addon.getSetting('CondSubForced03'),
-              self.CondSubTag
-          )]
-      )]
+        self.CondSubTag = 'false'
 
-      # These handle custom user preferences, that should be stored
-      self.movieOverrides = addon.getSetting('movieOverrides') == 'true'
-      self.tvShowOverrides = addon.getSetting('tvShowOverrides') == 'true'
-      self.storeCustomMediaPreferences = self.movieOverrides or self.tvShowOverrides
+        # (english name, canonical code) per spinner slot - see langutils.from_spinner()
+        self.AudioPrefs = [(set(), [
+            self.spinner_lang(addon, 'AudioLang%02d' % n) for n in range(1, 13)])]
+        self.SubtitlePrefs = [(set(), [
+            self.spinner_lang(addon, 'SubLang%02d' % n) + (addon.getSetting('SubForced%02d' % n),)
+            for n in range(1, 4)])]
+        self.CondSubtitlePrefs = [(set(), [
+            self.spinner_lang(addon, 'CondAudioLang%02d' % n)
+            + self.spinner_lang(addon, 'CondSubLang%02d' % n)
+            + (addon.getSetting('CondSubForced%02d' % n), self.CondSubTag)
+            for n in range(1, 13)])]
 
-      self.at_least_one_pref_on = (self.audio_prefs_on
-                                  or self.sub_prefs_on
-                                  or self.condsub_prefs_on
-                                  or self.useFilename or self.storeCustomMediaPreferences)
+        # These handle custom user preferences, that should be stored
+        self.movieOverrides = addon.getSetting('movieOverrides') == 'true'
+        self.tvShowOverrides = addon.getSetting('tvShowOverrides') == 'true'
+        self.storeCustomMediaPreferences = self.movieOverrides or self.tvShowOverrides
 
-      log(LOG_DEBUG, 'storeCustomMediaPreferences: {0}'.format(self.storeCustomMediaPreferences))
+        # the regex subtitle filter is a preference on its own (2.0 ignored it here, so enabling only
+        # the regex filter left the whole service idle)
+        self.at_least_one_pref_on = (self.audio_prefs_on
+                                    or self.sub_prefs_on
+                                    or self.condsub_prefs_on
+                                    or self.regex_sub_filter_enabled
+                                    or self.useFilename or self.storeCustomMediaPreferences)
+
+        log(LOG_DEBUG, 'storeCustomMediaPreferences: {0}'.format(self.storeCustomMediaPreferences))
 
     def readCustomPrefs(self):
         addon = xbmcaddon.Addon()
@@ -196,7 +206,7 @@ class settings():
 
     def is_store_user_preference_for_player(self, player):
         """
-        Check if the player is playing a video and if the store user preference is enabled for the media type of the video (e.g. movie, tv show).
+        Check if the player is playing a video and if the store user preferences is enabled for the media type of the video (e.g. movie, tv show).
         :param player: The player object
         :return: True if the player is playing a video and the store user preference is enabled for the media type, False otherwise
         """
