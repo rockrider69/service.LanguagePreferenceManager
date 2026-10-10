@@ -257,6 +257,42 @@ msgctxt "#30216"
 msgid "French"
 msgstr ""
 
+msgctxt "#30351"
+msgid "English (United States)"
+msgstr ""
+
+msgctxt "#30352"
+msgid "English (United Kingdom)"
+msgstr ""
+
+msgctxt "#30353"
+msgid "French (Canada)"
+msgstr ""
+
+msgctxt "#30354"
+msgid "French (France)"
+msgstr ""
+
+msgctxt "#30355"
+msgid "Spanish (Latin America)"
+msgstr ""
+
+msgctxt "#30356"
+msgid "Spanish (Spain)"
+msgstr ""
+
+msgctxt "#30357"
+msgid "Portuguese (Portugal)"
+msgstr ""
+
+msgctxt "#30358"
+msgid "Chinese (Simplified)"
+msgstr ""
+
+msgctxt "#30359"
+msgid "Chinese (Traditional)"
+msgstr ""
+
 msgctxt "#30217"
 msgid "German"
 msgstr ""

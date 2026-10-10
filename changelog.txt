@@ -1,3 +1,10 @@
+--- Version 1.1.1
+
+- Add regional/script language preferences for English, French, Spanish,
+  Portuguese and Chinese, grouped with their base language in settings.
+- Prefer exact BCP-47 tags or recognized track-title variants, then unlabelled
+  tracks of the same language; preserve generic language preferences.
+
 --- Version 1.1.0
 
 - More robust code in 2digits/3digits ISO639 languages codes support

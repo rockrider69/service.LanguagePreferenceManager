@@ -15,16 +15,22 @@ LANGUAGES      = (
     ("Bosnian"                    , "10",       "bs",            "bos",                 "3",                     30204  ),
     ("Bulgarian"                  , "33",       "bg",            "bul",                 "4",                     30205  ),
     ("Catalan"                    , "53",       "ca",            "cat",                 "5",                     30206  ),
-    ("Chinese"                    , "17",       "zh",            "chi",                 "6",                     30207  ),
+    ("Chinese"                    , "17",       "zh",            "chi,zho",                 "6",                     30207  ),
+    ("Chinese (Simplified)"       , "17",       "zh",            "zh-hans",             "58",                    30358  ),
+    ("Chinese (Traditional)"      , "17",       "zh",            "zh-hant",             "59",                    30359  ),
     ("Croatian"                   , "38",       "hr",            "hrv",                 "7",                     30208  ),
     ("Czech"                      , "7",        "cs",            "cze",                 "8",                     30209  ),
     ("Danish"                     , "24",       "da",            "dan",                 "9",                     30210  ),
     ("Dutch"                      , "23",       "nl",            "dut",                 "10",                    30211  ),
     ("English"                    , "2",        "en",            "eng",                 "11",                    30212  ),
+    ("English (United Kingdom)"   , "2",        "en",            "en-gb",               "52",                    30352  ),
+    ("English (United States)"    , "2",        "en",            "en-us",               "51",                    30351  ),
     ("Estonian"                   , "20",       "et",            "est",                 "12",                    30213  ),
     ("Farsi"                      , "52",       "fa",            "per",                 "13",                    30214  ),
     ("Finnish"                    , "31",       "fi",            "fin",                 "14",                    30215  ),
-    ("French"                     , "8",        "fr",            "fre",                 "15",                    30216  ),
+    ("French"                     , "8",        "fr",            "fre,fra",                 "15",                    30216  ),
+    ("French (Canada)"            , "8",        "fr",            "fr-ca",               "53",                    30353  ),
+    ("French (France)"            , "8",        "fr",            "fr-fr",               "54",                    30354  ),
     ("German"                     , "5",        "de",            "ger,deu",             "16",                    30217  ),
     ("Greek"                      , "16",       "el",            "ell,gre",             "17",                    30218  ),
     ("Hebrew"                     , "22",       "he",            "heb",                 "18",                    30219  ),
@@ -43,12 +49,15 @@ LANGUAGES      = (
     ("Polish"                     , "26",       "pl",            "pol",                 "31",                    30232  ),
     ("Portuguese"                 , "32",       "pt",            "por",                 "32",                    30233  ),
     ("Portuguese (Brazil)"        , "48",       "pb",            "pt-br",               "33",                    30234  ),
+    ("Portuguese (Portugal)"      , "32",       "pt",            "pt-pt",               "57",                    30357  ),
     ("Romanian"                   , "13",       "ro",            "rum",                 "34",                    30235  ),
     ("Russian"                    , "27",       "ru",            "rus",                 "35",                    30236  ),
     ("Serbian"                    , "36",       "sr",            "srp,scc",             "36",                    30237  ),
     ("Slovak"                     , "37",       "sk",            "slo",                 "37",                    30238  ),
     ("Slovenian"                  , "1",        "sl",            "slv",                 "38",                    30239  ),
     ("Spanish"                    , "28",       "es",            "spa",                 "39",                    30240  ),
+    ("Spanish (Latin America)"    , "28",       "es",            "es-419",              "55",                    30355  ),
+    ("Spanish (Spain)"            , "28",       "es",            "es-es",               "56",                    30356  ),
     ("Swedish"                    , "25",       "sv",            "swe",                 "40",                    30241  ),
     ("Thai"                       , "0",        "th",            "tha",                 "41",                    30242  ),
     ("Turkish"                    , "30",       "tr",            "tur",                 "42",                    30243  ),
@@ -71,11 +80,20 @@ def languageTranslate(lang, lang_from, lang_to):
 def multicode_languageTranslate(lang):
   """
   Wrapper to languageTranslate to support multi language codes in custom preferences and in Kodi reported track language.
-  (Can evolve later to support more codes like BCP47 : en-US, en-GB, fr-FR, Fr-CA, etc...)
+  Regional/script preferences retain their specific code instead of expanding to the base language.
 
   :return: The full language name and the comma separated list of corresponding ISO 639 codes.
           None if no full match found in above LANGUAGES DB
   """
+
+  from language_matching import VARIANTS
+
+  lang = (lang or "").strip().lower().replace("_", "-")
+  for variant, definition in VARIANTS.items():
+      if lang in definition["codes"]:
+          # Keep the historical Brazilian code for original-audio preferences.
+          codes = "pt-br,pb" if variant == "pt-br" else variant
+          return (languageTranslate(variant, 3, 0), codes)
 
   multi_pref = []
   if len(lang) == 2 and languageTranslate(lang, 2, 0) and languageTranslate(lang, 2, 3):

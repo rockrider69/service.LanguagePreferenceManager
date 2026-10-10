@@ -270,6 +270,42 @@ msgctxt "#30216"
 msgid "French"
 msgstr "Franska"
 
+msgctxt "#30351"
+msgid "English (United States)"
+msgstr "Engelska (USA)"
+
+msgctxt "#30352"
+msgid "English (United Kingdom)"
+msgstr "Engelska (Storbritannien)"
+
+msgctxt "#30353"
+msgid "French (Canada)"
+msgstr "Franska (Kanada)"
+
+msgctxt "#30354"
+msgid "French (France)"
+msgstr "Franska (Frankrike)"
+
+msgctxt "#30355"
+msgid "Spanish (Latin America)"
+msgstr "Spanska (Latinamerika)"
+
+msgctxt "#30356"
+msgid "Spanish (Spain)"
+msgstr "Spanska (Spanien)"
+
+msgctxt "#30357"
+msgid "Portuguese (Portugal)"
+msgstr "Portugisiska (Portugal)"
+
+msgctxt "#30358"
+msgid "Chinese (Simplified)"
+msgstr "Kinesiska (förenklad)"
+
+msgctxt "#30359"
+msgid "Chinese (Traditional)"
+msgstr "Kinesiska (traditionell)"
+
 msgctxt "#30217"
 msgid "German"
 msgstr "Tyska"
