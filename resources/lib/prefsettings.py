@@ -101,7 +101,7 @@ class settings():
         self.regex_sub_filter_enabled = addon.getSetting('regexSubFilter') == 'true'
         self.regex_sub_pattern = addon.getSetting('regexSubPattern')
         if _OLD_SS_PATTERN in self.regex_sub_pattern:
-            # the S&S part of the pattern up to 2.0.5 allowed nothing between the two s, so it matched the "ss" of
+            # the old S&S part of the pattern allowed nothing between the two s, so it matched the "ss" of
             # any title (Russian, Swiss German, Classic ...): replace it in the stored setting too
             self.regex_sub_pattern = self.regex_sub_pattern.replace(_OLD_SS_PATTERN, _SS_PATTERN)
             log(LOG_INFO, 'Regex pattern: the Signs & Songs part matched any "ss" in a title, corrected to {0}'.format(
@@ -170,7 +170,7 @@ class settings():
         self.tvShowOverrides = addon.getSetting('tvShowOverrides') == 'true'
         self.storeCustomMediaPreferences = self.movieOverrides or self.tvShowOverrides
 
-        # the regex subtitle filter is a preference on its own (2.0 ignored it here, so enabling only
+        # the regex subtitle filter is a preference on its own (it used to be ignored here, so enabling only
         # the regex filter left the whole service idle)
         self.at_least_one_pref_on = (self.audio_prefs_on
                                     or self.sub_prefs_on

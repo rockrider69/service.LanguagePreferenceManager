@@ -471,7 +471,7 @@ class LangPrefMan_Player(xbmc.Player):
         # - condsub_prefs_on is enabled AND
         # - the regex subtitle filter did not select a subtitle (now or on the initial run).
         # It is deliberately NOT limited to the initial run: it is re-evaluated whenever the audio track
-        # changes (onAVChange), exactly as in 1.0.8. (2.0 wrongly added an initial-run-only guard here.)
+        # changes (onAVChange), exactly as in 1.0.8. (An initial-run-only guard here would be a bug.)
         if settings.condsub_prefs_on and not regex_sub_matched and not self.regex_sub_selected and not protect_sub:
             if settings.custom_condsub_prefs_on:
                 trackIndex = self.evalCondSubPrefs(settings.custom_condsub)

@@ -69,6 +69,7 @@ _WORD = re.compile(r"[a-z\u00c0-\u024f]+")
 # region aliases per language: the countries of a group share one region code
 _REGION_ALIASES = {
     'eng': {'UK': 'GB'},
+    'fre': {'CAN': 'CA', 'FRA': 'FR'},
     'spa': {c: '419' for c in ('MX', 'AR', 'CO', 'CL', 'PE', 'VE', 'UY', 'PY', 'BO', 'EC', 'GT', 'CR', 'PA', 'DO',
                                 'HN', 'NI', 'SV', 'CU', 'PR', 'US', 'LA')},
     'chi': {'CN': 'Hans', 'SG': 'Hans', 'TW': 'Hant', 'HK': 'Hant', 'MO': 'Hant', 'CHS': 'Hans', 'CHT': 'Hant'},
@@ -81,10 +82,10 @@ _TITLE_REGIONS = (
     ('US', ('us', 'usa', 'american')),
     ('BR', ('brazil', 'brazilian', 'brasil', 'brasileiro', 'brasileira', 'br', 'ptbr')),
     ('PT', ('portugal', 'european', 'europeu', 'europeu', 'pt')),
-    ('419', ('latino', 'latam', 'latinoamerica', 'latinoamericano', 'latinoamérica', 'latinoamericano', '419',
+    ('419', ('latino', 'latam', 'latinoamerica', 'latinoamericano', 'latinoamericana', 'latinoamérica', 'latinoamericano', '419',
              'mexico', 'méxico', 'mexican', 'mx')),
     ('ES', ('spain', 'castilian', 'castellano', 'españa', 'espana', 'european', 'es')),
-    ('CA', ('canada', 'canadian', 'canadien', 'quebec', 'québec', 'québécois', 'quebecois', 'vfq', 'ca')),
+    ('CA', ('canada', 'canadian', 'canadien', 'quebec', 'québec', 'québécois', 'quebecois', 'quebecoise', 'québécoise', 'canadienne', 'vfq', 'vfc', 'ca')),
     ('FR', ('france', 'vff', 'fr')),
     ('IN', ('india', 'indian')),
     ('CH', ('switzerland', 'swiss', 'schweiz', 'schweizer', 'suisse', 'svizzera')),
@@ -101,6 +102,10 @@ _REGION_LANGUAGES = {'BR': ('por',), 'PT': ('por',), '419': ('spa',), 'ES': ('sp
 _TITLE_TOKEN = re.compile(r"[A-Za-z0-9À-ɏ]+")
 _TITLE_TAG = re.compile(r"(?<![A-Za-z0-9])[A-Za-z]{2,3}[-_](?:[A-Za-z]{2}|[0-9]{3}|[A-Za-z]{4})(?![A-Za-z0-9])")
 _LATIN_AMERICA = re.compile(r"\blatin[\s-]*americ", re.IGNORECASE)
+_UNITED_STATES = re.compile(r"\bunited[\s-]*states\b", re.IGNORECASE)
+_UNITED_KINGDOM = re.compile(r"\bunited[\s-]*kingdom\b", re.IGNORECASE)
+# Chinese-character script labels: simplified (简体, 簡体) and traditional (繁體, 繁体)
+_CJK_SCRIPTS = (("Hans", ("简体", "簡体")), ("Hant", ("繁體", "繁体")))
 
 _REGION_NAMES = {'AU': 'Australia', 'GB': 'UK', 'US': 'US', 'BR': 'Brazil', 'PT': 'Portugal', '419': 'Latin America',
                  'ES': 'Spain', 'CA': 'Canada', 'FR': 'France', 'Hans': 'Simplified', 'Hant': 'Traditional',
@@ -256,6 +261,13 @@ def region_from_name(track_name, base=''):
             return region
     if _LATIN_AMERICA.search(name) and (not base or base == 'spa'):
         return '419'
+    if _UNITED_STATES.search(name) and (not base or base in ('eng', 'spa')):
+        return _REGION_ALIASES.get(base, {}).get('US', 'US')
+    if _UNITED_KINGDOM.search(name) and (not base or base == 'eng'):
+        return 'GB'
+    for script, labels in _CJK_SCRIPTS:
+        if (not base or base == 'chi') and any(label in name for label in labels):
+            return script
     for tok in _TITLE_TOKEN.findall(name):
         low = tok.lower()
         if len(tok) <= 3 and not (tok.isupper() or tok.isdigit()):

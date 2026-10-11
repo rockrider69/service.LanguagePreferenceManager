@@ -71,6 +71,7 @@ LANGUAGES      = (
     ("French (Belgium)"            , "0",      "fr",            "fr-BE",                "66",                    30264   ),
     ("French (Switzerland)"        , "0",      "fr",            "fr-CH",                "67",                    30265   ),
     ("Dutch (Belgium)"             , "0",      "nl",            "nl-BE",                "68",                    30266   ),
+    ("French (France)"             , "0",      "fr",            "fr-FR",                "69",                    30267   ),
     ("None"                       , "-1",       "",              "non",                 "45",                    30200  ),
     ("Any"                        , "-2",       "",              "any",                 "46",                    30300  ),
     ("Undefined"                  , "-3",       "",              "und",                 "50",                    30350  ),

@@ -477,6 +477,10 @@ msgctxt "#30266"
 msgid "Dutch (Belgium)"
 msgstr "Niederländisch (Belgien)"
 
+msgctxt "#30267"
+msgid "French (France)"
+msgstr "Französisch (Frankreich)"
+
 msgctxt "#30200"
 msgid "None"
 msgstr "Keine"

@@ -1,61 +1,57 @@
---- Version 2.0.15
+--- Version 1.1.1Beta2
+
+This beta builds on 1.1.1Beta1; the changes are listed below.
+
+- Regional/script language preferences now use one common engine (langutils), which includes the variants of
+  1.1.1Beta1 (Thanks to Hugs11): English (UK / US / Australia / India / Canada), Spanish (Spain / Latin America),
+  French (France / Canada / Belgium / Switzerland), Portuguese (Portugal / Brazil), Chinese (Simplified / Traditional),
+  German (Switzerland / Austria) and Dutch (Belgium). The region is read from the track's language tag, its title
+  or an external subtitle's file name; custom tags such as en-AU, es-419, zh-Hant work everywhere.
+- All aliases and codes of the 1.1.1Beta1 variant table are recognised too (VFC, Canadienne, Latinoamericana,
+  United States / United Kingdom, Chinese-character script labels, 3-letter regions such as fre-can / fra-fra).
+- Language codes can be typed as 2-letter, 3-letter or BCP47 codes everywhere (custom preferences, Original audio list).
+- New "Sub converter" for ASS/SSA and other text subtitles: lines are moved to the top, keeping styles and positions.
+- Reworked seekback / "Fast Subtitles Display" ("Start & Resume" by default).
+- Regex subtitle filter fixes (first match, no false "Signs & Songs" matches).
+- The language of external subtitles is read from their file names; stored preferences save region and track title
+  and can no longer be lost when saved at the same moment.
+- Setting values of the 1.1.1Beta1 language variants (51-59) were renumbered: re-select regional languages in the settings.
+- Settings strings of 1.1.1Beta1 (30351-30359) replaced by 30251-30267.
+
+Details (newest first):
 
 - change: sub converter: an ASS/SSA subtitle is no longer turned into plain SRT. The copy is an .ass file with the track's own header (styles, fonts, colours) and every line's tags untouched; only lines at the bottom (alignment 1-3 from the style or an \an tag, with no \pos or one in the lower part of the picture) go to the top, a \pos line is mirrored. Signs, songs, effects and anything placed elsewhere stay where they are. Other text formats (WebVTT) still become yellow SRT at the top
 
---- Version 2.0.14
-
 - change: sub converter: the file is read in large sequential blocks (4 MB) instead of one small read per video/audio block, the way a demuxer such as ffmpeg reads it. Over http a 1.8 GB file went from tens of thousands of requests to a few hundred; locally the scan takes under a second on PC, nvidia shield based devices avg 5-90seconds dependening on filesize of playback, no interaction required will automatically work once rendered. 
-
---- Version 2.0.13
 
 - change: sub converter: tested with a video served over http and with an add-on (plugin://) item that resolves to an http address, also with '|' headers; the converted copy's name and the log no longer contain the headers, query string or user:password of the address
 - note: it reads the file through Kodi's file layer, so nfs://, smb://, http(s):// and plugin streams that resolve to a Matroska (.mkv) file work; streams that are not a plain Matroska file (HLS, DASH, MP4) are logged as unreadable
 
---- Version 2.0.12
-
 - fix: sub converter: while it reads the video (the first time, a big file takes a minute or more) a subtitle change by the user was ignored by the watcher; now it is seen and stored as usual, and the converted copy is not selected over the user's choice
 - change: sub converter: the log now says (INFO) when a conversion starts and why a video cannot be converted (not a readable Matroska file, e.g. a plugin stream)
-
---- Version 2.0.11
 
 - reworked sub converter to keep font & styling insteas pf converting to srt.
 - change: sub converter: it now converts whenever the subtitle LPM selected is any text non picture based example :  SRT (ASS/SSA, WebVTT), with the same placement: lines that are positioned keep their place, the rest goes to the top, all in yellow
 - note: PGS/SUP, VobSub and other picture subtitles are bitmaps; they cannot be turned into text without OCR, which Kodi add-ons do not have, so they are left as they are (the log says so)
 
---- Version 2.0.10
-
-- change: sub converter: it now works whenever the subtitle LPM selected is an ASS/SSA track, even if the video also has SRT, PGS or other subtitle tracks (2.0.9 needed every subtitle to be ASS)
+- change: sub converter: it now works whenever the subtitle LPM selected is an ASS/SSA track, even if the video also has SRT, PGS or other subtitle tracks (before, every subtitle had to be ASS)
 - change: sub converter: a line that the ASS file positions with a point (\pos / \move) is placed at that exact spot on the screen, moved from the script's resolution into the picture's place on the screen (also for films with black bars); lines with an alignment tag or a non-bottom style keep that alignment
-
---- Version 2.0.9
 
 - change: sub converter: only the lines the ASS file does not position itself (the usual bottom-centre dialogue) are moved to the top. A line that says where it goes, with an alignment tag, a \pos / \move, or a style that is not bottom centre (signs, top-style lines), keeps its place; every line stays yellow plain text
 
---- Version 2.0.8
-
 - new: "Sub converter" (shown with the regex subtitle filter or the conditional subtitles): with Japanese, Korean or Chinese audio and nothing but ASS/SSA subtitles in the video, the subtitle LPM selected is copied to a plain SRT (ASS styling removed, timings converted), shown at the top of the picture in yellow, and that copy is selected. It is made in the background from the Matroska (.mkv) file and kept in the add-on's own folder (converted_subs), which is emptied every time Kodi starts. Videos with any other subtitle format (SRT, PGS ...) are left alone
-
---- Version 2.0.7
 
 - change: the regex subtitle filter looks at every subtitle in track order and takes the first match (it says which tracks matched in the log); when several tracks match and some are ASS (the format with the styled signs & songs), the first ASS track is taken. The format is read from the video's header, for Matroska (.mkv) files; other containers keep the first match
 - change: the regex exclusion pattern no longer removes a subtitle in which the filter matched a whole word: "Signs and Song Subtitles" or "Forced Subtitles" are kept, only a piece of a word ("titles" in "Subtitles") is still excluded
 
---- Version 2.0.6
-
 - fix: the regex subtitle filter took ordinary subtitles for Signs & Songs tracks: the "S&S" part of its pattern matched the "ss" inside a title, so a video whose subtitles included "Russian" (or "Swiss German", "Classic" ...) got that track before any conditional rule was tried. The two s of "S&S", "S + S", "S and S" or "S.S" now have to stand on their own. A stored pattern that still holds the old part is corrected when LPM starts
-
---- Version 2.0.5
 
 - change: "Fast Subtitles Display" is now "Start & Resume" by default: when LPM switches a subtitle on, a video in its first 10 seconds restarts from 0:00 and a resumed video jumps back 10 seconds, so the first lines show at once. A setting you chose yourself stays as it is
 
---- Version 2.0.4
-
 - change: "Fast Subtitles Display" is now "New Start only" by default (was "Disabled"): when LPM switches a subtitle on in the first 10 seconds, the video restarts from 0:00 so the first lines show at once. A setting you chose yourself stays as it is
 
---- Version 2.0.3
-
 - new: more regional variants in the language lists: English (India / Canada), German (Switzerland / Austria), French (Belgium / Switzerland), Dutch (Belgium); their region is also read from track titles ("Deutsch (Schweiz)", "Vlaams"). Other regions can be typed as custom preferences (de-CH, en_IN ...)
-- new: LPM reads the subtitle file names in the video's folder (also the Subs / Subtitles / Sub / VobSub subfolders and Kodi's custom subtitle folder) and takes the language of each external subtitle from its file (pt-BR, en-AU, en-IN, zh-Hant, es-419, fr-CA ...), as Kodi misreads some of them (Movie.en-IN.srt as Indonesian); also for files named "Movie pt-BR.srt", "Movie_pt-BR.srt" or "Movie-pt-BR.srt". Streams it cannot map to a file are read from the name Kodi shows, as in 2.0.2
+- new: LPM reads the subtitle file names in the video's folder (also the Subs / Subtitles / Sub / VobSub subfolders and Kodi's custom subtitle folder) and takes the language of each external subtitle from its file (pt-BR, en-AU, en-IN, zh-Hant, es-419, fr-CA ...), as Kodi misreads some of them (Movie.en-IN.srt as Indonesian); also for files named "Movie pt-BR.srt", "Movie_pt-BR.srt" or "Movie-pt-BR.srt". Streams it cannot map to a file are read from the name Kodi shows
 - fix: stored preferences can no longer be lost when the "stored preferences" dialog and the service save at the same moment (the file is replaced in one step and keeps its permissions; a file being written is not read as empty; a file that cannot be read is never overwritten). When a delete in the dialog cannot be saved, the entry stays in the list and a message says so (was: removed from the list but still stored)
 - fix: if playback stops during the start delay, LPM no longer applies the previous video's tracks
 - fix: a language tag in a track title ("Portuguese (PT-BR)", "Spanish (ES-419)") gives the region, not the language part, and release words (eng-Full, en.HI, en.BD) are not taken as a region; zh-CHS / zh-CHT keep their script; "Mandarin" / "Cantonese" in a title no longer count as Simplified / Traditional
@@ -65,8 +61,6 @@
 - fix: more external subtitle file names are read right: Movie.chs.srt / Movie.cht.srt as Chinese (Simplified / Traditional), Movie.pt.br.srt (region in lower case) as Portuguese (Brazil), and .text files are included; on Kodi 19 to 21 (3-letter codes) a plain and a regional file of one language (Movie.es.srt, Movie.es-ES.srt) are told apart; a subtitle never gets the language of another subtitle's file
 - fix: custom conditional rules accept the -ff and -ss tags together in either order (en:en-ff-ss lost "forced" and read FF as a region); in the custom audio / subtitle preferences, where these tags have no meaning, they are ignored again, and a subtag that is no region or script (en-XX) is dropped instead of filtering out regional tracks
 - note: the cause is in Kodi itself, which misreads external subtitle file names with a region tag (Movie.pt-BR.srt as Breton "br", Movie.en-AU.srt as "avt", Movie.en-IN.srt as Indonesian, Movie.fr-CA.srt as Catalan "ca", Movie.de-CH.srt as "ch"); LPM works around it. This is to be reported to the Kodi project, so that Kodi reads such tags (BCP 47) itself
-
---- Version 2.0.2
 
 - fix: when the subtitle Kodi had already selected matches the normal subtitle preferences, it now counts as a match: "Turn subtitles on" switches it on again (as in 1.0.x), and neither the file name tag nor the fallback replaces it
 - fix: after LPM switched the audio track itself (audio, file name or stored preference), a user switching back to the track the video had started with is now always recognised as a change and stored
@@ -78,8 +72,6 @@
 - fix: no more script error in the Kodi log when playback stops while LPM is checking an audio change
 - fix: external subtitle files with a region in the name are recognised: Kodi reads Movie.pt-BR.srt as Breton and Movie.en-AU.srt as "avt"; LPM now takes the language from the name (pt-BR, en-AU, zh-Hant, es-419, fr-CA ...), so Portuguese, English and the regional preferences find them
 
---- Version 2.0.1
-
 - feat: 2-letter ISO 639-1 language codes (en, ja, de ... as reported by Kodi 22 "Piers") are now supported everywhere, in addition to 3-letter ISO 639-2 codes (both B and T variants: ger/deu, fre/fra, chi/zho ...). First step towards BCP47: tags like pt-BR or zh-Hans are understood (region/script ignored, except Brazilian Portuguese)
 - New langutils.py: ONE normalize()/lang_matches() used by the settings spinners, custom preferences, regex / normal / conditional subtitle logic, the Original audio list and the stored per-media overrides. Replaces the two duplicated matchers and the "en,eng" string packing
 - langcodes.py refreshed from Kodi's own language tables: ~190 alpha-2 codes, ISO 639-2/T variants, 487 language names. Matching works for every language (typed custom codes included), not only the ones of the settings spinner. Spinner indices unchanged. Fixed Belarusian being mapped to Armenian codes
@@ -90,7 +82,7 @@
 - fix: stored (manually set) preferences are protected: the part of a stored preference that applies to a file (audio and/or subtitles) can no longer be undone by the regex filter, the normal / conditional / filename preferences or the fallback. If only one part is applicable (for example the stored subtitle language is not in this file), just that part is applied and only the other part falls back to the other preferences. Stored preferences remain the only thing that outranks the regex filter
 - feat: new last-resort fallback. When regex, conditional (and normal) preferences select nothing, the default subtitle is chosen, otherwise the first valid one (not blacklisted, not Signs&Songs when those are ignored). Only active with the regex filter or conditional subtitles enabled; follows the "turn subtitles on/off" options
 - fix: enabling only the regex filter now activates the service (it was missing from the "at least one preference enabled" check)
-- fix: conditional subtitles are re-evaluated again when the audio track changes during playback, as in 1.0.8 (2.0 had limited them to the initial run)
+- fix: conditional subtitles are re-evaluated again when the audio track changes during playback, as in 1.0.8 (it had been limited to the initial run)
 - fix: tracks selected by LPM itself are no longer stored as manual user overrides. Overrides stored with 3-letter codes keep working with the 2-letter codes of Kodi 22
 - fix: option tags -ff / -ss of custom preferences are removed as exact suffixes (rstrip also ate letters, e.g. "af-ff", "es-ss")
 - fix: empty keywords in the blacklists (e.g. a trailing comma) no longer blacklist every track
@@ -98,8 +90,6 @@
 - Ported from 1.0.9: Original audio list handles 'any' and skips blacklisted tracks; seek-back workaround only when a subtitle is active
 - Ported from 1.0.8: abort-aware subtitle watcher thread (Kodi exit no longer hangs); no exception when there is no current audio stream
 - Original audio list accepts 2-letter and 3-letter codes
-
---- Version 2.0
 
 - feat: Add regex-based subtitle stream selector with fallback support
 - Added new toggle "Use regex pattern to filter subtitles" in General settings
@@ -126,11 +116,46 @@ like full subtitles. added negative look back for search ‘sub’ before ‘tit
 - Added Japanese, French, German and Italian language options for UI, English & Swedish were already there.
 - Added "Unknown, Undefined, None, Original" language & subtitle codes and updated logic for finding and filtering them within all settings.
 
+--- Version 1.1.1Beta1
+
+- Add regional/script language preferences for English, French, Spanish,
+  Portuguese and Chinese, grouped with their base language in settings (Thanks to Hugs11).
+- Prefer exact BCP-47 tags or recognized track-title variants, then unlabelled
+  tracks of the same language; preserve generic language preferences (Thanks to Hugs11).
+- Add Chinese translation (Thanks to wabisabi926).
+- Avoid some wrong seekback decisions in subtitles delayed workaround.
+
+--- Version 1.1.0
+
+- More robust code in 2digits/3digits ISO639 languages codes support
+	        (as requested from greptile KODI automated tests)
+	- Proper handling & reporting of incorrect lang codes in Custom Prefs and Original Prefs
+	- Refine "Only peform seekback if subtitle active"
+
+--- Version 1.0.9
+
+- Support 2digits ISO639 languages codes in addition to 3digits so far
+	(Required for Kodi22-Piers and first step toward BCP47 codes)
+- Fix audio blacklist was not considered when searching for Original audio tracks
+- 'Any' as Original Preference list will activate the first found Original audio track whatever the language
+- Only perform seek back if a subtitle is active
+
+--- Version 1.0.9Beta4
+
+- Only perform seek back if a subtitle is active
+
+--- Version 1.0.9Beta3
+
+- 'Any' as Original Preference list will activate the first found Original audio track whatever the language
+
+--- Version 1.0.9Beta2
+
+- Fix audio blacklist was not considered when searching for Original audio tracks
+- Support 2digits languages codes in addition to 3digits (Required from Kodi22 and move to BCP47)
 
 --- Version 1.0.8
 
-- Fix addon not closing properly when "Store Preferences" is used
-(Kodi exit : freeze on Piers, thread error message on Omega)
+- Fix addon not closing properly when "Store Preferences" is used (Kodi exit : freeze on Piers, thread error message on Omega)
 - Handle exception error in case video player reports no current audiostream activated
 
 --- Version 1.0.7
@@ -265,3 +290,4 @@ typos
 --- Version 0.0.1
 
 First version of Language Preference Manager.
+
