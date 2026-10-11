@@ -1,6 +1,7 @@
 import xbmc, xbmcaddon
 import re
 import langutils
+import subcodec
 from prefparser import PrefParser
 from resources.lib import kodi_utils
 from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
@@ -144,6 +145,15 @@ class settings():
         else:
             self.audio_keyword_blacklist = []
         self.fast_subs_display = int(addon.getSetting('FastSubsDisplay'))
+        # preferred subtitle formats, best first (names of subcodec.SUBTITLE_FORMATS); [] = no preference
+        self.sub_format_order = []
+        for setting in ('SubFormat1', 'SubFormat2', 'SubFormat3'):
+            try:
+                number = int(addon.getSetting(setting) or 0)
+            except ValueError:
+                number = 0
+            if 1 <= number <= len(subcodec.SUBTITLE_FORMATS) and subcodec.SUBTITLE_FORMATS[number - 1] not in self.sub_format_order:
+                self.sub_format_order.append(subcodec.SUBTITLE_FORMATS[number - 1])
         self.useFilename = addon.getSetting('useFilename') == 'true'
         self.filenameRegex = addon.getSetting('filenameRegex')
         if self.useFilename:

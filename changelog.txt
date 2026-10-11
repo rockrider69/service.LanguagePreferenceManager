@@ -9,6 +9,10 @@ This beta builds on 1.1.1Beta1; the changes are listed below.
   or an external subtitle's file name; custom tags such as en-AU, es-419, zh-Hant work everywhere.
 - All aliases and codes of the 1.1.1Beta1 variant table are recognised too (VFC, Canadienne, Latinoamericana,
   United States / United Kingdom, Chinese-character script labels, 3-letter regions such as fre-can / fra-fra).
+- New: subtitle format preference (issue #30; settings, General): when several subtitles of the preferred language are available,
+  the first format of your list (SRT, ASS/SSA, WebVTT, PGS, VobSub) that is present is taken. The format of embedded
+  .mkv tracks is read from the file, that of external files from their extension, any other from a format word in the
+  track title; when it is unknown nothing changes. The language always comes first.
 - Language codes can be typed as 2-letter, 3-letter or BCP47 codes everywhere (custom preferences, Original audio list).
 - New "Sub converter" for ASS/SSA and other text subtitles: lines are moved to the top, keeping styles and positions.
 - Reworked seekback / "Fast Subtitles Display" ("Start & Resume" by default).

@@ -70,7 +70,7 @@ msgid "Delay the evaluation by the following value [ms]"
 msgstr "延迟解析偏好（单位：毫秒）"
 
 msgctxt "#30113"
-msgid "Turn on subtitles if a subtitle preference matched"
+msgid "Turn on subtitles if a subtitle matches in any setting globally"
 msgstr "有匹配字幕偏好时自动开启字幕"
 
 msgctxt "#30114"
@@ -186,8 +186,8 @@ msgid "Enable Audio Original Preferences"
 msgstr "启用原声音轨偏好"
 
 msgctxt "#30143"
-msgid "Enter a comma-separated list of codes (e.g eng,ger,fre)"
-msgstr "输入语言代码列表，逗号分隔（例：eng,ger,fre）"
+msgid "Enter a comma-separated list of language codes, 2 or 3 letters (e.g. en,jpn,ger,fr)"
+msgstr "输入语言代码列表（2 或 3 位字母），逗号分隔（例：en,jpn,ger,fr）"
 
 msgctxt "#30144"
 msgid "Audio Original Preference List:"
@@ -396,3 +396,191 @@ msgstr "任意"
 msgctxt "#30350"
 msgid "Undefined"
 msgstr "未定义"
+
+msgctxt "#29997"
+msgid "Sixth Language"
+msgstr "第六语言"
+
+msgctxt "#29998"
+msgid "Fifth Language"
+msgstr "第五语言"
+
+msgctxt "#29999"
+msgid "Fourth Language"
+msgstr "第四语言"
+
+msgctxt "#30146"
+msgid "Use regex pattern to filter subtitles"
+msgstr "使用正则表达式筛选字幕"
+
+msgctxt "#30147"
+msgid "Regex pattern for subtitle filtering"
+msgstr "字幕筛选正则表达式"
+
+msgctxt "#30148"
+msgid "Regex exclusion pattern for subtitle filtering"
+msgstr "字幕筛选排除正则表达式"
+
+msgctxt "#30149"
+msgid "Use regex exclusion pattern to filter out false positives"
+msgstr "使用排除正则表达式过滤误判项"
+
+msgctxt "#30251"
+msgid "English (UK)"
+msgstr "英语（英国）"
+
+msgctxt "#30252"
+msgid "English (US)"
+msgstr "英语（美国）"
+
+msgctxt "#30253"
+msgid "English (Australia)"
+msgstr "英语（澳大利亚）"
+
+msgctxt "#30254"
+msgid "Spanish (Spain)"
+msgstr "西班牙语（西班牙）"
+
+msgctxt "#30255"
+msgid "Spanish (Latin America)"
+msgstr "西班牙语（拉丁美洲）"
+
+msgctxt "#30256"
+msgid "French (Canada)"
+msgstr "法语（加拿大）"
+
+msgctxt "#30257"
+msgid "Portuguese (Portugal)"
+msgstr "葡萄牙语（葡萄牙）"
+
+msgctxt "#30258"
+msgid "Chinese (Simplified)"
+msgstr "中文（简体）"
+
+msgctxt "#30259"
+msgid "Chinese (Traditional)"
+msgstr "中文（繁体）"
+
+msgctxt "#30260"
+msgid "English (India)"
+msgstr "英语（印度）"
+
+msgctxt "#30261"
+msgid "English (Canada)"
+msgstr "英语（加拿大）"
+
+msgctxt "#30262"
+msgid "German (Switzerland)"
+msgstr "德语（瑞士）"
+
+msgctxt "#30263"
+msgid "German (Austria)"
+msgstr "德语（奥地利）"
+
+msgctxt "#30264"
+msgid "French (Belgium)"
+msgstr "法语（比利时）"
+
+msgctxt "#30265"
+msgid "French (Switzerland)"
+msgstr "法语（瑞士）"
+
+msgctxt "#30266"
+msgid "Dutch (Belgium)"
+msgstr "荷兰语（比利时）"
+
+msgctxt "#30267"
+msgid "French (France)"
+msgstr "法语（法国）"
+
+msgctxt "#30400"
+msgid "Unknown"
+msgstr "未知"
+
+msgctxt "#30500"
+msgid "Original"
+msgstr "原始语言"
+
+msgctxt "#30600"
+msgid "Log level"
+msgstr "日志级别"
+
+msgctxt "#30601"
+msgid "None"
+msgstr "无"
+
+msgctxt "#30602"
+msgid "Errors"
+msgstr "错误"
+
+msgctxt "#30603"
+msgid "Information"
+msgstr "信息"
+
+msgctxt "#30604"
+msgid "Debug"
+msgstr "调试"
+
+msgctxt "#30610"
+msgid "Delete confirmation"
+msgstr "删除确认"
+
+msgctxt "#30611"
+msgid "Do you want to remove the stored preference for {0}?"
+msgstr "是否删除 {0} 已保存的偏好设置？"
+
+msgctxt "#30612"
+msgid "TV show"
+msgstr "电视剧"
+
+msgctxt "#30613"
+msgid "Movie"
+msgstr "电影"
+
+msgctxt "#30614"
+msgid "The stored preference could not be removed. Please try again."
+msgstr "无法删除已保存的偏好设置，请重试。"
+
+msgctxt "#30620"
+msgid "Sub converter (Japanese, Korean or Chinese audio when the selected subtitle is ASS/SSA: a copy with its styles, fonts and signs kept and the bottom lines moved to the top; other text formats other than SRT become plain yellow SRT at the top)"
+msgstr "字幕转换器（日语、韩语或中文音轨且所选字幕为 ASS/SSA 时：生成保留样式、字体和标识的副本，并将底部字幕行移到顶部；SRT 以外的其他文本格式会转为顶部的纯黄色 SRT）"
+
+msgctxt "#30630"
+msgid "Subtitle format preference (when several subtitles of the preferred language are available, the first format of this list that is present is taken; formats of embedded .mkv tracks and of subtitle files next to the video are known)"
+msgstr "字幕格式偏好（当有多个首选语言的字幕可用时，选用此列表中第一个存在的格式；可识别内嵌 .mkv 轨道以及视频旁字幕文件的格式）"
+
+msgctxt "#30631"
+msgid "Preferred subtitle format (1st)"
+msgstr "首选字幕格式（第一）"
+
+msgctxt "#30632"
+msgid "Preferred subtitle format (2nd)"
+msgstr "首选字幕格式（第二）"
+
+msgctxt "#30633"
+msgid "Preferred subtitle format (3rd)"
+msgstr "首选字幕格式（第三）"
+
+msgctxt "#30634"
+msgid "No preference"
+msgstr "无偏好"
+
+msgctxt "#30635"
+msgid "SRT (SubRip text)"
+msgstr "SRT（SubRip 文本）"
+
+msgctxt "#30636"
+msgid "ASS / SSA (styled text)"
+msgstr "ASS / SSA（样式文本）"
+
+msgctxt "#30637"
+msgid "WebVTT (text)"
+msgstr "WebVTT（文本）"
+
+msgctxt "#30638"
+msgid "PGS (Blu-ray pictures, .sup)"
+msgstr "PGS（蓝光图像字幕，.sup）"
+
+msgctxt "#30639"
+msgid "VobSub (DVD pictures, .idx/.sub)"
+msgstr "VobSub（DVD 图像字幕，.idx/.sub）"

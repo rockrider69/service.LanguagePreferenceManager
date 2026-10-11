@@ -431,10 +431,10 @@ def subtitle_file_tag(video_name, file_name):
                 and (len(nxt) == 2 and nxt.isalpha() or nxt.isdigit() or _canonical_region(lang, nxt) in _SCRIPTS)):
             tag = tag + '-' + nxt
     words = [t.lower() for t in _FILE_TOKEN.findall(middle)]
-    return {'tag': tag, 'words': words}
+    return {'tag': tag, 'words': words, 'ext': '.' + ext.lower()}
 
 
-def match_external_files(streams, file_tags, external_label=None):
+def match_external_files(streams, file_tags, external_label=None, files_out=None):
     """
     Map Kodi's external subtitle streams onto the subtitle files of the video (see subtitle_file_tag()).
 
@@ -448,6 +448,8 @@ def match_external_files(streams, file_tags, external_label=None):
 
     :param streams:   Kodi subtitle stream dicts
     :param file_tags: list of subtitle_file_tag() results
+    :param files_out: optional dict, filled with {stream index: [the subtitle_file_tag() results of the files the
+                      stream may be: one when it is certain]}
     :return: {stream index: tag}
     """
     candidates = {}
@@ -500,6 +502,8 @@ def match_external_files(streams, file_tags, external_label=None):
             tags = set(canonical_tag(file_tags[n]['tag']) for n in avail)     # pt-BR = pt.br = pob
             if len(tags) == 1:
                 result[index] = file_tags[avail[0]]['tag']
+                if files_out is not None:
+                    files_out[index] = [file_tags[n] for n in avail]
                 if len(avail) == 1:
                     taken.add(avail[0])
                 progress = True
@@ -513,6 +517,8 @@ def match_external_files(streams, file_tags, external_label=None):
             hits = [n for n in avail if guess and canonical_tag(file_tags[n]['tag']) == guess]
             if hits:
                 result[index] = file_tags[hits[0]]['tag']
+                if files_out is not None:
+                    files_out[index] = [file_tags[n] for n in hits]
                 if len(hits) == 1:
                     taken.add(hits[0])
                 progress = True

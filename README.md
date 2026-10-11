@@ -61,4 +61,6 @@ Subtitles (initial run):
 4. Subtitle tag in the file name (`Use filename`, e.g. `.subtitle-2`) - lowest preference, only if nothing above selected a track
 5. Default subtitle, else the first valid one - when nothing above selected a track (only with the regex filter or conditional subtitles enabled)
 
+Subtitle format (settings: Subtitle format preference): among tracks that fit the language preference equally well, the first format of the list that is present wins (embedded .mkv tracks and subtitle files next to the video are recognised); the regex filter and stored preferences are not affected.
+
 Audio: audio preferences first; an audio tag in the file name (`.audiostream-1`) is only used when the audio preferences matched nothing.

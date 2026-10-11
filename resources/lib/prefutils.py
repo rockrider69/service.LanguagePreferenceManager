@@ -88,6 +88,7 @@ class LangPrefMan_Player(xbmc.Player):
         # subtitle files next to the playing video: (playing file, [langutils.subtitle_file_tag() results])
         self.external_sub_files = (None, [])
         self.sub_codecs = (None, None)            # (playing file, embedded subtitle CodecIDs or None)
+        self.sub_formats = (None, {})             # (Kodi's subtitle list, {index: format}) - see subtitle_formats()
         # sub converter: a converted subtitle is being made / selected (LPM's own change, never a user's)
         self.sub_converting = False
         self.sub_convert_quiet_until = 0
@@ -311,7 +312,59 @@ class LangPrefMan_Player(xbmc.Player):
         found = langutils.best_matches(code, accepted, track_type)
         if not found:
             found = [st['index'] for st in accepted if name == st.get('language')]
+        if track_type == 'Subtitle' and len(found) > 1 and settings.sub_format_order:
+            found = self.best_format_matches(found)
         return found
+
+    def best_format_matches(self, found):
+        """Of equally good subtitle tracks (same language fit) the ones in the best format of the user's format
+        order (settings SubFormat1..3). A format outside the order, or unknown, ranks after the listed ones; when no
+        track has a known format (a container that cannot be read) nothing changes."""
+        formats = self.subtitle_formats()
+        order = settings.sub_format_order
+        rank = lambda index: order.index(formats[index]) if formats.get(index) in order else len(order)
+        best = min(rank(index) for index in found)
+        kept = [index for index in found if rank(index) == best]
+        if len(kept) < len(found):
+            log(LOG_INFO, 'Subtitle format preference {0}: tracks {1} of {2} kept'.format(
+                '>'.join(order), [i + 1 for i in kept], [i + 1 for i in found]))
+        return kept
+
+    def subtitle_formats(self):
+        """{subtitle index: 'srt' | 'ass' | 'webvtt' | 'pgs' | 'vobsub'} of the playing video's subtitle tracks whose
+        format is known: embedded tracks of a Matroska file by their CodecID (Kodi lists the embedded tracks in file
+        order), external subtitle files by their extension when the file is certain, and any other track by a format
+        word in its title ('English [SRT]'). Kodi itself reports no format. Worked out once per subtitle list."""
+        subs = list(self.subtitles or [])
+        try:
+            playing = self.getPlayingFile()
+        except RuntimeError:
+            playing = None
+        key = (playing, tuple((sub.get('index'), sub.get('name'), sub.get('language')) for sub in subs))
+        if self.sub_formats[0] == key:
+            return self.sub_formats[1]
+        label = xbmc.getLocalizedString(21602)
+        formats = {}
+        embedded = sorted((s for s in subs if langutils.external_name(s, label) is None), key=lambda s: s['index'])
+        codecs = self.embedded_subtitle_codecs() if embedded else None
+        if codecs is not None and len(codecs) == len(embedded):
+            for sub, codec in zip(embedded, codecs):
+                if subcodec.format_of_codec(codec):
+                    formats[sub['index']] = subcodec.format_of_codec(codec)
+        externals = [s for s in subs if langutils.external_name(s, label) is not None]
+        if externals:
+            files = {}
+            langutils.match_external_files(subs, self.subtitle_file_tags(len(externals)), label, files)
+            for sub in externals:
+                found = set(subcodec.format_of_extension(f.get('ext')) for f in files.get(sub['index'], []))
+                if len(found) == 1 and None not in found:
+                    formats[sub['index']] = found.pop()
+        for sub in subs:
+            if sub['index'] not in formats and subcodec.format_of_name(sub.get('name')):
+                formats[sub['index']] = subcodec.format_of_name(sub.get('name'))
+        log(LOG_DEBUG, 'Subtitle formats: {0}'.format(formats))
+        self.sub_formats = (key, formats)
+        return formats
 
     def subtitle_filter(self, forced, prefix, signs_only=False):
         """Filter for subtitle candidates: not blacklisted, no Signs&Songs track while that toggle is on, and the

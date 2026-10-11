@@ -544,3 +544,43 @@ msgstr ""
 msgctxt "#30620"
 msgid "Sub converter (Japanese, Korean or Chinese audio when the selected subtitle is ASS/SSA: a copy with its styles, fonts and signs kept and the bottom lines moved to the top; other text formats other than SRT become plain yellow SRT at the top)"
 msgstr ""
+
+msgctxt "#30630"
+msgid "Subtitle format preference (when several subtitles of the preferred language are available, the first format of this list that is present is taken; formats of embedded .mkv tracks and of subtitle files next to the video are known)"
+msgstr ""
+
+msgctxt "#30631"
+msgid "Preferred subtitle format (1st)"
+msgstr ""
+
+msgctxt "#30632"
+msgid "Preferred subtitle format (2nd)"
+msgstr ""
+
+msgctxt "#30633"
+msgid "Preferred subtitle format (3rd)"
+msgstr ""
+
+msgctxt "#30634"
+msgid "No preference"
+msgstr ""
+
+msgctxt "#30635"
+msgid "SRT (SubRip text)"
+msgstr ""
+
+msgctxt "#30636"
+msgid "ASS / SSA (styled text)"
+msgstr ""
+
+msgctxt "#30637"
+msgid "WebVTT (text)"
+msgstr ""
+
+msgctxt "#30638"
+msgid "PGS (Blu-ray pictures, .sup)"
+msgstr ""
+
+msgctxt "#30639"
+msgid "VobSub (DVD pictures, .idx/.sub)"
+msgstr ""

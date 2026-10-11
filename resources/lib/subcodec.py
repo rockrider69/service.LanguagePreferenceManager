@@ -6,6 +6,7 @@ Only Matroska (.mkv) is read: the Tracks element of the header lists every track
 Kodi numbers the embedded subtitle streams. Reading goes through a small reader object (read(n) -> bytes,
 seek(pos)), Kodi's file layer in the add-on (so smb:// nfs:// ... work too), a plain file in tests.
 """
+import re
 
 _EBML_HEADER = 0x1A45DFA3
 _SEGMENT = 0x18538067
@@ -215,6 +216,47 @@ def is_ass(codec):
 
 def is_webvtt(codec):
     return (codec or '').upper().startswith(('S_TEXT/WEBVTT', 'D_WEBVTT'))
+
+
+# The subtitle formats a user can rank (settings SubFormat1..3: value n = SUBTITLE_FORMATS[n - 1], 0 = none)
+SUBTITLE_FORMATS = ('srt', 'ass', 'webvtt', 'pgs', 'vobsub')
+
+_EXTENSION_FORMATS = {'.srt': 'srt', '.ass': 'ass', '.ssa': 'ass', '.vtt': 'webvtt', '.sup': 'pgs', '.idx': 'vobsub'}
+# format words in a track title: "English [SRT]", "Signs (ASS)", "PGS", "SubRip" ...
+_NAME_FORMATS = (('srt', re.compile(r'(?<![A-Za-z0-9])(?:srt|subrip)(?![A-Za-z0-9])', re.I)),
+                 ('ass', re.compile(r'(?<![A-Za-z0-9])(?:ass|ssa)(?![A-Za-z0-9])', re.I)),
+                 ('webvtt', re.compile(r'(?<![A-Za-z0-9])(?:web)?vtt(?![A-Za-z0-9])', re.I)),
+                 ('pgs', re.compile(r'(?<![A-Za-z0-9])(?:pgs|sup)(?![A-Za-z0-9])', re.I)),
+                 ('vobsub', re.compile(r'(?<![A-Za-z0-9])(?:vobsub|idx)(?![A-Za-z0-9])', re.I)))
+
+
+def format_of_codec(codec):
+    """The ranked format ('srt', 'ass', 'webvtt', 'pgs', 'vobsub') of a Matroska CodecID, None for any other."""
+    c = (codec or '').upper()
+    if c.startswith(('S_TEXT/UTF8', 'S_TEXT/ASCII')):
+        return 'srt'
+    if is_ass(c):
+        return 'ass'
+    if is_webvtt(c):
+        return 'webvtt'
+    if c.startswith('S_HDMV/PGS'):
+        return 'pgs'
+    if c.startswith('S_VOBSUB'):
+        return 'vobsub'
+    return None
+
+
+def format_of_extension(extension):
+    """The ranked format of a subtitle file's extension ('.srt', 'ass'), None when it names none ('.sub' may be
+    MicroDVD text or VobSub pictures: unknown)."""
+    e = (extension or '').lower()
+    return _EXTENSION_FORMATS.get(e if e.startswith('.') else '.' + e)
+
+
+def format_of_name(name):
+    """The ranked format a track title names ('English [SRT]'), None when it names none or several."""
+    found = [fmt for fmt, pattern in _NAME_FORMATS if pattern.search(name or '')]
+    return found[0] if len(found) == 1 else None
 
 
 def is_convertible(codec):

@@ -12,6 +12,7 @@ xbmc = types.ModuleType("xbmc")
 xbmc.Player = type("Player", (), {})
 xbmc.Monitor = type("Monitor", (), {})
 xbmc.sleep = lambda _milliseconds: None
+xbmc.getLocalizedString = lambda _id: "(External)"
 sys.modules["xbmc"] = xbmc
 
 xbmcaddon = types.ModuleType("xbmcaddon")
@@ -42,6 +43,7 @@ class FakeSettings:
     audio_original_preflist_enabled = False
     audio_original_preflist = []
     audio_original_any = False
+    sub_format_order = []
     audio_original_langs = []
     delay = 0
 
@@ -93,6 +95,7 @@ class PreferenceEvaluationTests(unittest.TestCase):
         settings.audio_original_preflist = []
         settings.audio_original_any = False
         settings.audio_original_langs = []
+        settings.sub_format_order = []
 
     def test_settings_region_does_not_match_other_region(self):
         player = self.make_player()
@@ -184,6 +187,96 @@ class PreferenceEvaluationTests(unittest.TestCase):
         settings.audio_keyword_blacklist_enabled = True
         settings.audio_keyword_blacklist = ["commentary"]
         self.assertEqual(2, player.evalAudioPrefs([]))
+
+
+    # ---- subtitle format preference (settings SubFormat1..3) -------------------------------------------------
+    def english_subs(self, formats):
+        """Three English subtitle tracks (indexes 0, 1, 2) whose known formats are given as {index: format}."""
+        player = self.make_player()
+        player.subtitles = [{"index": i, "language": "eng", "name": "English", "isforced": False} for i in range(3)]
+        player.selected_sub = player.subtitles[0]
+        player.subtitle_formats = lambda: formats
+        return player
+
+    def test_without_a_format_order_the_first_matching_track_stays(self):
+        player = self.english_subs({0: "pgs", 1: "srt", 2: "ass"})
+        self.assertEqual(-1, player.evalSubPrefs([(set(), [("English", "eng", "false")])]))
+
+    def test_best_format_is_taken_and_replaces_the_current_track(self):
+        settings.sub_format_order = ["srt", "ass"]
+        player = self.english_subs({0: "pgs", 1: "ass", 2: "srt"})
+        self.assertEqual(2, player.evalSubPrefs([(set(), [("English", "eng", "false")])]))
+
+    def test_current_track_in_the_best_format_is_kept(self):
+        settings.sub_format_order = ["ass", "srt"]
+        player = self.english_subs({0: "ass", 1: "srt", 2: "ass"})
+        self.assertEqual(-1, player.evalSubPrefs([(set(), [("English", "eng", "false")])]))
+
+    def test_second_format_is_used_when_the_first_is_missing(self):
+        settings.sub_format_order = ["pgs", "srt", "ass"]
+        player = self.english_subs({0: "ass", 1: "vobsub", 2: "srt"})
+        self.assertEqual(2, player.evalSubPrefs([(set(), [("English", "eng", "false")])]))
+
+    def test_unlisted_and_unknown_formats_rank_after_the_listed_ones(self):
+        settings.sub_format_order = ["srt"]
+        player = self.english_subs({0: "pgs", 2: "srt"})            # track 1 has no known format
+        self.assertEqual(2, player.evalSubPrefs([(set(), [("English", "eng", "false")])]))
+
+    def test_unknown_formats_change_nothing(self):
+        settings.sub_format_order = ["srt", "ass"]
+        player = self.english_subs({})
+        self.assertEqual(-1, player.evalSubPrefs([(set(), [("English", "eng", "false")])]))
+
+    def test_the_language_always_wins_over_the_format(self):
+        settings.sub_format_order = ["srt"]
+        player = self.english_subs({0: "srt", 1: "srt", 2: "ass"})
+        player.subtitles[2]["language"] = "fre"
+        player.subtitles[2]["name"] = "Francais"
+        self.assertEqual(2, player.evalSubPrefs([(set(), [("French", "fre", "false")])]))
+
+    def test_conditional_rules_use_the_format_order(self):
+        settings.sub_format_order = ["srt", "ass"]
+        player = self.english_subs({0: "ass", 1: "srt", 2: "ass"})
+        player.selected_audio_stream = {"index": 0, "language": "jpn", "name": "Japanese"}
+        prefs = PrefParser().parsePrefString("jpn:eng")
+        self.assertEqual(1, player.evalCondSubPrefs(prefs))
+
+    def test_a_format_word_in_the_title_is_read_when_the_file_is_unreadable(self):
+        player = self.make_player()
+        player.subtitles = [{"index": 0, "language": "eng", "name": "English [PGS]", "isforced": False},
+                            {"index": 1, "language": "eng", "name": "English (SRT)", "isforced": False},
+                            {"index": 2, "language": "eng", "name": "English", "isforced": False}]
+        player.selected_sub = player.subtitles[0]
+        player.getPlayingFile = lambda: "/video/movie.mp4"          # not Matroska: no codecs
+        player.embedded_subtitle_codecs = lambda: None
+        player.sub_formats = (None, {})
+        settings.sub_format_order = ["srt", "pgs"]
+        self.assertEqual({0: "pgs", 1: "srt"}, player.subtitle_formats())
+        self.assertEqual(1, player.evalSubPrefs([(set(), [("English", "eng", "false")])]))
+
+    def test_formats_of_embedded_tracks_come_from_the_file_in_kodi_order(self):
+        player = self.make_player()
+        player.subtitles = [{"index": 0, "language": "en", "name": "(External)", "isforced": False},
+                            {"index": 1, "language": "en", "name": "English", "isforced": False},
+                            {"index": 2, "language": "en", "name": "English", "isforced": False},
+                            {"index": 3, "language": "fr", "name": "Francais", "isforced": False}]
+        player.getPlayingFile = lambda: "/video/movie.mkv"
+        player.embedded_subtitle_codecs = lambda: ["S_TEXT/UTF8", "S_HDMV/PGS", "S_TEXT/ASS"]
+        player.subtitle_file_tags = lambda externals: [{"tag": "en", "words": ["en"], "ext": ".ass"}]
+        player.sub_formats = (None, {})
+        self.assertEqual({0: "ass", 1: "srt", 2: "pgs", 3: "ass"}, player.subtitle_formats())
+
+    def test_an_external_file_of_an_uncertain_format_is_unknown(self):
+        player = self.make_player()
+        player.subtitles = [{"index": 0, "language": "en", "name": "(External)", "isforced": False},
+                            {"index": 1, "language": "en", "name": "(External)", "isforced": False}]
+        player.getPlayingFile = lambda: "/video/movie.mkv"
+        player.embedded_subtitle_codecs = lambda: None
+        # Movie.en.srt and Movie.en.ass: two streams, the same language, no telling which is which
+        player.subtitle_file_tags = lambda externals: [{"tag": "en", "words": ["en"], "ext": ".srt"},
+                                                       {"tag": "en", "words": ["en"], "ext": ".ass"}]
+        player.sub_formats = (None, {})
+        self.assertEqual({}, player.subtitle_formats())
 
 
 if __name__ == "__main__":
