@@ -1,35 +1,106 @@
 from logger import log, LOG_INFO, LOG_DEBUG, LOG_ERROR
+import os
+import time
 import xbmcvfs
 import json as simplejson
 
 __user_data_path__ = xbmcvfs.translatePath("special://profile/addon_data/service.languagepreferencemanager/")
+__preferences_file__ = __user_data_path__ + "customMediaPreferences.json"
+
+
+_UNREAD = ('unread',)
+# _load() results
+_OK, _UNREADABLE, _INVALID = 'ok', 'unreadable', 'invalid'
+
+
+def _file_state():
+    """(modification time, size) of the preferences file, None when there is none."""
+    try:
+        st = os.stat(__preferences_file__)
+        return (st.st_mtime_ns, st.st_size)
+    except OSError:
+        return None
 
 from resources.lib import kodi_utils
-
+import langutils
 
 class MediaPreferenceManager:
 
     def __init__(self):
         self.preferences = []
+        # this list is the file's (from_file()): it follows the file's changes - see refresh()
+        self.tied = False
+        # state of the file when this list was read or written (None: there was no file), _UNREAD when the
+        # file could not be read (then it is read again before any change)
+        self.file_state = None
+        # the list is not the file's (it could not be re-read): the next save must not overwrite the file
+        self.save_blocked = False
+        # state of the file when it last could not be parsed (see refresh())
+        self.failed_state = None
+
+    def refresh(self):
+        """
+        Re-read the file when someone else changed it. The stored-preferences dialog runs in its own Python
+        interpreter with its own copy of the list: without this, the service kept applying a preference deleted
+        there, and its next save wrote the deleted preference back into the file.
+
+        A file that cannot be parsed (empty, or invalid JSON) may be in the middle of a write by an older version:
+        the list is kept and the file looked at again. Seen unchanged a second time, it is not being written: the
+        list is kept and the next save writes it back (repairing the file). A file that cannot be opened at all
+        keeps the list and blocks saving, so its content is never lost.
+        :return: False when the list is not the file's (it changed but cannot be read now)
+        """
+        if not self.tied:
+            return True
+        state = _file_state()
+        if state == self.file_state:
+            return True
+        result, fresh = MediaPreferenceManager._load()
+        if result == _OK:
+            log(LOG_INFO, "Custom media preferences file changed - reloading it")
+            self.preferences = fresh.preferences
+            self.file_state = state
+            self.failed_state = None
+            return True
+        if result == _INVALID and state == self.failed_state:
+            log(LOG_ERROR, "Custom media preferences file is not valid - the current list will replace it")
+            self.file_state = state
+            self.failed_state = None
+            return True
+        self.failed_state = state
+        log(LOG_INFO, "Custom media preferences file changed but cannot be read now - keeping the current list")
+        return False
 
     def add_preference(self, custom_media_preference):
+        """Add (or replace) the preference for its media. :return: False when the file could not be read (the
+        next save is then skipped, see refresh())."""
         if not isinstance(custom_media_preference, CustomMediaPreference):
             log(LOG_ERROR, "Cannot add non-custom media preference")
-            return
+            return False
 
         if not custom_media_preference:
             log(LOG_ERROR, "Cannot add empty custom media preference")
-            return
+            return False
 
+        if not self.refresh():
+            self.save_blocked = True
+            return False
         matching_preference = self.get_matching_preference(custom_media_preference)
         if matching_preference is not None:
-            self.remove_preference(matching_preference)
+            self.preferences.remove(matching_preference)
 
         self.preferences.append(custom_media_preference)
+        return True
 
     def remove_preference(self, custom_media_preference):
-        if self.has_preference(custom_media_preference):
-            self.preferences.remove(custom_media_preference)
+        """Remove the preference for the same media (the file is re-read first if someone else changed it).
+        :return: False when the file could not be read (nothing removed; the caller must not save)"""
+        if not self.refresh():
+            return False
+        matching_preference = self.get_matching_preference(custom_media_preference)
+        if matching_preference is not None:
+            self.preferences.remove(matching_preference)
+        return True
 
     def has_preference(self, custom_media_preference):
         """
@@ -59,6 +130,7 @@ class MediaPreferenceManager:
         :return:  The custom media preference that applies to the playing item with the highest priority, or None if no preference applies
         """
 
+        self.refresh()
         applicable_preferences = []
 
         for preference in self.preferences:
@@ -72,31 +144,91 @@ class MediaPreferenceManager:
         return max(applicable_preferences, key=lambda preference: preference.priority_index)
 
     def save_preferences(self):
-        file_name = __user_data_path__ + "customMediaPreferences.json"
+        """Write the list. :return: True when it was written."""
+        if self.save_blocked:
+            # the file could not be read: writing this list would lose what the file holds
+            self.save_blocked = False
+            log(LOG_ERROR, "Custom media preferences not saved: the file could not be read, it is left as it is")
+            return False
+        content = simplejson.dumps(self.to_json(), indent=4)
+        # written to a temporary file that then replaces the old one: a reader (the service or the
+        # stored-preferences dialog, each in its own interpreter) never sees a half written file. Its name is
+        # unique per writer, and os.open applies the umask like a normal file creation.
+        temp_file = "{0}.{1}.{2}.tmp".format(__preferences_file__, os.getpid(), time.monotonic_ns())
+        try:
+            handle = os.open(temp_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o666)
+        except OSError as e:
+            log(LOG_ERROR, "Failed to save custom media preferences: " + str(e))
+            return False
+        try:
+            with os.fdopen(handle, 'w') as file:
+                file.write(content)
+            try:
+                os.chmod(temp_file, os.stat(__preferences_file__).st_mode & 0o777)   # keep the old permissions
+            except OSError:
+                pass
+            # the state of what we wrote, taken before the rename (which keeps it): a file another writer moves
+            # into place right after ours then still counts as a change
+            st = os.stat(temp_file)
+            written_state = (st.st_mtime_ns, st.st_size)
+            for attempt in range(10):
+                try:
+                    os.replace(temp_file, __preferences_file__)
+                    break
+                except PermissionError:      # Windows: the other interpreter is reading the file right now
+                    if attempt == 9:
+                        raise
+                    time.sleep(0.05)
+        except OSError as e:
+            log(LOG_ERROR, "Failed to save custom media preferences: " + str(e))
+            try:
+                os.remove(temp_file)
+            except OSError:
+                pass
+            return False
+        self.file_state = written_state
+        self.failed_state = None
+        return True
 
-        with open(file_name, 'w') as file:
-            file.write(simplejson.dumps(self.to_json(), indent=4))
+    @staticmethod
+    def _load():
+        """Read the preferences file: (_OK, manager) - a missing or empty-list file gives an empty manager -,
+        (_UNREADABLE, None) when it cannot be opened, (_INVALID, None) when it is empty or not valid JSON."""
+        if not xbmcvfs.exists(__preferences_file__):
+            return _OK, MediaPreferenceManager()
+        log(LOG_DEBUG, "Attempting custom media preferences from file")
+        try:
+            with open(__preferences_file__, 'r') as file:
+                content = file.read()
+        except OSError as e:
+            log(LOG_ERROR, "Failed to read custom media preferences: " + str(e))
+            return _UNREADABLE, None
+        if not content.strip():
+            log(LOG_DEBUG, "No custom media preferences found (empty file?)")
+            return _INVALID, None
+        try:
+            return _OK, MediaPreferenceManager.from_json(simplejson.loads(content))
+        except Exception as e:
+            log(LOG_ERROR, "Failed to load custom media preferences: " + str(e))
+            return _INVALID, None
 
     @staticmethod
     def from_file():
-        file_name = __user_data_path__ + "customMediaPreferences.json"
-        if xbmcvfs.exists(file_name):
-            log(LOG_DEBUG, "Attempting custom media preferences from file")
-
-            with open(file_name, 'r') as file:
-                # Check if file is empty
-                if not file.read(1):
-                    log(LOG_DEBUG, "No custom media preferences found (empty file?)")
-                    return
-
-                file.seek(0)
-
-                try:
-                    return MediaPreferenceManager.from_json(simplejson.loads(file.read()))
-                except Exception as e:
-                    log(LOG_ERROR, "Failed to load custom media preferences: " + str(e))
-
-        return MediaPreferenceManager()
+        """The preferences of the file. When it cannot be read, an empty list that reads the file again before
+        any change (see refresh()); an empty or invalid file at start gives an empty list."""
+        state = _file_state()
+        result, manager = MediaPreferenceManager._load()
+        if result == _OK:
+            manager.tied = True
+            manager.file_state = state
+            return manager
+        manager = MediaPreferenceManager()
+        manager.tied = True
+        if result == _INVALID:
+            manager.file_state = state
+        else:
+            manager.file_state = _UNREAD
+        return manager
 
     def to_json(self):
         return [preference.to_json() for preference in self.preferences]
@@ -119,21 +251,31 @@ class CustomMediaPreference:
         self.priority_index = 0
         self.audio_language = ""
         self.audio_track_id = -1
+        self.audio_name = ""
         self.subtitle_language = ""
         self.subtitle_track_id = -1
+        self.subtitle_name = ""
         self.enable_subtitles = False
 
     def apply_to_player(self, player):
         """
         Apply the custom media preference to the player. This will set the audio and subtitle streams according to the preference.
 
+        The audio part and the subtitle part are applied independently. What was really applied is recorded on the
+        player (stored_audio_applied / stored_sub_applied): the regex, normal, conditional, filename and fallback logic
+        must never touch a part that a stored (manually set) preference has set.
+
         :param player: The player to apply the custom media preference to
-        :return: True if the custom media preference was successfully applied, False otherwise. False can be returned if the audio or subtitle track is not found in the media.
+        :return: True if the whole custom media preference was applied, False if a part could not be applied
+                 (track not found in the media). The part that was applied stays applied.
         """
+        player.stored_audio_applied = False
+        player.stored_sub_applied = False
         if not player.isPlayingVideo():
             return False
 
         set_subtitles = self.subtitle_language or self.subtitle_track_id != -1
+        fully_applied = True
 
         if self.audio_language or self.audio_track_id != -1:
             audio_track_index = self.get_audio_track_index(player)
@@ -144,9 +286,11 @@ class CustomMediaPreference:
                     player.add_ignore_audio_change_index(audio_track_index)
 
                 player.setAudioStream(audio_track_index)
+                player.lpm_audio_target = audio_track_index
+                player.stored_audio_applied = True
             else:
-                # If the audio track is not found, we failed to apply the preferences
-                return False
+                # The stored audio track does not exist in this media: only this part falls back to the other preferences
+                fully_applied = False
 
         if set_subtitles:
             subtitle_track_index = self.get_subtitle_track_index(player)
@@ -154,88 +298,76 @@ class CustomMediaPreference:
                 if self.enable_subtitles:
                     player.setSubtitleStream(subtitle_track_index)
                 player.showSubtitles(self.enable_subtitles)
+                player.selected_sub_enabled = bool(self.enable_subtitles)
+                player.stored_sub_applied = True
+            elif not self.enable_subtitles:
+                # The user stored "subtitles off" and the track is not in this media: honour the "off"
+                player.showSubtitles(False)
+                player.selected_sub_enabled = False
+                player.stored_sub_applied = True
             else:
-                # If the subtitle track is not found, we failed to apply the preferences.
-                # However, we can return success, if the subtitles are disabled and no subtitle track is found.
-                return not self.enable_subtitles
+                fully_applied = False
 
-        return True
+        return fully_applied
 
     def get_audio_track_index(self, player):
         """
         Get the audio track index that matches the custom media preference. If no audio track matches, return None.
-        First, the audio track is searched by language. If no audio track is found by language, the audio track is searched by raw index.
+        See find_track().
 
         :param player: The player to get the audio track index for
         :return: The audio track index that matches the custom media preference, or None if no audio track matches
         """
-
-        # Find all audio tracks (index) that match the language code
-        found_audio_languages = [stream['index'] for stream in player.audiostreams if
-                                 stream['language'] == self.audio_language]
-
-        if found_audio_languages:
-            if len(found_audio_languages) == 1:
-                log(LOG_DEBUG,
-                    "Found audio track by language " + self.audio_language + " for file " + player.getPlayingFile())
-                return found_audio_languages[0]
-            elif len(found_audio_languages) > 1:
-                log(LOG_DEBUG, "Multiple audio tracks found for language " + self.audio_language + " for file " + player.getPlayingFile())
-
-        if self.audio_track_id != -1:
-            log(LOG_DEBUG,
-                "Failed to find audio track by language " + self.audio_language + " for file " + player.getPlayingFile() + ". Trying by index")
-            if self.audio_track_id < len(player.audiostreams):
-                log(LOG_DEBUG, "Found audio track by index " + str(self.audio_track_id) + " for file " + player.getPlayingFile())
-                return self.audio_track_id
-            else:
-                log(LOG_ERROR, "Audio track id " + str(
-                    self.audio_track_id) + " is out of range for file " + player.getPlayingFile())
-
-        if found_audio_languages:
-            log(LOG_DEBUG,
-                "Multiple audio tracks found for language " + self.audio_language + " for file " + player.getPlayingFile() + " and no set index. Picking first.")
-            return found_audio_languages[0]
-
-        return None
+        return self.find_track(player, player.audiostreams, self.audio_language, self.audio_name,
+                               self.audio_track_id, 'Audio')
 
     def get_subtitle_track_index(self, player):
         """
         Get the subtitle track index that matches the custom media preference. If no subtitle track matches, return None.
-        First, the subtitle track is searched by language. If no subtitle track is found by language, the subtitle track is searched by raw index.
+        See find_track().
 
         :param player: The player to get the subtitle track index for
         :return: The subtitle track index that matches the custom media preference, or None if no subtitle track matches
         """
+        return self.find_track(player, player.subtitles, self.subtitle_language, self.subtitle_name,
+                               self.subtitle_track_id, 'Subtitle')
 
-        # Find all subtitle tracks (index) that match the language code
-        found_language_subtitles = [subtitle['index'] for subtitle in player.subtitles if
-                                    subtitle['language'] == self.subtitle_language]
+    @staticmethod
+    def find_track(player, streams, language, name, track_id, track_type):
+        """
+        Find the stored track in this media. The tracks of the stored language are searched first; the stored
+        value may be in any code form (eng / en / deu / ger / eng-AU / pob ...), e.g. saved on Kodi 21 and replayed
+        on Kodi 22. A track of the stored region is preferred to one of unknown region (langutils.match_score).
+        When several tracks fit, the one with the stored title is taken, then the one at the stored index, then
+        the first. When no track has the stored language, the track at the stored index is taken.
 
-        if found_language_subtitles:
-            if len(found_language_subtitles) == 1:
-                log(LOG_DEBUG,
-                    f"Found subtitle track by language {self.subtitle_language} for file {player.getPlayingFile()}")
-                return found_language_subtitles[0]
-            else:
-                log(LOG_DEBUG,
-                    f"Multiple subtitle tracks found for language {self.subtitle_language} for file {player.getPlayingFile()}")
+        :return: the track index, or None if no track matches
+        """
+        playing = player.getPlayingFile()
+        found = langutils.best_matches(language, streams, track_type) if language else []
+        if len(found) > 1 and name:
+            named = [stream['index'] for stream in streams if stream['index'] in found and stream.get('name') == name]
+            if named:
+                log(LOG_DEBUG, f"{track_type} tracks of language {language} with the stored title {name!r}: {named}")
+                found = named
 
-        if self.subtitle_track_id != -1:
-            log(LOG_DEBUG,
-                "Failed to find subtitle track by language " + self.subtitle_language + " for file " + player.getPlayingFile() + ". Trying by index")
-            if self.subtitle_track_id < len(player.subtitles):
-                log(LOG_DEBUG, "Found subtitle track by index " + str(self.subtitle_track_id) + " for file " + player.getPlayingFile())
-                return self.subtitle_track_id
-            else:
-                log(LOG_ERROR, "Subtitle track id " + str(
-                    self.subtitle_track_id) + " is out of range for file " + player.getPlayingFile())
+        if len(found) == 1:
+            log(LOG_DEBUG, f"Found {track_type} track by language {language} for file {playing}")
+            return found[0]
+        if found:
+            if track_id in found:
+                log(LOG_DEBUG, f"Multiple {track_type} tracks found for language {language} for file {playing}, "
+                               f"using the stored index {track_id}")
+                return track_id
+            log(LOG_DEBUG, f"Multiple {track_type} tracks found for language {language} for file {playing}. Picking first.")
+            return found[0]
 
-        if found_language_subtitles:
-            log(LOG_DEBUG,
-                f"Multiple subtitle tracks found for language {self.subtitle_language} for file {player.getPlayingFile()} and no set index. Picking first.")
-            return found_language_subtitles[0]
-
+        if track_id != -1:
+            log(LOG_DEBUG, f"Failed to find {track_type} track by language {language} for file {playing}. Trying by index")
+            if track_id < len(streams):
+                log(LOG_DEBUG, f"Found {track_type} track by index {track_id} for file {playing}")
+                return track_id
+            log(LOG_ERROR, f"{track_type} track id {track_id} is out of range for file {playing}")
         return None
 
     def to_json(self):
@@ -254,8 +386,10 @@ class CustomMediaPreference:
             "priority": self.priority_index,
             "audio_language": self.audio_language,
             "audio_track_id": self.audio_track_id,
+            "audio_name": self.audio_name,
             "subtitle_language": self.subtitle_language,
             "subtitle_track_id": self.subtitle_track_id,
+            "subtitle_name": self.subtitle_name,
             "enable_subtitles": self.enable_subtitles
         }
 
@@ -272,8 +406,10 @@ class CustomMediaPreference:
         custom_media_preference.priority_index = json["priority"]
         custom_media_preference.audio_language = json["audio_language"]
         custom_media_preference.audio_track_id = json["audio_track_id"]
+        custom_media_preference.audio_name = json.get("audio_name", "")
         custom_media_preference.subtitle_language = json["subtitle_language"]
         custom_media_preference.subtitle_track_id = json["subtitle_track_id"]
+        custom_media_preference.subtitle_name = json.get("subtitle_name", "")
         custom_media_preference.enable_subtitles = json["enable_subtitles"]
         return custom_media_preference
 
@@ -291,9 +427,26 @@ class CustomMediaPreference:
         custom_media_preference = CustomMediaPreference()
         custom_media_preference.selector = MediaSelector.from_playing_item(player)
 
-        custom_media_preference.audio_language = player.getSelectedAudioLanguage()
+        # the language with its region when the track tells it (pob, eng-AU), and the track title
+        custom_media_preference.audio_language = (langutils.stream_code(getattr(player, 'selected_audio_stream', None))
+                                                  or player.getSelectedAudioLanguage())
+        custom_media_preference.audio_name = (getattr(player, 'selected_audio_stream', None) or {}).get('name', '') or ''
+        # If the selected audio track is flagged as original, store "org" as the language
+        if hasattr(player, 'selected_audio_stream') and player.selected_audio_stream and \
+                player.selected_audio_stream.get('isoriginal', False):
+            custom_media_preference.audio_language = "org"
         custom_media_preference.audio_track_id = player.getSelectedAudioIndex()
-        custom_media_preference.subtitle_language = player.getSelectedSubtitleLanguage()
+
+        custom_media_preference.subtitle_language = (langutils.stream_code(getattr(player, 'selected_sub', None))
+                                                     or player.getSelectedSubtitleLanguage())
+        custom_media_preference.subtitle_name = (getattr(player, 'selected_sub', None) or {}).get('name', '') or ''
+        # If the selected subtitle track has "original" or "unknown" in its name, store the special code
+        if hasattr(player, 'selected_sub') and player.selected_sub:
+            sub_name_lower = player.selected_sub.get('name', '').lower()
+            if "original" in sub_name_lower:
+                custom_media_preference.subtitle_language = "org"
+            elif "unknown" in sub_name_lower or player.selected_sub.get('language', '') == "unk":
+                custom_media_preference.subtitle_language = "unk"
         custom_media_preference.subtitle_track_id = player.getSelectedSubtitleIndex()
         custom_media_preference.enable_subtitles = player.selected_sub_enabled
 

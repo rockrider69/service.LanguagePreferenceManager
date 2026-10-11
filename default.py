@@ -17,6 +17,7 @@ from prefsettings import settings
 from prefutils import LangPref_Monitor
 from prefutils import LangPrefMan_Player
 from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
+import subconvert
 
 settings = settings()
 
@@ -25,6 +26,10 @@ settings = settings()
 class Main:
     def __init__(self):
         self._init_vars()
+        # the converted subtitles of the sub converter only live until the next start of Kodi
+        removed = subconvert.clean_folder(__user_data_path__, lambda msg: log(LOG_INFO, msg))
+        if removed:
+            log(LOG_INFO, 'Sub converter: {0} converted subtitle(s) of the last session removed'.format(removed))
         if not settings.service_enabled:
             log(LOG_INFO, "Service not enabled")
 

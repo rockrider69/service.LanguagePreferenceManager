@@ -2,7 +2,7 @@
 <addon
 	id="service.languagepreferencemanager"
 	name="Language Preference Manager"
-	version="1.1.1Beta1"
+	version="1.1.1Beta2"
 	provider-name="ace20022/scott967/rockrider69"
 	>
 	<requires>
@@ -13,23 +13,43 @@
 		<provides>executable</provides>
 	</extension>
 	<extension point="xbmc.addon.metadata">
-		<summary lang="en_GB">Language Preference Manager</summary>
 		<summary lang="zh_CN">语言偏好管理器</summary>
+		<summary lang="en_GB">Language Preference Manager</summary>
 		<summary lang="sv_SE">Hanterare för språkinställningar</summary>
-		<description lang="en_GB">Sets the audio and subtitle track according to your language preferences</description>
+		<summary lang="it_IT">Gestore delle preferenze linguistiche</summary>
+		<summary lang="ja_JP">言語設定マネージャー</summary>
+		<summary lang="de_DE">Sprachpräferenz-Manager</summary>
+		<summary lang="fr_FR">Gestionnaire des préférences linguistiques</summary>
 		<description lang="zh_CN">根据你的语言偏好自动选择音轨与字幕轨道</description>
+		<description lang="en_GB">Sets the audio and subtitle track according to your language preferences</description>
 		<description lang="sv_SE">Ställer in ljud- och undertextspår enligt dina språkinställningar</description>
-		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
+		<description lang="it_IT">Imposta le tracce audio e dei sottotitoli in base alle preferenze linguistiche.</description>
+		<description lang="ja_JP">言語設定に従って音声トラックと字幕トラックを設定します。</description>
+		<description lang="de_DE">Legt die Audio- und Untertitelspur entsprechend Ihren Spracheinstellungen fest</description>
+		<description lang="fr_FR">Définit les pistes audio et de sous-titres selon vos préférences linguistiques</description>
 		<disclaimer lang="zh_CN">如遇到 Bug、功能需求或相关问题，请前往 Kodi 论坛的语言偏好管理器主题帖反馈。</disclaimer>
+		<disclaimer lang="en_GB">For bugs, requests or general questions visit the Language Preference Manager thread on the Kodi forum.</disclaimer>
 		<disclaimer lang="sv_SE">För buggar, önskemål eller allmänna frågor, besök tråden Language Preference Manager på Kodi-forumet.</disclaimer>
+		<disclaimer lang="it_IT">Per bug, richieste o domande generali, visita il thread di Language Preference Manager sul forum Kodi.</disclaimer>
+		<disclaimer lang="ja_JP">バグ報告、要望、一般的な質問については、KodiフォーラムのLanguage Preference Managerスレッドをご覧ください。</disclaimer>
+		<disclaimer lang="de_DE">Bei Fehlern, Anfragen oder allgemeinen Fragen besuchen Sie den Thread „Language Preference Manager“ im Kodi-Forum.</disclaimer>
+		<disclaimer lang="fr_FR">Pour signaler des bugs, faire des demandes ou poser des questions générales, consultez le fil « Language Preference Manager » sur le forum Kodi.</disclaimer>
 		<platform>all</platform>
-		<news>1.1.1Beta1 : - Add regional/script language preferences for English, French, Spanish,
+		<news>1.1.1Beta2 : - Builds on 1.1.1Beta1.
+- Regional/script language variants (English UK/US/Australia/India/Canada, Spanish Spain/Latin America,
+  French France/Canada/Belgium/Switzerland, Portuguese Portugal/Brazil, Chinese Simplified/Traditional,
+  German Switzerland/Austria, Dutch Belgium) share one engine; the region is read from the track tag, title or
+  external subtitle file name.
+- New "Sub converter": ASS/SSA and other text subtitles keep their styles, only bottom lines move to the top.
+- Reworked seekback / "Fast Subtitles Display" ("Start &amp; Resume" by default).
+- Regex subtitle filter fixes; external subtitle languages read from file names; safer stored preferences.
+- The settings values of the 1.1.1Beta1 language variants were renumbered: re-select regional languages in settings.
+  1.1.1Beta1 : - Add regional/script language preferences for English, French, Spanish,
   Portuguese and Chinese, grouped with their base language in settings (Thanks to Hugs11).
 - Prefer exact BCP-47 tags or recognized track-title variants, then unlabelled
   tracks of the same language; preserve generic language preferences (Thanks to Hugs11).
 - Add Chinese translation (Thanks to wabisabi926).
 - Avoid some wrong seekback decisions in subtitles delayed workaround.
-			
 		</news>
 		<assets>
 			<icon>resources/icon.png</icon>

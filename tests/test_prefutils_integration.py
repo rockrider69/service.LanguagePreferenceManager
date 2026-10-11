@@ -41,6 +41,8 @@ class FakeSettings:
     ignore_signs_on = False
     audio_original_preflist_enabled = False
     audio_original_preflist = []
+    audio_original_any = False
+    audio_original_langs = []
     delay = 0
 
 
@@ -67,12 +69,13 @@ class PreferenceEvaluationTests(unittest.TestCase):
         player.audio_changed = False
         player.selected_audio_stream = {"index": 0, "language": "eng", "name": "English"}
         player.audiostreams = [player.selected_audio_stream]
-        player.getDetails = lambda: None
+        player.getDetails = lambda: True
+        player.genres_and_tags = set()
         return player
 
     def test_subtitle_evaluator_selects_france_from_real_track_order(self):
         player = self.make_player()
-        preferences = [(set(), [("French (France)", "fr-fr", "false")])]
+        preferences = [(set(), [("French (France)", "fr-FR", "false")])]
         self.assertEqual(16, player.evalSubPrefs(preferences))
 
     def test_generic_french_preference_keeps_current_track(self):
@@ -88,17 +91,19 @@ class PreferenceEvaluationTests(unittest.TestCase):
         settings.ignore_signs_on = False
         settings.audio_original_preflist_enabled = False
         settings.audio_original_preflist = []
+        settings.audio_original_any = False
+        settings.audio_original_langs = []
 
     def test_settings_region_does_not_match_other_region(self):
         player = self.make_player()
         player.subtitles = [player.selected_sub]
-        prefs = [(set(), [("French (France)", "fr,fr-fr", "false")])]
+        prefs = [(set(), [("French (France)", "fr-FR", "false")])]
         self.assertEqual(-2, player.evalSubPrefs(prefs))
 
     def test_exact_variant_ranks_above_current_unlabelled_track(self):
         player = self.make_player()
         player.selected_sub["name"] = "French"
-        prefs = [(set(), [("French (France)", "fr,fr-fr", "false")])]
+        prefs = [(set(), [("French (France)", "fr-FR", "false")])]
         self.assertEqual(16, player.evalSubPrefs(prefs))
 
     def test_blacklisted_exact_variant_falls_back_to_unlabelled_track(self):
@@ -106,14 +111,14 @@ class PreferenceEvaluationTests(unittest.TestCase):
         player.selected_sub["name"] = "French"
         settings.subtitle_keyword_blacklist_enabled = True
         settings.subtitle_keyword_blacklist = ["france"]
-        prefs = [(set(), [("French (France)", "fr,fr-fr", "false")])]
+        prefs = [(set(), [("French (France)", "fr-FR", "false")])]
         self.assertEqual(-1, player.evalSubPrefs(prefs))
 
     def test_audio_uses_same_ranking_and_keeps_best_current_track(self):
         player = self.make_player()
         player.audiostreams = player.subtitles
         player.selected_audio_stream = player.audiostreams[0]
-        prefs = [(set(), [("French (France)", "fr,fr-fr")])]
+        prefs = [(set(), [("French (France)", "fr-FR")])]
         self.assertEqual(16, player.evalAudioPrefs(prefs))
         player.selected_audio_stream = player.audiostreams[1]
         self.assertEqual(-1, player.evalAudioPrefs(prefs))
@@ -138,7 +143,7 @@ class PreferenceEvaluationTests(unittest.TestCase):
     def test_conditional_region_applies_only_to_matching_audio(self):
         player = self.make_player()
         player.selected_audio_stream = {"index": 0, "language": "fr-ca", "name": "French"}
-        prefs = [(set(), [("French (France)", "fr,fr-fr", "English", "en,eng", "false", "false")])]
+        prefs = [(set(), [("French (France)", "fr-FR", "English", "en,eng", "false", "false")])]
         self.assertEqual(-2, player.evalCondSubPrefs(prefs))
 
     def test_conditional_none_and_forced_subtitle_override(self):
@@ -152,17 +157,20 @@ class PreferenceEvaluationTests(unittest.TestCase):
     def test_forced_and_signs_filters_are_preserved(self):
         player = self.make_player()
         player.subtitles[1]["isforced"] = True
-        self.assertEqual(-2, player.evalSubPrefs([(set(), [("French (France)", "fr-fr", "false")])]))
+        self.assertEqual(-2, player.evalSubPrefs([(set(), [("French (France)", "fr-FR", "false")])]))
         self.assertEqual(16, player.evalSubPrefs([(set(), [("French (France)", "fr-fr", "true")])]))
         player.subtitles[1]["isforced"] = False
         player.subtitles[1]["name"] += " Signs"
         settings.ignore_signs_on = True
-        self.assertEqual(-2, player.evalSubPrefs([(set(), [("French (France)", "fr-fr", "false")])]))
+        self.assertEqual(-2, player.evalSubPrefs([(set(), [("French (France)", "fr-FR", "false")])]))
+        # the -ss tag selects Signs&Songs tracks, but the ignore toggle always wins
+        self.assertEqual(-2, player.evalCondSubPrefs(PrefParser().parsePrefString("any:fr-fr-ss")))
+        settings.ignore_signs_on = False
         self.assertEqual(16, player.evalCondSubPrefs(PrefParser().parsePrefString("any:fr-fr-ss")))
 
     def test_suffix_removal_preserves_bcp47_codes_ending_in_s(self):
         rule = PrefParser().parsePrefString("any:en-us-ss")[0][1][0]
-        self.assertEqual("en-us", rule[3])
+        self.assertEqual("eng-US", rule[3])
         self.assertEqual("true", rule[5])
 
     def test_original_audio_blacklist_still_applies(self):
@@ -171,6 +179,7 @@ class PreferenceEvaluationTests(unittest.TestCase):
             {"index": 1, "language": "eng", "name": "Commentary", "isoriginal": True},
             {"index": 2, "language": "eng", "name": "Original", "isoriginal": True}]
         settings.audio_original_preflist_enabled = True
+        settings.audio_original_any = True
         settings.audio_original_preflist = ["any", "any"]
         settings.audio_keyword_blacklist_enabled = True
         settings.audio_keyword_blacklist = ["commentary"]
