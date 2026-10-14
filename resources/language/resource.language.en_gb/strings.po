@@ -584,3 +584,7 @@ msgstr ""
 msgctxt "#30639"
 msgid "VobSub (DVD pictures, .idx/.sub)"
 msgstr ""
+
+msgctxt "#30640"
+msgid "Select the audio track from the rules (first rule with an available audio language)"
+msgstr ""

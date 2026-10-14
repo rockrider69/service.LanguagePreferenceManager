@@ -459,9 +459,26 @@ class LangPrefMan_Player(xbmc.Player):
         if settings.useFilename and not self.LPM_initial_run_done:
             filename_audio, filename_sub = self.evalFilenamePrefs()
 
+        # Conditional rules choose the audio track (opt-in), ahead of the audio preferences and the filename tag:
+        # the first rule, in list order, whose audio language is available. Only a stored per-video preference
+        # outranks it. Without a usable rule the audio preferences / filename tag below apply as before. The
+        # subtitles follow further down: the regex filter first, else the conditional rules for this audio track.
+        cond_audio_decided = False
+        if settings.cond_audio_switch and not self.LPM_initial_run_done and not protect_audio:
+            cond_audio = self.evalCondAudioPrefs(settings.custom_condsub if settings.custom_condsub_prefs_on
+                                                 else settings.CondSubtitlePrefs)
+            if cond_audio != -2:
+                cond_audio_decided = True          # -1 = the playing track already matches a rule
+                if cond_audio >= 0:
+                    self.setAudioStream(cond_audio)
+                    self.lpm_expected_audio_index = cond_audio
+                    self.lpm_audio_target = cond_audio
+                    self.audio_changed = True
+
         # Audio preferences
         audio_pref_matched = False
-        if settings.audio_prefs_on and not self.LPM_initial_run_done and not protect_audio:
+        if (settings.audio_prefs_on and not self.LPM_initial_run_done and not protect_audio
+                and not cond_audio_decided):
             if settings.custom_audio_prefs_on:
                 trackIndex = self.evalAudioPrefs(settings.custom_audio)
             else:
@@ -479,8 +496,12 @@ class LangPrefMan_Player(xbmc.Player):
 
         # Filename audio tag - lowest priority: only if no audio preference matched
         if filename_audio >= 0 and not protect_audio:
-            if audio_pref_matched:
+            if cond_audio_decided:
+                log(LOG_INFO, 'Filename preference: audio track {0} ignored - the conditional rules chose the audio'.format(filename_audio))
+            elif audio_pref_matched:
                 log(LOG_INFO, 'Filename preference: audio track {0} ignored - an audio preference matched and has priority'.format(filename_audio))
+            elif filename_audio == self.getSelectedAudioIndex():
+                log(LOG_INFO, 'Filename preference: audio track {0} is already playing'.format(filename_audio))
             elif filename_audio < len(self.audiostreams):
                 log(LOG_INFO, 'Filename preference: Match, selecting audio track {0}'.format(filename_audio))
                 self.setAudioStream(filename_audio)
@@ -626,7 +647,9 @@ class LangPrefMan_Player(xbmc.Player):
     def evalFallbackSubPrefs(self):
         """
         Last resort when nothing else selected a subtitle: the track flagged as default, otherwise the first
-        valid track. Valid = not blacklisted, and not a Signs&Songs track while that toggle is on.
+        valid track. Valid = not blacklisted, not a Signs&Songs track while that toggle is on, and not forced
+        (the default flag usually sits on a forced track: it is played only when a rule asked for it, which
+        then already selected it - never as a fallback).
         :return: subtitle index, or -2 if there is no valid subtitle track
         """
         valid = []
@@ -635,6 +658,8 @@ class LangPrefMan_Player(xbmc.Player):
             if self.isInBlacklist(sub_name, 'Subtitle'):
                 continue
             if settings.ignore_signs_on and self.isSignsSub(sub_name):
+                continue
+            if self.isForcedTrack(sub):
                 continue
             valid.append(sub)
         for sub in valid:
@@ -841,6 +866,21 @@ class LangPrefMan_Player(xbmc.Player):
             log(LOG_INFO, 'Regex subtitle preference: No matching subtitle track found')
             return -2
 
+        # A forced track (name or flag) hit by the pattern - 'forced' is in the default one - is not a Signs&Songs
+        # track: it never outranks one, and which forced track is right depends on the language, which only the
+        # conditional rules know. Without a non-forced hit the regex gives way to them (they pick a forced track
+        # themselves when a rule asks for it). Without conditional rules the first forced track is kept as before.
+        non_forced = [s for s in candidates if not self.isForcedTrack(s)]
+        if non_forced:
+            if len(non_forced) != len(candidates):
+                log(LOG_DEBUG, 'Regex subtitle: forced tracks {0} ignored, a non-forced track matched'.format(
+                    [s['index'] for s in candidates if s not in non_forced]))
+            candidates = non_forced
+        elif settings.condsub_prefs_on:
+            log(LOG_INFO, 'Regex subtitle preference: only forced tracks {0} matched - leaving the choice to the '
+                          'conditional subtitle rules'.format([s['index'] for s in candidates]))
+            return -2
+
         chosen = candidates[0]
         if len(candidates) > 1:
             ass = self.ass_subtitle_indexes(self.subtitles) & set(s['index'] for s in candidates)
@@ -871,8 +911,37 @@ class LangPrefMan_Player(xbmc.Player):
                 elif (pref[0].lower() == 'subtitle'):
                     sub = int(pref[1])
                     log(LOG_INFO, 'subtitle track extracted from filename: {0}'.format(sub))
+        # Languages named in the file name ('Movie.JPN.UKR.subs.ENG.mkv'): only where no track number was given
+        audio_langs, sub_langs = langutils.filename_languages(filename)
+        if audio < 0 and audio_langs:
+            audio = self.filename_language_track(audio_langs, self.audiostreams, 'Audio')
+        if sub < 0 and sub_langs:
+            sub = self.filename_language_track(sub_langs, self.subtitles, 'Subtitle')
+        # The file name names nothing usable: the first audio and the first subtitle track (number 0)
+        if audio < 0 and self.audiostreams:
+            audio = 0
+            log(LOG_INFO, 'Filename preference: nothing usable for the audio in the file name - first audio track')
+        if sub < 0 and self.subtitles:
+            sub = 0
+            log(LOG_INFO, 'Filename preference: nothing usable for the subtitles in the file name - first subtitle track')
         log(LOG_DEBUG, 'filename: audio: {0}, sub: {1} ({2})'.format(audio, sub, filename))
         return audio, sub
+
+    def filename_language_track(self, codes, streams, track_type):
+        """The track for the first language of the file name that a track has (the same matching as the other
+        preferences: 2 / 3 letter codes, regions, scripts, track titles). -1 when none has."""
+        if track_type == 'Audio':
+            def accept(stream):
+                return not self.isInBlacklist(stream.get('name', '') or '', 'Audio')
+        else:
+            accept = self.subtitle_filter('false', 'Filename')
+        for code in codes:
+            found = self.best_matches(code, object(), streams, track_type, accept)
+            if found:
+                log(LOG_INFO, 'Filename preference: {0} language {1} found in the file name - track {2}'.format(
+                    track_type.lower(), code, found[0]))
+                return found[0]
+        return -1
 
     def evalAudioPrefs(self, audio_prefs):
         log(LOG_DEBUG, 'Evaluating audio preferences')
@@ -976,6 +1045,50 @@ class LangPrefMan_Player(xbmc.Player):
                 i += 1
         return -2
 
+    def cond_audio_stream(self):
+        """The audio track the conditional rules are matched against: the one playing - except on the initial run,
+        where LPM has just switched the audio (audio / filename preference) and Kodi still reports the track it
+        started on (often the default-flagged one) while the switch is pending."""
+        target = getattr(self, 'lpm_audio_target', None)
+        if target is not None and not self.LPM_initial_run_done:
+            for stream in self.audiostreams or []:
+                if stream.get('index') == target:
+                    return stream
+        return self.selected_audio_stream
+
+    def evalCondAudioPrefs(self, condsub_prefs):
+        """Audio track chosen by the conditional rules: the first rule (list order) whose audio language is among
+        the available audio tracks. :return: the track index, -1 when the playing track is already that one,
+        -2 when no rule has an available audio track"""
+        log(LOG_DEBUG, 'Evaluating conditional rules for the audio track')
+        if not self.getDetails():
+            return -2
+
+        def accept(stream):
+            return not self.isInBlacklist(stream.get('name', '') or '', 'Audio')
+
+        i = 0
+        for g_t, preferences in condsub_prefs:
+            if g_t and not (self.genres_and_tags & g_t):
+                continue
+            for audio_name, audio_codes, _sub_name, _sub_codes, _forced, _ss_tag in preferences:
+                i += 1
+                for audio_code in audio_codes.split(','):
+                    if audio_code in ('', 'non'):
+                        continue
+                    found = self.best_matches(audio_code, audio_name, self.audiostreams, 'Audio', accept)
+                    if not found:
+                        continue
+                    if self.getSelectedAudioIndex() in found:
+                        log(LOG_INFO, 'CondAudio : playing audio track matches conditional rule {0} ({1}) - kept'.format(
+                            i, audio_name))
+                        return -1
+                    log(LOG_INFO, 'CondAudio : conditional rule {0} ({1}) - selecting audio track {2}'.format(
+                        i, audio_name, found[0] + 1))
+                    return found[0]
+        log(LOG_INFO, 'CondAudio : no conditional rule has an available audio track')
+        return -2
+
     def evalCondSubPrefs(self, condsub_prefs):
         log(LOG_DEBUG, 'Evaluating conditional subtitle preferences')
         log(LOG_DEBUG, 'Subtitle names containing the following keywords are blacklisted: {0}'.format(
@@ -987,6 +1100,7 @@ class LangPrefMan_Player(xbmc.Player):
         log(LOG_DEBUG, 'Getting video properties')
         if not self.getDetails():
             return None                       # playback stopped: evalPrefs ends here
+        audio = self.cond_audio_stream()
         i = 0
         for pref in condsub_prefs:
             i += 1
@@ -1010,11 +1124,11 @@ class LangPrefMan_Player(xbmc.Player):
                         log(LOG_DEBUG, 'continue')
                         continue
 
-                    if (self.selected_audio_stream and
-                            'language' in self.selected_audio_stream and
-                            (self.stream_matches_language(audio_code, self.selected_audio_stream, 'Audio') or
+                    if (audio and
+                            'language' in audio and
+                            (self.stream_matches_language(audio_code, audio, 'Audio') or
                              audio_name ==
-                             self.selected_audio_stream['language'])):
+                             audio['language'])):
                         log(LOG_INFO,
                             'CondSubs : Selected audio language matches conditional preference {0} ({1}:{2}), force tag is {3}'.format(
                                 i, audio_name, sub_name, forced))
@@ -1128,6 +1242,11 @@ class LangPrefMan_Player(xbmc.Player):
         test = subName.lower()
         matches = ['signs']
         return any(x in test for x in matches)
+
+    def isForcedTrack(self, sub):
+        """A forced subtitle track: 'forced' in its name or the forced flag set."""
+        name = (sub.get('name', '') or '').lower()
+        return bool(sub.get('isforced', False)) or any(x in name for x in ('forced', 'forcés'))
 
     def testForcedFlag(self, forced, subName, subForcedTag):
         test = subName.lower()

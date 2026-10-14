@@ -1033,6 +1033,13 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="condAudioSwitch" label="30640" type="boolean">
+                    <default>false</default>
+                    <control type="toggle"/>
+                    <dependencies>
+                        <dependency type="visible" setting="enableCondSub" operator="is">true</dependency>
+                    </dependencies>
+                </setting>
             </group>
             <group id="2">
                 <setting id="CondAudioLang01" type="integer" label="30110">

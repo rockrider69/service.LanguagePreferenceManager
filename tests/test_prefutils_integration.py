@@ -279,5 +279,170 @@ class PreferenceEvaluationTests(unittest.TestCase):
         self.assertEqual({}, player.subtitle_formats())
 
 
+class ForcedDefaultRegexTests(unittest.TestCase):
+    """Regex filter / fallback must not play a forced (or default-flagged forced) track unless the conditional
+    subtitle rules ask for it."""
+
+    def setUp(self):
+        import re
+        xbmc.getLocalizedString = lambda _id: "(External)"
+        settings.regex_sub_filter_enabled = True
+        settings.regex_sub_filter = re.compile(r'(?i:forced|signs?|songs?)')
+        settings.regex_sub_exclusion = None
+        settings.condsub_prefs_on = True
+        settings.turn_subs_on = True
+        settings.turn_subs_off = False
+        self.player = object.__new__(LangPrefMan_Player)
+        self.player.getPlayingFile = lambda: (_ for _ in ()).throw(RuntimeError())
+        self.player.sub_codecs = (None, None)
+        self.player.subtitles = [
+            {"index": 0, "language": "eng", "name": "English Forced", "isforced": True, "isdefault": True},
+            {"index": 1, "language": "jpn", "name": "Japanese Forced", "isforced": True, "isdefault": False},
+            {"index": 2, "language": "eng", "name": "English", "isforced": False, "isdefault": False},
+            {"index": 3, "language": "eng", "name": "Signs & Songs", "isforced": False, "isdefault": False},
+        ]
+
+    def tearDown(self):
+        for key in ("regex_sub_filter_enabled", "regex_sub_filter", "regex_sub_exclusion", "condsub_prefs_on",
+                    "turn_subs_on", "turn_subs_off"):
+            if hasattr(FakeSettings, key):
+                delattr(FakeSettings, key)
+
+    def test_regex_prefers_signs_over_forced_track(self):
+        self.assertEqual(3, self.player.evalRegexSubPrefs())
+
+    def test_regex_forced_only_hit_defers_to_conditionals(self):
+        del self.player.subtitles[3]
+        self.assertEqual(-2, self.player.evalRegexSubPrefs())
+
+    def test_regex_forced_only_hit_kept_without_conditionals(self):
+        del self.player.subtitles[3]
+        settings.condsub_prefs_on = False
+        self.assertEqual(0, self.player.evalRegexSubPrefs())
+
+    def test_fallback_skips_default_forced_track(self):
+        self.assertEqual(2, self.player.evalFallbackSubPrefs())
+
+    def test_fallback_still_uses_non_forced_default(self):
+        self.player.subtitles[3]["isdefault"] = True
+        self.assertEqual(3, self.player.evalFallbackSubPrefs())
+
+    def test_fallback_with_only_forced_tracks_selects_nothing(self):
+        self.player.subtitles = self.player.subtitles[:2]
+        self.assertEqual(-2, self.player.evalFallbackSubPrefs())
+
+
+class AudioOrderTests(unittest.TestCase):
+    """The audio preference order and the conditional rules' audio part are honored whatever flags the tracks carry
+    (Kodi starts on the default-flagged audio track, which says nothing about the user's order)."""
+
+    def setUp(self):
+        self.player = object.__new__(LangPrefMan_Player)
+        self.player.audiostreams = [
+            {"index": 0, "language": "eng", "name": "English", "isdefault": True, "isforced": True},
+            {"index": 1, "language": "jpn", "name": "Japanese", "isdefault": False, "isforced": False},
+            {"index": 2, "language": "fre", "name": "French", "isdefault": False, "isforced": False},
+        ]
+        self.player.selected_audio_stream = self.player.audiostreams[0]
+        self.player.subtitles = [
+            {"index": 0, "language": "eng", "name": "English", "isforced": False},
+            {"index": 1, "language": "fre", "name": "French", "isforced": False},
+            {"index": 2, "language": "ger", "name": "German", "isforced": False},
+        ]
+        self.player.selected_sub = self.player.subtitles[2]
+        self.player.audio_changed = False
+        self.player.getDetails = lambda: True
+        self.player.genres_and_tags = set()
+        self.player.LPM_initial_run_done = False
+        self.player.lpm_audio_target = None
+
+    def test_audio_order_beats_default_and_forced_flag(self):
+        prefs = PrefParser().parsePrefString("jpn>eng")
+        self.assertEqual(1, self.player.evalAudioPrefs(prefs))
+        prefs = PrefParser().parsePrefString("eng>jpn")
+        self.assertEqual(-1, self.player.evalAudioPrefs(prefs))
+
+    def test_conditional_rules_follow_rule_order_for_the_selected_audio(self):
+        self.player.selected_audio_stream = self.player.audiostreams[1]
+        self.assertEqual(0, self.player.evalCondSubPrefs(PrefParser().parsePrefString("jpn:eng>any:fre")))
+        self.assertEqual(1, self.player.evalCondSubPrefs(PrefParser().parsePrefString("any:fre>jpn:eng")))
+
+    def test_initial_run_uses_the_audio_track_lpm_switched_to(self):
+        # Kodi still reports the default-flagged English audio, LPM has just switched to Japanese (index 1)
+        self.player.lpm_audio_target = 1
+        prefs = PrefParser().parsePrefString("jpn:eng>eng:fre")
+        self.assertEqual(0, self.player.evalCondSubPrefs(prefs))
+
+    def test_pending_target_is_ignored_after_the_initial_run(self):
+        self.player.lpm_audio_target = 1
+        self.player.LPM_initial_run_done = True
+        prefs = PrefParser().parsePrefString("jpn:eng>eng:fre")
+        self.assertEqual(1, self.player.evalCondSubPrefs(prefs))
+
+
+
+class CondAudioTests(unittest.TestCase):
+    def player(self, current):
+        player = object.__new__(LangPrefMan_Player)
+        player.audiostreams = [
+            {"index": 0, "language": "jpn", "name": "Japanese"},
+            {"index": 1, "language": "ukr", "name": "Ukrainian"},
+            {"index": 2, "language": "ukr", "name": "Ukrainian"},
+        ]
+        player.selected_audio_stream = player.audiostreams[current]
+        player.getDetails = lambda: True
+        player.genres_and_tags = set()
+        return player
+
+    RULES = [(set(), [("Italian", "ita", "English", "eng", "false", "false"),
+                      ("Japanese", "jpn", "English", "eng", "true", "false"),
+                      ("Ukrainian", "ukr", "English", "eng", "false", "false"),
+                      ("Any", "any", "None", "non", "false", "false")])]
+
+    def test_first_rule_with_available_audio_wins_over_kodi_default(self):
+        self.assertEqual(0, self.player(1).evalCondAudioPrefs(self.RULES))
+
+    def test_playing_track_already_matching_is_kept(self):
+        self.assertEqual(-1, self.player(0).evalCondAudioPrefs(self.RULES))
+
+    def test_rule_order_decides(self):
+        rules = [(set(), [self.RULES[0][1][2], self.RULES[0][1][1]])]
+        self.assertEqual(1, self.player(0).evalCondAudioPrefs(rules))
+
+    def test_no_available_audio(self):
+        rules = [(set(), [self.RULES[0][1][0], ("None", "non", "English", "eng", "false", "false")])]
+        self.assertEqual(-2, self.player(1).evalCondAudioPrefs(rules))
+
+
+class FilenameEvaluationTests(unittest.TestCase):
+    AUDIO = [{"index": 0, "language": "ukr", "name": "Ukrainian"}, {"index": 1, "language": "jpn", "name": "Japanese"},
+             {"index": 2, "language": "pt-BR", "name": "Portuguese (Brazil)"}]
+    SUBS = [{"index": 0, "language": "eng", "name": "English", "isforced": False},
+            {"index": 1, "language": "jpn", "name": "Japanese", "isforced": False}]
+
+    def player(self, filename):
+        import re
+        settings.reg = re.compile(r"audiostream[_|.|-]*\d+|subtitle[_|.|-]*\d+", re.I)
+        settings.split = re.compile(r"[_|.|-]+", re.I)
+        player = object.__new__(LangPrefMan_Player)
+        player.audiostreams, player.subtitles = self.AUDIO, self.SUBS
+        player.getPlayingFile = lambda: filename
+        return player
+
+    def test_track_numbers_still_win(self):
+        self.assertEqual((2, 1), self.player("Movie.JPN.audiostream_2.subtitle_1.mkv").evalFilenamePrefs())
+
+    def test_languages_of_the_name(self):
+        self.assertEqual((1, 1), self.player("Movie.JPN.UKR.subs.JPN.mkv").evalFilenamePrefs())
+        self.assertEqual((2, 0), self.player("Movie.pt-BR.subs.eng.mkv").evalFilenamePrefs())
+
+    def test_a_language_without_a_track_falls_to_the_next_one(self):
+        self.assertEqual((0, 0), self.player("Movie.FRA.UKR.mkv").evalFilenamePrefs())
+
+    def test_nothing_usable_selects_the_first_tracks(self):
+        self.assertEqual((0, 0), self.player("Movie.2021.1080p.mkv").evalFilenamePrefs())
+        self.assertEqual((0, 0), self.player("Movie.FRA.subs.GER.mkv").evalFilenamePrefs())
+
+
 if __name__ == "__main__":
     unittest.main()

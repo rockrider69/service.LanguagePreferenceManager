@@ -13,6 +13,13 @@ This beta builds on 1.1.1Beta1; the changes are listed below.
   the first format of your list (SRT, ASS/SSA, WebVTT, PGS, VobSub) that is present is taken. The format of embedded
   .mkv tracks is read from the file, that of external files from their extension, any other from a format word in the
   track title; when it is unknown nothing changes. The language always comes first.
+- fix: regex subtitle filter / fallback and forced tracks. A forced track hit by the regex ("forced" is in the default
+  pattern) no longer outranks a Signs&Songs track, and when only forced tracks match and conditional subtitles are on,
+  the choice is left to the conditional rules (they pick a forced track when a rule asks for it). The final fallback
+  (default / first valid subtitle) skips forced tracks, so a default-flagged forced track is no longer played just
+  because it carries the default flag.
+- fix: on the initial run the conditional subtitle rules are matched against the audio track LPM has just switched to,
+  not the track Kodi started on (often the default-flagged one) while the switch is still pending.
 - Language codes can be typed as 2-letter, 3-letter or BCP47 codes everywhere (custom preferences, Original audio list).
 - New "Sub converter" for ASS/SSA and other text subtitles: lines are moved to the top, keeping styles and positions.
 - Reworked seekback / "Fast Subtitles Display" ("Start & Resume" by default).
@@ -23,6 +30,12 @@ This beta builds on 1.1.1Beta1; the changes are listed below.
 - Settings strings of 1.1.1Beta1 (30351-30359) replaced by 30251-30267.
 
 Details (newest first):
+- new: "Select the audio track from the rules" (Conditional Subtitle Preferences, off by default): the first conditional rule whose audio language is available chooses the audio track, ahead of the audio preferences and the filename tag; only a stored per-video preference outranks it. The regex filter still chooses the subtitles first, then the conditional rules.
+
+- new: filename preferences (setting "Try to set the audio and/or subtitle track from the filename") also read the languages written in the file name: 2 / 3 letter codes, regional and script tags and language names (Movie.JPN.UKR.subs.ENG.mkv, Movie.pt-BR.zh-Hant.mkv, [Japanese+Ukrainian]). Languages after "subs" are subtitle languages, the others audio languages. audiostream_N / subtitle_N still work and come first. When the name gives nothing usable, the first audio and the first subtitle track (number 0) are selected. Still the lowest priority: the regex filter, the conditional and normal preferences and stored preferences all outrank it. Only active with that setting on.
+
+- fix: conditional audio rules "Undefined" / "Unknown" no longer take a track whose title names a language (an untagged track titled "Japanese" matches the Japanese rule), nor a tagged track that has "unknown" in its title.
+
 
 - change: sub converter: an ASS/SSA subtitle is no longer turned into plain SRT. The copy is an .ass file with the track's own header (styles, fonts, colours) and every line's tags untouched; only lines at the bottom (alignment 1-3 from the style or an \an tag, with no \pos or one in the lower part of the picture) go to the top, a \pos line is mirrored. Signs, songs, effects and anything placed elsewhere stay where they are. Other text formats (WebVTT) still become yellow SRT at the top
 

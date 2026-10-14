@@ -79,5 +79,60 @@ class VariantMatchTests(unittest.TestCase):
                            langutils.match_score("pt-BR", self.stream("por")))
 
 
+class SpecialCodeTests(unittest.TestCase):
+    def test_untagged_track_with_language_title_is_not_undefined_or_unknown(self):
+        for tag in ("", "und", "unk"):
+            stream = {"language": tag, "name": "Japanese 5.1"}
+            self.assertFalse(langutils.stream_matches_language("und", stream))
+            self.assertFalse(langutils.stream_matches_language("unk", stream))
+            self.assertTrue(langutils.stream_matches_language("jpn", stream))
+
+    def test_untagged_track_without_language_is_undefined(self):
+        stream = {"language": "", "name": "AAC 5.1"}
+        self.assertTrue(langutils.stream_matches_language("und", stream))
+        self.assertTrue(langutils.stream_matches_language("unk", stream))
+
+    def test_unknown_in_title_of_tagged_track_is_not_unknown(self):
+        self.assertFalse(langutils.stream_matches_language("unk", {"language": "fre", "name": "Unknown commentary"}))
+
+
+class TitleOnlyWhenTagSaysNothingTests(unittest.TestCase):
+    def test_a_real_tag_is_never_overridden_by_the_title(self):
+        self.assertFalse(langutils.stream_matches_language("eng", {"language": "enm", "name": "English Middle"}))
+        self.assertFalse(langutils.stream_matches_language("jpn", {"language": "eng", "name": "Japanese 5.1"}))
+
+    def test_title_names_the_language_when_the_tag_says_nothing(self):
+        for tag in ("", "und", "mul"):
+            self.assertTrue(langutils.stream_matches_language("jpn", {"language": tag, "name": "Japanese 5.1"}))
+
+
+class FilenameLanguageTests(unittest.TestCase):
+    def read(self, name):
+        return langutils.filename_languages(name)
+
+    def test_codes_names_and_markers(self):
+        self.assertEqual((["jpn", "ukr"], []), self.read("Movie.2020.1080p.JPN.UKR.mkv"))
+        self.assertEqual((["jpn", "ukr"], []), self.read("Anime.Ep01.[Japanese+Ukrainian].mkv"))
+        self.assertEqual((["jpn", "ukr"], ["eng"]), self.read("Movie.2020.JPN.UKR.subs.ENG.mkv"))
+        self.assertEqual((["jpn", "ukr"], ["eng"]), self.read("Show-JPN-UKR-subs-ENG.mkv"))
+        self.assertEqual((["ger"], ["eng", "ita"]), self.read("Movie.Dubbed.German.subs.English.Italian.mkv"))
+
+    def test_regions_and_scripts(self):
+        self.assertEqual((["pob", "chi-Hant"], []), self.read("Movie.pt-BR.zh-Hant.mkv"))
+        self.assertEqual((["eng-AU", "srp-Latn"], []), self.read("Movie.en-AU.sr-Latn.mkv"))
+
+    def test_common_words_are_not_languages(self):
+        self.assertEqual(([], []), self.read("The.Man.In.It.No.He.Is.2020.mkv"))
+        self.assertEqual(([], []), self.read("Ice.Age.War.Man.mkv"))
+        self.assertEqual(([], []), self.read("NoHints.2021.1080p.x264.mkv"))
+
+    def test_only_the_file_name_is_read(self):
+        self.assertEqual((["ger"], []), self.read("smb://nas/Japanese Movies/Film.deu.mkv"))
+        self.assertEqual((["fre"], []), self.read("http://h/Film.FRA.mkv?x=ENG|User-Agent=Z"))
+
+    def test_track_numbers_are_not_languages(self):
+        self.assertEqual(([], []), self.read("Film.audiostream_2.subtitle_1.mkv"))
+
+
 if __name__ == "__main__":
     unittest.main()

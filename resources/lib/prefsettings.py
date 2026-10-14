@@ -95,6 +95,7 @@ class settings():
         self.audio_original_any = langutils.ANY in self.audio_original_langs
         self.sub_prefs_on = addon.getSetting('enableSub') == 'true'
         self.condsub_prefs_on = addon.getSetting('enableCondSub') == 'true'
+        self.cond_audio_switch = self.condsub_prefs_on and addon.getSetting('condAudioSwitch') == 'true'
         self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'
         self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
         self.ignore_signs_on = addon.getSetting('signs') == 'true'
