@@ -1034,7 +1034,7 @@
                     <control type="toggle"/>
                 </setting>
                 <setting id="condAudioSwitch" label="30640" type="boolean">
-                    <default>false</default>
+                    <default>true</default>
                     <control type="toggle"/>
                     <dependencies>
                         <dependency type="visible" setting="enableCondSub" operator="is">true</dependency>
