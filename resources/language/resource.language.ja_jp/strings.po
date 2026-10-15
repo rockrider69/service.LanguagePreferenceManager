@@ -584,3 +584,35 @@ msgstr "PGS（Blu-ray の画像字幕、.sup）"
 msgctxt "#30639"
 msgid "VobSub (DVD pictures, .idx/.sub)"
 msgstr "VobSub（DVD の画像字幕、.idx/.sub）"
+
+msgctxt "#30640"
+msgid "Select the audio track from the rules (first rule with an available audio language)"
+msgstr "ルールから音声トラックを選択（利用可能な音声言語を持つ最初のルール）"
+
+msgctxt "#30641"
+msgid "Subtitle format for this rule"
+msgstr "このルールの字幕フォーマット"
+
+msgctxt "#30642"
+msgid "General order (settings, General)"
+msgstr "全般の順序（設定、全般）"
+
+msgctxt "#30643"
+msgid "Preferred format 1st first"
+msgstr "優先フォーマット：1番目を優先"
+
+msgctxt "#30644"
+msgid "Preferred format 2nd first"
+msgstr "優先フォーマット：2番目を優先"
+
+msgctxt "#30645"
+msgid "Preferred format 3rd first"
+msgstr "優先フォーマット：3番目を優先"
+
+msgctxt "#30646"
+msgid "Check installation (stale or duplicate copies)"
+msgstr "インストールを確認（古いコピーまたは重複したコピー）"
+
+msgctxt "#30647"
+msgid "Installation"
+msgstr "インストール"

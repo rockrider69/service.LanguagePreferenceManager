@@ -44,6 +44,7 @@ class FakeSettings:
     audio_original_preflist = []
     audio_original_any = False
     sub_format_order = []
+    sub_format_slots = [None, None, None]
     audio_original_langs = []
     delay = 0
 
@@ -96,6 +97,7 @@ class PreferenceEvaluationTests(unittest.TestCase):
         settings.audio_original_any = False
         settings.audio_original_langs = []
         settings.sub_format_order = []
+        settings.sub_format_slots = [None, None, None]
 
     def test_settings_region_does_not_match_other_region(self):
         player = self.make_player()
@@ -241,6 +243,156 @@ class PreferenceEvaluationTests(unittest.TestCase):
         prefs = PrefParser().parsePrefString("jpn:eng")
         self.assertEqual(1, player.evalCondSubPrefs(prefs))
 
+    def cond_player(self):
+        settings.sub_format_order = ["srt", "ass", "pgs"]
+        settings.sub_format_slots = ["srt", "ass", "pgs"]
+        player = self.english_subs({0: "ass", 1: "srt", 2: "pgs"})
+        player.selected_audio_stream = {"index": 0, "language": "jpn", "name": "Japanese"}
+        return player
+
+    def cond_rule(self, slot):
+        return [(set(), [("Japanese", "jpn", "English", "eng", "false", "false", slot)])]
+
+    def test_a_conditional_rule_without_a_slot_uses_the_general_order(self):
+        self.assertEqual(1, self.cond_player().evalCondSubPrefs(self.cond_rule(0)))
+
+    def test_a_conditional_rule_can_use_the_second_or_third_format_first(self):
+        self.assertEqual(1, self.cond_player().evalCondSubPrefs(self.cond_rule(1)))
+        self.assertEqual(0, self.cond_player().evalCondSubPrefs(self.cond_rule(2)))
+        self.assertEqual(2, self.cond_player().evalCondSubPrefs(self.cond_rule(3)))
+
+    def test_a_chosen_format_that_is_missing_falls_back_to_the_general_order(self):
+        player = self.cond_player()
+        player.subtitle_formats = lambda: {0: "ass", 1: "srt", 2: "vobsub"}
+        self.assertEqual(0, player.evalCondSubPrefs(self.cond_rule(2)))
+        player.subtitle_formats = lambda: {0: "vobsub", 1: "srt", 2: "ass"}
+        self.assertEqual(1, player.evalCondSubPrefs(self.cond_rule(3)))
+
+    def test_an_empty_slot_leaves_the_general_order(self):
+        player = self.cond_player()
+        settings.sub_format_slots = ["srt", "ass", None]
+        self.assertEqual(1, player.evalCondSubPrefs(self.cond_rule(3)))
+
+    def test_old_six_field_rules_still_work(self):
+        player = self.cond_player()
+        self.assertEqual(1, player.evalCondSubPrefs([(set(), [("Japanese", "jpn", "English", "eng", "false", "false")])]))
+
+    def test_custom_rules_can_name_the_format_slot(self):
+        parser = PrefParser()
+        rule = parser.parsePrefString("jpn:eng-f2>jpn:eng-f3-ff>jpn:eng-ss-f1>jpn:eng")
+        self.assertEqual([2, 3, 1, 0], [r[6] for r in rule[0][1]] if isinstance(rule[0], tuple) else [r[6] for r in rule])
+        self.assertEqual(["false", "true", "false", "false"],
+                         [r[4] for r in (rule[0][1] if isinstance(rule[0], tuple) else rule)])
+        self.assertEqual(["false", "false", "true", "false"],
+                         [r[5] for r in (rule[0][1] if isinstance(rule[0], tuple) else rule)])
+        self.assertEqual(2, self.cond_player().evalCondSubPrefs(parser.parsePrefString("jpn:eng-f3")))
+
+    def converter_player(self):
+        from unittest import mock
+        player = self.make_player()
+        player.sub_converting = False
+        player.sub_convert_pending = False
+        player.sub_convert_quiet_until = 0
+        settings.sub_converter_on = True
+        settings.regex_sub_filter_enabled = False
+        settings.condsub_prefs_on = True
+        settings.is_store_user_preference_for_player = lambda p: False
+        player.getSelectedSubtitleIndex = lambda: 1
+        player.getSelectedSubtitleLanguage = lambda: "eng"
+        player.selected_sub_enabled = True
+        return player, mock
+
+    def test_switching_subtitles_during_playback_starts_the_sub_converter(self):
+        player, mock = self.converter_player()
+        with mock.patch("prefutils.threading.Thread") as thread:
+            player._check_subtitle_change(0, True, "jpn")     # the track was 0, now 1
+        thread.assert_called_once()
+        self.assertTrue(player.sub_converting)
+
+    def test_no_change_does_not_start_the_sub_converter(self):
+        player, mock = self.converter_player()
+        with mock.patch("prefutils.threading.Thread") as thread:
+            player._check_subtitle_change(1, True, "eng")
+        thread.assert_not_called()
+
+    def test_a_switch_during_a_running_conversion_is_converted_afterwards(self):
+        player, mock = self.converter_player()
+        player.sub_converting = True
+        with mock.patch("prefutils.threading.Thread") as thread:
+            player._check_subtitle_change(0, True, "jpn")
+        thread.assert_not_called()
+        self.assertTrue(player.sub_convert_pending)
+        player._sub_converter_job = lambda: None               # the next run finds nothing to do
+        player.isPlayingVideo = lambda: True
+        started = []
+        player.start_sub_converter = lambda user_switch=False: started.append(user_switch)
+        player.sub_converting = True
+        player._sub_converter_run()
+        self.assertEqual([False], started)
+        self.assertFalse(player.sub_convert_pending)
+        self.assertFalse(player.sub_converting)
+
+    def test_the_converters_own_switch_is_not_a_user_switch(self):
+        import time
+        player, mock = self.converter_player()
+        player.sub_convert_quiet_until = time.time() + 5
+        with mock.patch("prefutils.threading.Thread") as thread:
+            player._check_subtitle_change(0, True, "jpn")
+        thread.assert_not_called()
+
+    def flagged_player(self, formats, flagged, names=None):
+        """English tracks 0..n-1 in the given formats; the ones in `flagged` carry only the forced flag."""
+        player = self.make_player()
+        player.subtitles = [{"index": i, "language": "eng", "name": (names or {}).get(i, "English"),
+                             "isforced": i in flagged} for i in range(len(formats))]
+        player.selected_sub = player.subtitles[0]
+        player.selected_audio_stream = {"index": 0, "language": "jpn", "name": "Japanese"}
+        player.subtitle_formats = lambda: dict(enumerate(formats))
+        return player
+
+    def cond(self, forced="false"):
+        return [(set(), [("Japanese", "jpn", "English", "eng", forced, "false", 0)])]
+
+    def test_a_flagged_ass_track_is_chosen_by_the_format_preference_over_srt(self):
+        settings.sub_format_order = ["ass", "srt"]
+        settings.sub_format_slots = ["ass", "srt", None]
+        player = self.flagged_player(["srt", "ass"], {1})              # the ASS carries "forced + default"
+        self.assertEqual(1, player.evalCondSubPrefs(self.cond()))
+        settings.sub_format_order = ["srt", "ass"]
+        settings.sub_format_slots = ["srt", "ass", None]
+        self.assertEqual(0, player.evalCondSubPrefs(self.cond()))      # srt is current and best
+
+    def test_a_flagged_picture_track_stays_a_forced_track(self):
+        settings.sub_format_order = ["pgs", "srt"]
+        settings.sub_format_slots = ["pgs", "srt", None]
+        player = self.flagged_player(["pgs", "srt"], {0})              # forced PGS: foreign parts only
+        self.assertEqual(1, player.evalCondSubPrefs(self.cond()))
+
+    def test_a_track_named_forced_is_never_chosen_by_a_rule_that_wants_no_forced(self):
+        settings.sub_format_order = ["ass", "srt"]
+        settings.sub_format_slots = ["ass", "srt", None]
+        player = self.flagged_player(["srt", "ass"], {1}, {1: "English forced"})
+        self.assertEqual(0, player.evalCondSubPrefs(self.cond()))      # the srt, already playing
+
+    def test_without_a_format_preference_a_flagged_track_is_still_a_forced_track(self):
+        settings.sub_format_order = []
+        player = self.flagged_player(["srt", "ass"], {1})
+        player.subtitle_formats = lambda: {0: "srt", 1: "ass"}
+        self.assertEqual(0, player.evalCondSubPrefs(self.cond()))      # only the srt is eligible
+
+    def test_same_format_the_unflagged_track_comes_first(self):
+        settings.sub_format_order = ["ass", "srt"]
+        settings.sub_format_slots = ["ass", "srt", None]
+        player = self.flagged_player(["ass", "ass"], {0})
+        player.selected_sub = player.subtitles[0]
+        self.assertEqual(1, player.evalCondSubPrefs(self.cond()))
+
+    def test_a_forced_rule_still_takes_a_flagged_track(self):
+        settings.sub_format_order = ["ass", "srt"]
+        settings.sub_format_slots = ["ass", "srt", None]
+        player = self.flagged_player(["srt", "ass"], {1})
+        self.assertEqual(1, player.evalCondSubPrefs(self.cond("true")))      # the forced rule wants the flagged track
+
     def test_a_format_word_in_the_title_is_read_when_the_file_is_unreadable(self):
         player = self.make_player()
         player.subtitles = [{"index": 0, "language": "eng", "name": "English [PGS]", "isforced": False},
@@ -266,17 +418,66 @@ class PreferenceEvaluationTests(unittest.TestCase):
         player.sub_formats = (None, {})
         self.assertEqual({0: "ass", 1: "srt", 2: "pgs", 3: "ass"}, player.subtitle_formats())
 
-    def test_an_external_file_of_an_uncertain_format_is_unknown(self):
+    def external_player(self, tags, streams=2, embedded=None):
+        player = self.make_player()
+        player.subtitles = [{"index": i, "language": "en", "name": "(External)", "isforced": False}
+                            for i in range(streams)]
+        if embedded:
+            player.subtitles.append({"index": streams, "language": "en", "name": "English", "isforced": False})
+        player.getPlayingFile = lambda: "/video/movie.mkv"
+        player.embedded_subtitle_codecs = lambda: embedded
+        player.subtitle_file_tags = lambda externals: tags
+        player.sub_formats = (None, {})
+        player.sub_format_options = {}
+        player.selected_sub = player.subtitles[-1]
+        return player
+
+    def test_two_external_files_of_one_language_follow_kodis_reverse_listing_order(self):
+        # Movie.en.srt and Movie.en.ass: two streams, the same language and name. Kodi opens the files in the reverse
+        # of the folder listing (listing ass, srt -> streams srt, ass)
+        tags = [{"tag": "en", "words": ["en"], "ext": ".ass", "dir": "/video"},
+                {"tag": "en", "words": ["en"], "ext": ".srt", "dir": "/video"}]
+        player = self.external_player(tags)
+        self.assertEqual({0: "srt", 1: "ass"}, player.subtitle_formats())
+
+    def test_a_preferred_external_ass_beats_an_embedded_pgs(self):
+        tags = [{"tag": "en", "words": ["en"], "ext": ".ass", "dir": "/video"},
+                {"tag": "en", "words": ["en"], "ext": ".srt", "dir": "/video"}]
+        player = self.external_player(tags, embedded=["S_HDMV/PGS"])
+        player.selected_audio_stream = {"index": 0, "language": "jpn", "name": "Japanese"}
+        settings.sub_format_order = ["ass", "srt", "pgs"]
+        settings.sub_format_slots = ["ass", "srt", "pgs"]
+        rule = [(set(), [("Japanese", "jpn", "English", "eng", "false", "false", 0)])]
+        self.assertEqual(1, player.evalCondSubPrefs(rule))          # stream 1 = Movie.en.ass
+        settings.sub_format_order = ["srt", "ass", "pgs"]
+        player.sub_formats = (None, {})
+        self.assertEqual(0, player.evalCondSubPrefs(rule))          # stream 0 = Movie.en.srt
+
+    def test_files_from_several_folders_are_not_ordered_but_rank_as_their_best_format(self):
+        tags = [{"tag": "en", "words": ["en"], "ext": ".srt", "dir": "/video"},
+                {"tag": "en", "words": ["en"], "ext": ".ass", "dir": "/video/Subs"}]
+        player = self.external_player(tags, embedded=["S_HDMV/PGS"])
+        player.selected_audio_stream = {"index": 0, "language": "jpn", "name": "Japanese"}
+        settings.sub_format_order = ["ass", "srt", "pgs"]
+        settings.sub_format_slots = ["ass", "srt", "pgs"]
+        self.assertEqual({2: "pgs"}, player.subtitle_formats())
+        self.assertEqual({0: {"srt", "ass"}, 1: {"srt", "ass"}}, player.sub_format_options)
+        rule = [(set(), [("Japanese", "jpn", "English", "eng", "false", "false", 0)])]
+        self.assertEqual(0, player.evalCondSubPrefs(rule))          # an external file, never the pgs
+
+    def test_three_files_two_formats_are_matched_in_reverse_listing_order(self):
+        tags = [{"tag": "en", "words": ["en"], "ext": ".ass", "dir": "/video"},
+                {"tag": "fr", "words": ["fr"], "ext": ".ass", "dir": "/video"},
+                {"tag": "en", "words": ["eng"], "ext": ".srt", "dir": "/video"}]
         player = self.make_player()
         player.subtitles = [{"index": 0, "language": "en", "name": "(External)", "isforced": False},
-                            {"index": 1, "language": "en", "name": "(External)", "isforced": False}]
+                            {"index": 1, "language": "fr", "name": "(External)", "isforced": False},
+                            {"index": 2, "language": "en", "name": "(External)", "isforced": False}]
         player.getPlayingFile = lambda: "/video/movie.mkv"
         player.embedded_subtitle_codecs = lambda: None
-        # Movie.en.srt and Movie.en.ass: two streams, the same language, no telling which is which
-        player.subtitle_file_tags = lambda externals: [{"tag": "en", "words": ["en"], "ext": ".srt"},
-                                                       {"tag": "en", "words": ["en"], "ext": ".ass"}]
+        player.subtitle_file_tags = lambda externals: tags
         player.sub_formats = (None, {})
-        self.assertEqual({}, player.subtitle_formats())
+        self.assertEqual({0: "srt", 1: "ass", 2: "ass"}, player.subtitle_formats())
 
 
 class ForcedDefaultRegexTests(unittest.TestCase):
@@ -304,9 +505,40 @@ class ForcedDefaultRegexTests(unittest.TestCase):
 
     def tearDown(self):
         for key in ("regex_sub_filter_enabled", "regex_sub_filter", "regex_sub_exclusion", "condsub_prefs_on",
-                    "turn_subs_on", "turn_subs_off"):
+                    "turn_subs_on", "turn_subs_off", "sub_prefs_on", "custom_sub_prefs_on", "SubtitlePrefs",
+                    "sub_format_order"):
             if hasattr(FakeSettings, key):
                 delattr(FakeSettings, key)
+
+    def regex_language_setup(self, formats, order):
+        import re
+        settings.regex_sub_filter = re.compile(r'(?i:signs?|songs?|forced)')
+        settings.sub_prefs_on = True
+        settings.custom_sub_prefs_on = False
+        settings.SubtitlePrefs = [(set(), [("English", "eng")])]
+        settings.condsub_prefs_on = False
+        settings.sub_format_order = order
+        self.player.subtitles = [
+            {"index": 0, "language": "jpn", "name": "Signs & Songs", "isforced": False},
+            {"index": 1, "language": "eng", "name": "Signs & Songs", "isforced": False},
+            {"index": 2, "language": "eng", "name": "Signs & Songs", "isforced": True},
+        ]
+        self.player.subtitle_formats = lambda: formats
+        self.player.genres_and_tags = set()
+        self.player.cond_audio_stream = lambda: None
+
+    def test_regex_uses_preferred_language_and_ignores_flags(self):
+        self.regex_language_setup({0: "ass", 1: "srt", 2: "ass"}, ["ass", "srt"])
+        self.assertEqual(2, self.player.evalRegexSubPrefs())       # flagged ASS beats unflagged SRT
+
+    def test_regex_language_keeps_other_language_out(self):
+        self.regex_language_setup({0: "ass", 1: "srt", 2: "srt"}, ["ass", "srt"])
+        self.assertEqual(1, self.player.evalRegexSubPrefs())       # jpn ASS is the wrong language
+
+    def test_regex_without_language_match_acts_as_before(self):
+        self.regex_language_setup({0: "ass", 1: "srt", 2: "ass"}, ["ass", "srt"])
+        settings.SubtitlePrefs = [(set(), [("French", "fre")])]
+        self.assertEqual(0, self.player.evalRegexSubPrefs())
 
     def test_regex_prefers_signs_over_forced_track(self):
         self.assertEqual(3, self.player.evalRegexSubPrefs())

@@ -260,9 +260,9 @@ def format_of_name(name):
 
 
 def is_convertible(codec):
-    """True for the text subtitle formats the sub converter turns into SRT: everything but SRT itself (S_TEXT/UTF8)
-    and the picture formats (PGS / SUP, VobSub, DVB), which hold bitmaps and would need OCR."""
-    return is_ass(codec) or is_webvtt(codec)
+    """True for the text subtitle formats the sub converter handles (yellow, at the top): ASS/SSA, WebVTT and SRT
+    (S_TEXT/UTF8). Not the picture formats (PGS / SUP, VobSub, DVB), which hold bitmaps and would need OCR."""
+    return is_ass(codec) or is_webvtt(codec) or format_of_codec(codec) == 'srt'
 
 
 def is_bitmap(codec):

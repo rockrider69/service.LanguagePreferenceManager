@@ -184,12 +184,20 @@ msgid ""
 msgstr ""
 "L'audio/modifié des sous-titres remplace les préférences de configuration la prochaine fois pour le même film/la même série ?"
 
+msgctxt "#30138"
+msgid "Changed audio/subt. override config pref. next time for the same movie/series?"
+msgstr "Utiliser la préférence audio/sous-titres modifiée la prochaine fois pour le même film/la même série ?"
+
 msgctxt "#30139"
 msgid ""
 "If enabled, manually selected audio/subtitle tracks during playback will be "
 "stored and restored next time for the same movie/whole series."
 msgstr ""
 "S'il est activé, les pistes audio/sous-titres sélectionnées manuellement lors de la lecture seront stockées et restaurées la prochaine fois pour le même film/toute la série."
+
+msgctxt "#30139"
+msgid "If enabled, manually selected audio/subtitle tracks during playback will be stored and restored next time for the same movie/whole series."
+msgstr "Si activé, les pistes audio/sous-titres sélectionnées manuellement pendant la lecture seront enregistrées et restaurées la prochaine fois pour le même film/toute la série."
 
 msgctxt "#30140"
 msgid "Edit Overrides"
@@ -590,3 +598,35 @@ msgstr "PGS (images Blu-ray, .sup)"
 msgctxt "#30639"
 msgid "VobSub (DVD pictures, .idx/.sub)"
 msgstr "VobSub (images DVD, .idx/.sub)"
+
+msgctxt "#30640"
+msgid "Select the audio track from the rules (first rule with an available audio language)"
+msgstr "Sélectionner la piste audio d'après les règles (première règle avec une langue audio disponible)"
+
+msgctxt "#30641"
+msgid "Subtitle format for this rule"
+msgstr "Format de sous-titres pour cette règle"
+
+msgctxt "#30642"
+msgid "General order (settings, General)"
+msgstr "Ordre général (paramètres, Général)"
+
+msgctxt "#30643"
+msgid "Preferred format 1st first"
+msgstr "Format préféré : 1er en premier"
+
+msgctxt "#30644"
+msgid "Preferred format 2nd first"
+msgstr "Format préféré : 2e en premier"
+
+msgctxt "#30645"
+msgid "Preferred format 3rd first"
+msgstr "Format préféré : 3e en premier"
+
+msgctxt "#30646"
+msgid "Check installation (stale or duplicate copies)"
+msgstr "Vérifier l'installation (copies obsolètes ou en double)"
+
+msgctxt "#30647"
+msgid "Installation"
+msgstr "Installation"

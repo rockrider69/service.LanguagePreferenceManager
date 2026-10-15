@@ -79,6 +79,15 @@ class PrefParser:
             text = text[:-3]
         return text, 'ff' in found, 'ss' in found
 
+    @staticmethod
+    def split_format_tag(text):
+        """Remove a trailing format tag '-f1' / '-f2' / '-f3' (the rule prefers the 1st / 2nd / 3rd subtitle format of
+        the general settings), also when it stands before '-ff' / '-ss'. :return: (text, slot) with slot 0 = none"""
+        match = re.search(r'-f([123])((?:-ff|-ss)*)$', text, re.I)
+        if not match:
+            return text, 0
+        return text[:match.start()] + match.group(2), int(match.group(1))
+
     def parsePref(self, prefs):
         lang_prefs = []
         if (prefs.find(self.custom_prefs_delim) > 0):
@@ -96,6 +105,7 @@ class PrefParser:
                     sub_text = pref[1].strip()
                     # Sub tags like Eng:Jpn-ff to prioritize Forced tracks of another language, Eng:Eng-ss to
                     # prioritize Signs&Songs tracks
+                    sub_text, format_slot = self.split_format_tag(sub_text)
                     sub_text, ff_tag, ss_found = self.split_tags(sub_text)
                     ss_tag = 'true' if ss_found else 'false'
                     temp_a = self.lang_pref(audio_text)
@@ -105,7 +115,7 @@ class PrefParser:
                             forced_tag = 'true'
                         else:
                             forced_tag = 'false'
-                        lang_prefs.append((temp_a[0], temp_a[1], temp_s[0], temp_s[1], forced_tag, ss_tag))
+                        lang_prefs.append((temp_a[0], temp_a[1], temp_s[0], temp_s[1], forced_tag, ss_tag, format_slot))
                     else:
                         log(LOG_INFO, 'Custom cond sub prefs: lang code not found! '
                                       'Please report this: {0}:{1}'.format(audio_text, sub_text))

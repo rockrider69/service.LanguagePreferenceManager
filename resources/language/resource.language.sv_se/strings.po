@@ -95,7 +95,7 @@ msgstr "Avancerade/anpassade inställningar"
 
 msgctxt "#30116"
 msgid "Try to set the audio and/or subtitle track from the filename first"
-msgstr ""
+msgstr "Försök först ställa in ljud- och/eller undertextspåret utifrån filnamnet"
 "Försök att ställa in ljud- och/eller undertextspåret från filnamnet först"
 
 msgctxt "#30117"
@@ -132,7 +132,7 @@ msgstr "Aktivera svartlista för nyckelord för undertexter"
 
 msgctxt "#30126"
 msgid "Enter a comma-separated list of keywords to blacklist in subtitle names"
-msgstr ""
+msgstr "Ange en kommaseparerad lista med nyckelord att svartlista i undertextnamn"
 "Ange en kommaseparerad lista med nyckelord som ska svartlistas i "
 "undertextnamn"
 
@@ -146,7 +146,7 @@ msgstr "Aktivera svartlista för nyckelord för ljud"
 
 msgctxt "#30129"
 msgid "Enter a comma-separated list of keywords to blacklist in audio names"
-msgstr ""
+msgstr "Ange en kommaseparerad lista med nyckelord att svartlista i ljudnamn"
 "Ange en kommaseparerad lista med nyckelord som ska svartlistas i ljudnamn"
 
 msgctxt "#30130"
@@ -189,6 +189,10 @@ msgstr ""
 "Ändrat ljud/undertext åsidosätter konfigurationsinställning nästa gång för "
 "samma film/serie?"
 
+msgctxt "#30138"
+msgid "Changed audio/subt. override config pref. next time for the same movie/series?"
+msgstr "Använda den ändrade ljud-/undertextinställningen nästa gång för samma film/serie?"
+
 msgctxt "#30139"
 msgid ""
 "If enabled, manually selected audio/subtitle tracks during playback will be "
@@ -196,6 +200,10 @@ msgid ""
 msgstr ""
 "Om detta är aktiverat kommer manuellt valda ljud-/undertextspår under "
 "uppspelning att sparas och återställas nästa gång för samma film/hela serie."
+
+msgctxt "#30139"
+msgid "If enabled, manually selected audio/subtitle tracks during playback will be stored and restored next time for the same movie/whole series."
+msgstr "Om aktiverat sparas ljud-/undertextspår som valts manuellt under uppspelning och återställs nästa gång för samma film/hela serien."
 
 msgctxt "#30140"
 msgid "Edit Overrides"
@@ -596,3 +604,35 @@ msgstr "PGS (Blu-ray-bilder, .sup)"
 msgctxt "#30639"
 msgid "VobSub (DVD pictures, .idx/.sub)"
 msgstr "VobSub (DVD-bilder, .idx/.sub)"
+
+msgctxt "#30640"
+msgid "Select the audio track from the rules (first rule with an available audio language)"
+msgstr "Välj ljudspåret från reglerna (första regeln med ett tillgängligt ljudspråk)"
+
+msgctxt "#30641"
+msgid "Subtitle format for this rule"
+msgstr "Undertextformat för den här regeln"
+
+msgctxt "#30642"
+msgid "General order (settings, General)"
+msgstr "Allmän ordning (inställningar, Allmänt)"
+
+msgctxt "#30643"
+msgid "Preferred format 1st first"
+msgstr "Önskat format: 1:a först"
+
+msgctxt "#30644"
+msgid "Preferred format 2nd first"
+msgstr "Önskat format: 2:a först"
+
+msgctxt "#30645"
+msgid "Preferred format 3rd first"
+msgstr "Önskat format: 3:e först"
+
+msgctxt "#30646"
+msgid "Check installation (stale or duplicate copies)"
+msgstr "Kontrollera installation (föråldrade eller dubbla kopior)"
+
+msgctxt "#30647"
+msgid "Installation"
+msgstr "Installation"

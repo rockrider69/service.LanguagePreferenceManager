@@ -584,3 +584,35 @@ msgstr "PGS（蓝光图像字幕，.sup）"
 msgctxt "#30639"
 msgid "VobSub (DVD pictures, .idx/.sub)"
 msgstr "VobSub（DVD 图像字幕，.idx/.sub）"
+
+msgctxt "#30640"
+msgid "Select the audio track from the rules (first rule with an available audio language)"
+msgstr "从规则中选择音轨（第一条具有可用音频语言的规则）"
+
+msgctxt "#30641"
+msgid "Subtitle format for this rule"
+msgstr "此规则的字幕格式"
+
+msgctxt "#30642"
+msgid "General order (settings, General)"
+msgstr "通用顺序（设置，常规）"
+
+msgctxt "#30643"
+msgid "Preferred format 1st first"
+msgstr "首选格式：第 1 个优先"
+
+msgctxt "#30644"
+msgid "Preferred format 2nd first"
+msgstr "首选格式：第 2 个优先"
+
+msgctxt "#30645"
+msgid "Preferred format 3rd first"
+msgstr "首选格式：第 3 个优先"
+
+msgctxt "#30646"
+msgid "Check installation (stale or duplicate copies)"
+msgstr "检查安装（过时或重复的副本）"
+
+msgctxt "#30647"
+msgid "Installation"
+msgstr "安装"

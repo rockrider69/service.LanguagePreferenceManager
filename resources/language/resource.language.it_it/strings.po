@@ -584,3 +584,35 @@ msgstr "PGS (immagini Blu-ray, .sup)"
 msgctxt "#30639"
 msgid "VobSub (DVD pictures, .idx/.sub)"
 msgstr "VobSub (immagini DVD, .idx/.sub)"
+
+msgctxt "#30640"
+msgid "Select the audio track from the rules (first rule with an available audio language)"
+msgstr "Seleziona la traccia audio dalle regole (prima regola con una lingua audio disponibile)"
+
+msgctxt "#30641"
+msgid "Subtitle format for this rule"
+msgstr "Formato dei sottotitoli per questa regola"
+
+msgctxt "#30642"
+msgid "General order (settings, General)"
+msgstr "Ordine generale (impostazioni, Generale)"
+
+msgctxt "#30643"
+msgid "Preferred format 1st first"
+msgstr "Formato preferito: 1° per primo"
+
+msgctxt "#30644"
+msgid "Preferred format 2nd first"
+msgstr "Formato preferito: 2° per primo"
+
+msgctxt "#30645"
+msgid "Preferred format 3rd first"
+msgstr "Formato preferito: 3° per primo"
+
+msgctxt "#30646"
+msgid "Check installation (stale or duplicate copies)"
+msgstr "Verifica installazione (copie obsolete o duplicate)"
+
+msgctxt "#30647"
+msgid "Installation"
+msgstr "Installazione"

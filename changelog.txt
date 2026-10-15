@@ -13,6 +13,29 @@ This beta builds on 1.1.1Beta1; the changes are listed below.
   the first format of your list (SRT, ASS/SSA, WebVTT, PGS, VobSub) that is present is taken. The format of embedded
   .mkv tracks is read from the file, that of external files from their extension, any other from a format word in the
   track title; when it is unknown nothing changes. The language always comes first.
+- new: protection against a stale copy. The add-on no longer writes or uses compiled Python files (__pycache__; any left by an
+  older version are deleted at start), its own modules are searched first, the log shows the version, folder and a code
+  fingerprint it runs ("Running version ..."), and when another folder holds a copy of the add-on (an older version unzipped
+  next to this one) an error is logged and a warning shown on screen: delete the old folder and restart Kodi.
+  New button in the settings (General, Installation): "Check installation" shows a dialog, either "No stale versions
+  detected and no second copy of the add-on is installed", or what is wrong (a second copy, leftover compiled files, or
+  Kodi still running older code than the files installed: restart Kodi).
+- Fixed: with a subtitle format preference set, a text track (ASS/SRT/WebVTT) that only has the forced/default flag (no "forced" in its name) is no longer excluded from non-forced rules, so the format preference can choose it (e.g. English ASS flagged forced+default with Japanese audio). Flagged image tracks (PGS/VobSub) and tracks named "forced" stay excluded; the unflagged track wins a tie within the same format; without a format preference nothing changes.
+- Changed: the regex subtitle filter now respects the preferred subtitle language and format. Among the tracks the regex matches, it takes the language of the conditional rule for the playing audio (else the subtitle preferences), then the best format (the rule's 1st/2nd/3rd choice or the general order); the forced/default/original flags and "forced" names do not count there. If no matching track is in a preferred language, the filter works as before (ASS first, forced tracks deferred).
+- New: every conditional subtitle rule (settings, Conditional Subtitle Preferences) has its own "Subtitle format for this rule" choice:
+  the general order (default), or the 1st / 2nd / 3rd preferred format of the General settings put first for that rule only
+  (the other formats follow in the general order; if the chosen format is not present the order still applies). In the custom
+  rule field add -f1, -f2 or -f3 to the subtitle language, e.g. jpn:eng-f2 or jpn:eng-f3-ff.
+- fix: sub converter: it now also runs when you switch subtitles by hand during the playback (to another ASS, WebVTT ... track of the
+  video), not only at the start and after an audio change. A switch made while an earlier conversion is still running is
+  converted as soon as that one ends; a copy already made for a track is reused.
+- fix: sub converter: embedded SRT subtitles are converted as well (they were skipped): yellow, at the top; italic / bold / underline
+  are kept, lines with a position or a non-bottom alignment tag keep their place.
+- fix: subtitle format preference with external subtitle files. Two files of one language and name (Movie.en.ass and Movie.en.srt,
+  Movie.en.ass and Movie.en.sup) could not be told apart, their format stayed unknown and an embedded PGS (.sup) track of the
+  video won over a preferred ASS file. Kodi lists such files in the reverse of the folder's listing order; the tracks are now
+  matched to the files that way. When that is not possible (files of several folders, or more files than tracks) a track ranks
+  as the best format it may have, so a preferred text format is still taken before a PGS track.
 - fix: regex subtitle filter / fallback and forced tracks. A forced track hit by the regex ("forced" is in the default
   pattern) no longer outranks a Signs&Songs track, and when only forced tracks match and conditional subtitles are on,
   the choice is left to the conditional rules (they pick a forced track when a rule asks for it). The final fallback

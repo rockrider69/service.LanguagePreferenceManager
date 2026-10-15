@@ -228,6 +228,18 @@
                     </dependencies>
                 </setting>
             </group>
+            <group id="7" label="30647">
+                <setting id="checkInstallation" type="string" label="30646">
+                    <level>0</level>
+                    <default/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="button" format="action">
+                        <data>RunScript(service.languagepreferencemanager,check_install)</data>
+                    </control>
+                </setting>
+            </group>
         </category>
         <category id="Audio Preferences" label="30104">
             <group id="1">
@@ -1202,6 +1214,21 @@
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="CondSubFormat01" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
+                </setting>
             </group>
             <group id="3">
                 <setting id="CondAudioLang02" type="integer" label="30110">
@@ -1363,6 +1390,21 @@
                 <setting id="CondSubForced02" type="boolean" label="30120">
                     <default>true</default>
                     <control type="toggle"/>
+                </setting>
+                <setting id="CondSubFormat02" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
                 </setting>
             </group>
             <group id="4">
@@ -1526,6 +1568,21 @@
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="CondSubFormat03" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
+                </setting>
             </group>
             <group id="5">
                 <setting id="CondAudioLang04" type="integer" label="30110">
@@ -1687,6 +1744,21 @@
                 <setting id="CondSubForced04" type="boolean" label="30120">
                     <default>true</default>
                     <control type="toggle"/>
+                </setting>
+                <setting id="CondSubFormat04" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
                 </setting>
             </group>
             <group id="6">
@@ -1850,6 +1922,21 @@
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="CondSubFormat05" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
+                </setting>
             </group>
             <group id="7">
                 <setting id="CondAudioLang06" type="integer" label="30110">
@@ -2011,6 +2098,21 @@
                 <setting id="CondSubForced06" type="boolean" label="30120">
                     <default>true</default>
                     <control type="toggle"/>
+                </setting>
+                <setting id="CondSubFormat06" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
                 </setting>
             </group>
             <group id="8">
@@ -2174,6 +2276,21 @@
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="CondSubFormat07" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
+                </setting>
             </group>
             <group id="9">
                 <setting id="CondAudioLang08" type="integer" label="30110">
@@ -2335,6 +2452,21 @@
                 <setting id="CondSubForced08" type="boolean" label="30120">
                     <default>false</default>
                     <control type="toggle"/>
+                </setting>
+                <setting id="CondSubFormat08" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
                 </setting>
             </group>
             <group id="10">
@@ -2498,6 +2630,21 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="CondSubFormat09" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
+                </setting>
             </group>
             <group id="11">
                 <setting id="CondAudioLang10" type="integer" label="30110">
@@ -2659,6 +2806,21 @@
                 <setting id="CondSubForced10" type="boolean" label="30120">
                     <default>false</default>
                     <control type="toggle"/>
+                </setting>
+                <setting id="CondSubFormat10" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
                 </setting>
             </group>
             <group id="12">
@@ -2822,6 +2984,21 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="CondSubFormat11" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
+                </setting>
             </group>
             <group id="13">
                 <setting id="CondAudioLang12" type="integer" label="30110">
@@ -2983,6 +3160,21 @@
                 <setting id="CondSubForced12" type="boolean" label="30120">
                     <default>false</default>
                     <control type="toggle"/>
+                </setting>
+                <setting id="CondSubFormat12" type="integer" label="30641">
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="30642">0</option>
+                            <option label="30643">1</option>
+                            <option label="30644">2</option>
+                            <option label="30645">3</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                    <dependencies>
+                        <dependency type="visible" setting="SubFormat1" operator="!is">0</dependency>
+                    </dependencies>
                 </setting>
             </group>
             <group id="14">

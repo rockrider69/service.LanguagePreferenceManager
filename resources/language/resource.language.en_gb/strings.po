@@ -588,3 +588,31 @@ msgstr ""
 msgctxt "#30640"
 msgid "Select the audio track from the rules (first rule with an available audio language)"
 msgstr ""
+
+msgctxt "#30641"
+msgid "Subtitle format for this rule"
+msgstr ""
+
+msgctxt "#30642"
+msgid "General order (settings, General)"
+msgstr ""
+
+msgctxt "#30643"
+msgid "Preferred format 1st first"
+msgstr ""
+
+msgctxt "#30644"
+msgid "Preferred format 2nd first"
+msgstr ""
+
+msgctxt "#30645"
+msgid "Preferred format 3rd first"
+msgstr ""
+
+msgctxt "#30646"
+msgid "Check installation (stale or duplicate copies)"
+msgstr ""
+
+msgctxt "#30647"
+msgid "Installation"
+msgstr ""
