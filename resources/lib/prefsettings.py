@@ -170,8 +170,9 @@ class settings():
         self.CondSubTag = 'false'
 
         # (english name, canonical code) per spinner slot - see langutils.from_spinner()
+        # settings.xml has 6 audio spinners (AudioLang01..06): reading more only logged "no valid value" lines
         self.AudioPrefs = [(set(), [
-            self.spinner_lang(addon, 'AudioLang%02d' % n) for n in range(1, 13)])]
+            self.spinner_lang(addon, 'AudioLang%02d' % n) for n in range(1, 7)])]
         self.SubtitlePrefs = [(set(), [
             self.spinner_lang(addon, 'SubLang%02d' % n) + (addon.getSetting('SubForced%02d' % n),)
             for n in range(1, 4)])]

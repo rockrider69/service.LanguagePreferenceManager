@@ -263,13 +263,25 @@ class LangPrefMan_Player(xbmc.Player):
                 log(LOG_INFO, 'Audio track changed from {0} to {1}. Reviewing Conditional Subtitles rules...'.format(
                     previous_audio_language, self.getSelectedAudioLanguage()))
 
-                if settings.is_store_user_preference_for_player(self) and not lpm_initiated:
+                store_user_choice = settings.is_store_user_preference_for_player(self) and not lpm_initiated
+                if store_user_choice:
                     custom_preference = CustomMediaPreference.from_player(self)
                     media_preference_manager.add_preference(custom_preference)
                     media_preference_manager.save_preferences()
 
+                subs_before_rules = (self.getSelectedSubtitleIndex(), self.selected_sub_enabled)
                 self.evalPrefs()
                 self.refresh_subtitle_baseline()
+
+                # The conditional rules just re-evaluated the subtitles for the new audio track (e.g. switched them
+                # off for fre:non). refresh_subtitle_baseline() adopted that as the baseline, so the subtitle change
+                # watcher never sees it: store the result now, or the stored enabled_subtitles stays at the old value.
+                if (store_user_choice and self.getSelectedAudioIndex() == new_audio_index
+                        and (self.getSelectedSubtitleIndex(), self.selected_sub_enabled) != subs_before_rules):
+                    log(LOG_DEBUG, 'Subtitles changed by the rules after the audio change - storing the result')
+                    custom_preference = CustomMediaPreference.from_player(self)
+                    media_preference_manager.add_preference(custom_preference)
+                    media_preference_manager.save_preferences()
             else:
                 self._check_subtitle_change(previous_sub_index, previous_sub_enabled, previous_sub_language)
 

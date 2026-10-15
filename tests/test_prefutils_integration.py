@@ -151,6 +151,38 @@ class PreferenceEvaluationTests(unittest.TestCase):
         prefs = [(set(), [("French (France)", "fr-FR", "English", "en,eng", "false", "false")])]
         self.assertEqual(-2, player.evalCondSubPrefs(prefs))
 
+    def _original_player(self, sub_name, flag=False, forced=False, audio_original=False):
+        player = self.make_player()
+        player.selected_audio_stream = {"index": 0, "language": "eng", "name": "English", "isoriginal": audio_original}
+        player.audiostreams = [player.selected_audio_stream]
+        player.subtitles = [
+            {"index": 0, "language": "eng", "name": "English", "isforced": False},
+            {"index": 1, "language": "fre", "name": sub_name, "isforced": forced, "isoriginal": flag},
+        ]
+        player.selected_sub = player.subtitles[0]
+        player.getSelectedSubtitleIndex = lambda: 0
+        return player
+
+    def test_conditional_original_subtitle_matches_a_title_saying_original(self):
+        # "original" in the subtitle title is enough (Kodi reports no original flag for subtitles)
+        player = self._original_player("French original")
+        self.assertEqual(1, player.evalCondSubPrefs(PrefParser().parsePrefString("eng:org")))
+
+    def test_conditional_original_subtitle_ignores_a_flag_without_title(self):
+        player = self._original_player("French", flag=True)
+        self.assertEqual(-2, player.evalCondSubPrefs(PrefParser().parsePrefString("eng:org")))
+
+    def test_conditional_original_subtitle_title_in_a_forced_track_is_not_taken_by_a_non_forced_rule(self):
+        player = self._original_player("French original", forced=True)
+        self.assertEqual(-2, player.evalCondSubPrefs(PrefParser().parsePrefString("eng:org")))
+
+    def test_conditional_original_audio_needs_the_flag_not_the_title(self):
+        player = self._original_player("French")
+        player.selected_audio_stream["name"] = "English original"
+        self.assertEqual(-2, player.evalCondSubPrefs(PrefParser().parsePrefString("org:fre")))
+        player.selected_audio_stream["isoriginal"] = True
+        self.assertEqual(1, player.evalCondSubPrefs(PrefParser().parsePrefString("org:fre")))
+
     def test_conditional_none_and_forced_subtitle_override(self):
         player = self.make_player()
         player.selected_audio_stream = {"index": 0, "language": "fr-fr", "name": "French"}
@@ -678,3 +710,78 @@ class FilenameEvaluationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StoredPreferenceAfterAudioChangeTests(unittest.TestCase):
+    """User switches the audio (en -> fr): the conditional rules then switch the subtitles off (fre:non). The stored
+    preference must end up with the subtitles disabled, not the state from before the rules ran."""
+
+    def setUp(self):
+        import prefutils
+        self.module = prefutils
+        self.stored = []
+        self.saved = []
+        self.old = (prefutils.CustomMediaPreference, prefutils.media_preference_manager,
+                    {k: getattr(settings, k, None) for k in ("service_enabled", "at_least_one_pref_on",
+                                                             "is_store_user_preference_for_player")})
+        state = self.state = {"audio": 0, "sub": 1, "enabled": True}
+        stored = self.stored
+
+        class Pref:
+            @staticmethod
+            def from_player(player):
+                return (player.getSelectedAudioIndex(), player.getSelectedSubtitleIndex(), player.selected_sub_enabled)
+
+        prefutils.CustomMediaPreference = Pref
+        prefutils.media_preference_manager = types.SimpleNamespace(
+            add_preference=stored.append, save_preferences=lambda: self.saved.append(1))
+        settings.service_enabled = True
+        settings.at_least_one_pref_on = True
+        settings.is_store_user_preference_for_player = staticmethod(lambda _p: True)
+
+        player = object.__new__(LangPrefMan_Player)
+        player.LPM_initial_run_done = True
+        player.isPlayingVideo = lambda: True
+        player.audio_changed = False
+        player.lpm_expected_audio_index = None
+        player.lpm_audio_target = None
+        player.selected_audio_stream = {"index": 0, "language": "eng", "name": "English"}
+        player.selected_sub = {"index": 1, "language": "fre", "name": "French"}
+        player.selected_sub_enabled = True
+        player.is_ignore_audio_change_index = lambda _i: False
+        player.sub_convert_quiet_until = 0
+        player.getSelectedSubtitleLanguage = lambda: "fre"
+        player.getSelectedAudioLanguage = lambda: "fre" if state["audio"] else "eng"
+        player.getSelectedAudioIndex = lambda: player.selected_audio_stream["index"]
+        player.getSelectedSubtitleIndex = lambda: state["sub"]
+
+        def get_details():
+            player.selected_audio_stream = {"index": state["audio"], "language": "eng", "name": "x"}
+            player.selected_sub_enabled = state["enabled"]
+            return True
+
+        player.getDetails = get_details
+        player.refresh_subtitle_baseline = lambda: get_details()   # the real one re-reads the state
+        player.start_sub_converter = lambda **_kw: None
+
+        def eval_prefs():
+            state["enabled"] = False          # fre:non - the rules switch the subtitles off
+
+        player.evalPrefs = eval_prefs
+        self.player = player
+
+    def tearDown(self):
+        self.module.CustomMediaPreference, self.module.media_preference_manager = self.old[0], self.old[1]
+
+    def test_rules_switching_subs_off_after_a_user_audio_change_are_stored(self):
+        self.state["audio"] = 1               # the user picked the French audio in the GUI
+        self.player.onAVChange()
+        self.assertEqual((1, 1, True), self.stored[0])      # first store: the user's audio choice
+        self.assertEqual((1, 1, False), self.stored[-1])    # last store: subtitles disabled by the rules
+        self.assertEqual(2, len(self.stored))
+
+    def test_no_second_store_when_the_rules_leave_the_subtitles_alone(self):
+        self.state["audio"] = 1
+        self.player.evalPrefs = lambda: None
+        self.player.onAVChange()
+        self.assertEqual(1, len(self.stored))
