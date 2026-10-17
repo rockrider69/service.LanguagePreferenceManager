@@ -431,10 +431,10 @@ def subtitle_file_tag(video_name, file_name):
                 and (len(nxt) == 2 and nxt.isalpha() or nxt.isdigit() or _canonical_region(lang, nxt) in _SCRIPTS)):
             tag = tag + '-' + nxt
     words = [t.lower() for t in _FILE_TOKEN.findall(middle)]
-    return {'tag': tag, 'words': words}
+    return {'tag': tag, 'words': words, 'ext': '.' + ext.lower()}
 
 
-def match_external_files(streams, file_tags, external_label=None):
+def match_external_files(streams, file_tags, external_label=None, files_out=None):
     """
     Map Kodi's external subtitle streams onto the subtitle files of the video (see subtitle_file_tag()).
 
@@ -448,6 +448,8 @@ def match_external_files(streams, file_tags, external_label=None):
 
     :param streams:   Kodi subtitle stream dicts
     :param file_tags: list of subtitle_file_tag() results
+    :param files_out: optional dict, filled with {stream index: [the subtitle_file_tag() results of the files the
+                      stream may be: one when it is certain]}
     :return: {stream index: tag}
     """
     candidates = {}
@@ -500,6 +502,8 @@ def match_external_files(streams, file_tags, external_label=None):
             tags = set(canonical_tag(file_tags[n]['tag']) for n in avail)     # pt-BR = pt.br = pob
             if len(tags) == 1:
                 result[index] = file_tags[avail[0]]['tag']
+                if files_out is not None:
+                    files_out[index] = [file_tags[n] for n in avail]
                 if len(avail) == 1:
                     taken.add(avail[0])
                 progress = True
@@ -513,6 +517,8 @@ def match_external_files(streams, file_tags, external_label=None):
             hits = [n for n in avail if guess and canonical_tag(file_tags[n]['tag']) == guess]
             if hits:
                 result[index] = file_tags[hits[0]]['tag']
+                if files_out is not None:
+                    files_out[index] = [file_tags[n] for n in hits]
                 if len(hits) == 1:
                     taken.add(hits[0])
                 progress = True
@@ -624,9 +630,13 @@ def _special_matches(c, stream, track_type):
         if track_type == 'Audio':
             return bool(stream.get('isoriginal', False)) or s == ORG
         return s == ORG or 'original' in name_l
-    if c == UNK:
-        return s in (UNK, '') or 'unknown' in name_l
-    if c == UND:
+    if c in (UNK, UND):
+        # a track whose title names a language ("Japanese", "German 5.1") is not unknown / undefined: its
+        # language rule must win, as it does for every other language code
+        if language_from_name(stream.get('name')):
+            return False
+        if c == UNK:
+            return s in (UNK, '') or (s in _NO_LANGUAGE and 'unknown' in name_l)
         return s in (UND, '')
     return False                          # "None" is handled by the callers, it never matches a track
 
@@ -668,3 +678,66 @@ def best_matches(code, streams, track_type='Audio'):
         elif score and score == best:
             out.append(stream['index'])
     return out
+
+
+# --- languages named in a video's file name (setting "use file name") ---------------------------------------------
+# Ordinary English words that are also 3 letter language codes: never read as a language from a file name.
+_FILE_NOT_A_CODE = frozenset(('ice', 'per', 'man', 'war', 'dan', 'fin', 'may', 'nor', 'mac', 'lit', 'est'))
+_FILE_SUB_MARKERS = frozenset(('sub', 'subs', 'subtitle', 'subtitles'))
+_FILE_AUDIO_MARKERS = frozenset(('audio', 'audios', 'dub', 'dubs', 'dubbed'))
+_FILE_PIECE = re.compile(r"(?<![A-Za-z0-9])[A-Za-z]{2,3}[-_](?:[A-Za-z]{2}|[0-9]{3}|[A-Za-z]{4})(?![A-Za-z0-9])"
+                         r"|[A-Za-z0-9\u00c0-\u024f]+")
+
+
+def _file_piece_language(piece):
+    """Canonical code of one piece of a file name: a language tag with its region / script ('pt-BR', 'zh-Hant'),
+    a 3 letter code written in one case ('JPN', 'ukr') or a language name ('Japanese'); '' for anything else.
+    A bare 2 letter word is never a language here ('it', 'no', 'he', 'de' are far too common in titles)."""
+    if '-' in piece or '_' in piece:
+        base, region = parse_tag(piece)
+        if base and base not in SPECIAL_CODES and valid_region(region) and base in _SPINNER_LANG_3:
+            return canonical_tag(piece)
+        return ''
+    low = piece.lower()
+    if len(low) >= 4 and low in NAME_TO_2B:
+        return normalize(low)
+    if len(low) == 3 and (piece.islower() or piece.isupper()) and low not in _FILE_NOT_A_CODE:
+        code = normalize(low)
+        if code in _SPINNER_LANG_3 and code not in SPECIAL_CODES:
+            return code
+    return ''
+
+
+def filename_languages(filename):
+    """Languages named in the name of a video: (audio codes, subtitle codes), each in the order they are written.
+
+    Languages written after a subtitle word ('subs', 'subtitles') are subtitle languages up to the next other word;
+    all the others are audio languages ('Movie.2020.JPN.UKR.subs.ENG.mkv' -> audio jpn, ukr; subtitles eng).
+    Only the file name itself is read (not the folders, the extension, the query or the headers of an address).
+    """
+    name = str(filename or '').split('|')[0].split('?')[0].replace('\\', '/').rsplit('/', 1)[-1]
+    stem, dot, ext = name.rpartition('.')
+    if dot and 1 <= len(ext) <= 4 and ext.isalnum():
+        name = stem
+    audio, subs, mode = [], [], 'audio'
+    for m in _FILE_PIECE.finditer(name):
+        piece = m.group(0)
+        pieces = [piece]
+        if ('-' in piece or '_' in piece) and not _file_piece_language(piece):
+            pieces = _TITLE_TOKEN.findall(piece)          # 'JPN-UKR' is two words, not a tag
+        for part in pieces:
+            low = part.lower()
+            if low in _FILE_SUB_MARKERS:
+                mode = 'subs'
+                continue
+            if low in _FILE_AUDIO_MARKERS:
+                mode = 'audio'
+                continue
+            code = _file_piece_language(part)
+            if not code:
+                mode = 'audio'
+                continue
+            target = subs if mode == 'subs' else audio
+            if code not in target:
+                target.append(code)
+    return audio, subs

@@ -61,4 +61,11 @@ Subtitles (initial run):
 4. Subtitle tag in the file name (`Use filename`, e.g. `.subtitle-2`) - lowest preference, only if nothing above selected a track
 5. Default subtitle, else the first valid one - when nothing above selected a track (only with the regex filter or conditional subtitles enabled)
 
+Subtitle format (settings: Subtitle format preference): among tracks that fit the language preference equally well, the first format of the list that is present wins (embedded .mkv tracks and subtitle files next to the video are recognised); the regex filter and stored preferences are not affected.
+
+Subtitle format per conditional rule: every conditional rule can use the general order (default) or put the 1st / 2nd / 3rd preferred format first (spinner "Subtitle format for this rule"; in the custom field add -f1 / -f2 / -f3 after the subtitle language, e.g. jpn:eng-f2). The language still decides first; if the chosen format is missing the general order applies.
+
+Forced-flag text tracks: when a format preference is set, an ASS/SRT/WebVTT track that only carries the forced/default flag (and has no "forced" in its name) can be chosen by non-forced rules. Flagged PGS/VobSub tracks and tracks named "forced" stay excluded; an unflagged track wins a tie within the same format. Without a format preference nothing changes.
+- Changed: the regex subtitle filter now respects the preferred subtitle language and format. Among the tracks the regex matches, it takes the language of the conditional rule for the playing audio (else the subtitle preferences), then the best format (the rule's 1st/2nd/3rd choice or the general order); the forced/default/original flags and "forced" names do not count there. If no matching track is in a preferred language, the filter works as before (ASS first, forced tracks deferred).
+
 Audio: audio preferences first; an audio tag in the file name (`.audiostream-1`) is only used when the audio preferences matched nothing.

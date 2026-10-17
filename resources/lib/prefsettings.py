@@ -1,6 +1,7 @@
 import xbmc, xbmcaddon
 import re
 import langutils
+import subcodec
 from prefparser import PrefParser
 from resources.lib import kodi_utils
 from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
@@ -94,6 +95,7 @@ class settings():
         self.audio_original_any = langutils.ANY in self.audio_original_langs
         self.sub_prefs_on = addon.getSetting('enableSub') == 'true'
         self.condsub_prefs_on = addon.getSetting('enableCondSub') == 'true'
+        self.cond_audio_switch = self.condsub_prefs_on and addon.getSetting('condAudioSwitch') == 'true'
         self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'
         self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
         self.ignore_signs_on = addon.getSetting('signs') == 'true'
@@ -144,6 +146,20 @@ class settings():
         else:
             self.audio_keyword_blacklist = []
         self.fast_subs_display = int(addon.getSetting('FastSubsDisplay'))
+        # preferred subtitle formats, best first (names of subcodec.SUBTITLE_FORMATS); [] = no preference
+        self.sub_format_order = []
+        # the format of each of the three slots (1st, 2nd, 3rd), None for an empty slot: a conditional rule can
+        # choose one of them as its own first choice (CondSubFormat01..12)
+        self.sub_format_slots = [None, None, None]
+        for slot, setting in enumerate(('SubFormat1', 'SubFormat2', 'SubFormat3')):
+            try:
+                number = int(addon.getSetting(setting) or 0)
+            except ValueError:
+                number = 0
+            if 1 <= number <= len(subcodec.SUBTITLE_FORMATS):
+                self.sub_format_slots[slot] = subcodec.SUBTITLE_FORMATS[number - 1]
+                if subcodec.SUBTITLE_FORMATS[number - 1] not in self.sub_format_order:
+                    self.sub_format_order.append(subcodec.SUBTITLE_FORMATS[number - 1])
         self.useFilename = addon.getSetting('useFilename') == 'true'
         self.filenameRegex = addon.getSetting('filenameRegex')
         if self.useFilename:
@@ -154,15 +170,16 @@ class settings():
         self.CondSubTag = 'false'
 
         # (english name, canonical code) per spinner slot - see langutils.from_spinner()
+        # settings.xml has 6 audio spinners (AudioLang01..06): reading more only logged "no valid value" lines
         self.AudioPrefs = [(set(), [
-            self.spinner_lang(addon, 'AudioLang%02d' % n) for n in range(1, 13)])]
+            self.spinner_lang(addon, 'AudioLang%02d' % n) for n in range(1, 7)])]
         self.SubtitlePrefs = [(set(), [
             self.spinner_lang(addon, 'SubLang%02d' % n) + (addon.getSetting('SubForced%02d' % n),)
             for n in range(1, 4)])]
         self.CondSubtitlePrefs = [(set(), [
             self.spinner_lang(addon, 'CondAudioLang%02d' % n)
             + self.spinner_lang(addon, 'CondSubLang%02d' % n)
-            + (addon.getSetting('CondSubForced%02d' % n), self.CondSubTag)
+            + (addon.getSetting('CondSubForced%02d' % n), self.CondSubTag, self.cond_format_slot(addon, n))
             for n in range(1, 13)])]
 
         # These handle custom user preferences, that should be stored
@@ -179,6 +196,16 @@ class settings():
                                     or self.useFilename or self.storeCustomMediaPreferences)
 
         log(LOG_DEBUG, 'storeCustomMediaPreferences: {0}'.format(self.storeCustomMediaPreferences))
+
+    @staticmethod
+    def cond_format_slot(addon, n):
+        """The subtitle format slot conditional rule n uses first: 0 = the general order, 1..3 = the 1st / 2nd / 3rd
+        preferred format of the general settings."""
+        try:
+            slot = int(addon.getSetting('CondSubFormat%02d' % n) or 0)
+        except ValueError:
+            return 0
+        return slot if 0 <= slot <= 3 else 0
 
     def readCustomPrefs(self):
         addon = xbmcaddon.Addon()

@@ -184,12 +184,20 @@ msgid ""
 msgstr ""
 "L'audio/modifié des sous-titres remplace les préférences de configuration la prochaine fois pour le même film/la même série ?"
 
+msgctxt "#30138"
+msgid "Changed audio/subt. override config pref. next time for the same movie/series?"
+msgstr "Utiliser la préférence audio/sous-titres modifiée la prochaine fois pour le même film/la même série ?"
+
 msgctxt "#30139"
 msgid ""
 "If enabled, manually selected audio/subtitle tracks during playback will be "
 "stored and restored next time for the same movie/whole series."
 msgstr ""
 "S'il est activé, les pistes audio/sous-titres sélectionnées manuellement lors de la lecture seront stockées et restaurées la prochaine fois pour le même film/toute la série."
+
+msgctxt "#30139"
+msgid "If enabled, manually selected audio/subtitle tracks during playback will be stored and restored next time for the same movie/whole series."
+msgstr "Si activé, les pistes audio/sous-titres sélectionnées manuellement pendant la lecture seront enregistrées et restaurées la prochaine fois pour le même film/toute la série."
 
 msgctxt "#30140"
 msgid "Edit Overrides"
@@ -550,3 +558,75 @@ msgstr "La préférence enregistrée n'a pas pu être supprimée. Réessayez."
 msgctxt "#30620"
 msgid "Sub converter (Japanese, Korean or Chinese audio when the selected subtitle is ASS/SSA: a copy with its styles, fonts and signs kept and the bottom lines moved to the top; other text formats other than SRT become plain yellow SRT at the top)"
 msgstr "Convertisseur de sous-titres (audio japonais, coréen ou chinois quand le sous-titre choisi est ASS/SSA : copie avec styles, polices et panneaux conservés, lignes du bas déplacées en haut ; les autres formats texte hors SRT deviennent du SRT jaune simple en haut)"
+
+msgctxt "#30630"
+msgid "Subtitle format preference (when several subtitles of the preferred language are available, the first format of this list that is present is taken; formats of embedded .mkv tracks and of subtitle files next to the video are known)"
+msgstr "Préférence de format de sous-titres (lorsque plusieurs sous-titres de la langue préférée sont disponibles, le premier format de cette liste qui est présent est retenu ; les formats des pistes .mkv intégrées et des fichiers de sous-titres placés à côté de la vidéo sont reconnus)"
+
+msgctxt "#30631"
+msgid "Preferred subtitle format (1st)"
+msgstr "Format de sous-titres préféré (1er)"
+
+msgctxt "#30632"
+msgid "Preferred subtitle format (2nd)"
+msgstr "Format de sous-titres préféré (2e)"
+
+msgctxt "#30633"
+msgid "Preferred subtitle format (3rd)"
+msgstr "Format de sous-titres préféré (3e)"
+
+msgctxt "#30634"
+msgid "No preference"
+msgstr "Aucune préférence"
+
+msgctxt "#30635"
+msgid "SRT (SubRip text)"
+msgstr "SRT (texte SubRip)"
+
+msgctxt "#30636"
+msgid "ASS / SSA (styled text)"
+msgstr "ASS / SSA (texte stylisé)"
+
+msgctxt "#30637"
+msgid "WebVTT (text)"
+msgstr "WebVTT (texte)"
+
+msgctxt "#30638"
+msgid "PGS (Blu-ray pictures, .sup)"
+msgstr "PGS (images Blu-ray, .sup)"
+
+msgctxt "#30639"
+msgid "VobSub (DVD pictures, .idx/.sub)"
+msgstr "VobSub (images DVD, .idx/.sub)"
+
+msgctxt "#30640"
+msgid "Select the audio track from the rules (first rule with an available audio language)"
+msgstr "Sélectionner la piste audio d'après les règles (première règle avec une langue audio disponible)"
+
+msgctxt "#30641"
+msgid "Subtitle format for this rule"
+msgstr "Format de sous-titres pour cette règle"
+
+msgctxt "#30642"
+msgid "General order (settings, General)"
+msgstr "Ordre général (paramètres, Général)"
+
+msgctxt "#30643"
+msgid "Preferred format 1st first"
+msgstr "Format préféré : 1er en premier"
+
+msgctxt "#30644"
+msgid "Preferred format 2nd first"
+msgstr "Format préféré : 2e en premier"
+
+msgctxt "#30645"
+msgid "Preferred format 3rd first"
+msgstr "Format préféré : 3e en premier"
+
+msgctxt "#30646"
+msgid "Check installation (stale or duplicate copies)"
+msgstr "Vérifier l'installation (copies obsolètes ou en double)"
+
+msgctxt "#30647"
+msgid "Installation"
+msgstr "Installation"

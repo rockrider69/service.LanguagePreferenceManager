@@ -95,7 +95,7 @@ msgstr "Avancerade/anpassade inställningar"
 
 msgctxt "#30116"
 msgid "Try to set the audio and/or subtitle track from the filename first"
-msgstr ""
+msgstr "Försök först ställa in ljud- och/eller undertextspåret utifrån filnamnet"
 "Försök att ställa in ljud- och/eller undertextspåret från filnamnet först"
 
 msgctxt "#30117"
@@ -132,7 +132,7 @@ msgstr "Aktivera svartlista för nyckelord för undertexter"
 
 msgctxt "#30126"
 msgid "Enter a comma-separated list of keywords to blacklist in subtitle names"
-msgstr ""
+msgstr "Ange en kommaseparerad lista med nyckelord att svartlista i undertextnamn"
 "Ange en kommaseparerad lista med nyckelord som ska svartlistas i "
 "undertextnamn"
 
@@ -146,7 +146,7 @@ msgstr "Aktivera svartlista för nyckelord för ljud"
 
 msgctxt "#30129"
 msgid "Enter a comma-separated list of keywords to blacklist in audio names"
-msgstr ""
+msgstr "Ange en kommaseparerad lista med nyckelord att svartlista i ljudnamn"
 "Ange en kommaseparerad lista med nyckelord som ska svartlistas i ljudnamn"
 
 msgctxt "#30130"
@@ -189,6 +189,10 @@ msgstr ""
 "Ändrat ljud/undertext åsidosätter konfigurationsinställning nästa gång för "
 "samma film/serie?"
 
+msgctxt "#30138"
+msgid "Changed audio/subt. override config pref. next time for the same movie/series?"
+msgstr "Använda den ändrade ljud-/undertextinställningen nästa gång för samma film/serie?"
+
 msgctxt "#30139"
 msgid ""
 "If enabled, manually selected audio/subtitle tracks during playback will be "
@@ -196,6 +200,10 @@ msgid ""
 msgstr ""
 "Om detta är aktiverat kommer manuellt valda ljud-/undertextspår under "
 "uppspelning att sparas och återställas nästa gång för samma film/hela serie."
+
+msgctxt "#30139"
+msgid "If enabled, manually selected audio/subtitle tracks during playback will be stored and restored next time for the same movie/whole series."
+msgstr "Om aktiverat sparas ljud-/undertextspår som valts manuellt under uppspelning och återställs nästa gång för samma film/hela serien."
 
 msgctxt "#30140"
 msgid "Edit Overrides"
@@ -556,3 +564,75 @@ msgstr "Den sparade inställningen kunde inte tas bort. Försök igen."
 msgctxt "#30620"
 msgid "Sub converter (Japanese, Korean or Chinese audio when the selected subtitle is ASS/SSA: a copy with its styles, fonts and signs kept and the bottom lines moved to the top; other text formats other than SRT become plain yellow SRT at the top)"
 msgstr "Undertextkonverterare (japanskt, koreanskt eller kinesiskt ljud när den valda undertexten är ASS/SSA: kopia med stilar, typsnitt och skyltar bevarade och nedre rader flyttade överst; andra textformat än SRT blir enkel gul SRT överst)"
+
+msgctxt "#30630"
+msgid "Subtitle format preference (when several subtitles of the preferred language are available, the first format of this list that is present is taken; formats of embedded .mkv tracks and of subtitle files next to the video are known)"
+msgstr "Önskat undertextformat (när flera undertexter på det önskade språket finns väljs det första formatet i listan som finns; formaten för inbäddade .mkv-spår och för undertextfiler bredvid videon känns igen)"
+
+msgctxt "#30631"
+msgid "Preferred subtitle format (1st)"
+msgstr "Önskat undertextformat (1:a)"
+
+msgctxt "#30632"
+msgid "Preferred subtitle format (2nd)"
+msgstr "Önskat undertextformat (2:a)"
+
+msgctxt "#30633"
+msgid "Preferred subtitle format (3rd)"
+msgstr "Önskat undertextformat (3:e)"
+
+msgctxt "#30634"
+msgid "No preference"
+msgstr "Ingen preferens"
+
+msgctxt "#30635"
+msgid "SRT (SubRip text)"
+msgstr "SRT (SubRip-text)"
+
+msgctxt "#30636"
+msgid "ASS / SSA (styled text)"
+msgstr "ASS / SSA (formaterad text)"
+
+msgctxt "#30637"
+msgid "WebVTT (text)"
+msgstr "WebVTT (text)"
+
+msgctxt "#30638"
+msgid "PGS (Blu-ray pictures, .sup)"
+msgstr "PGS (Blu-ray-bilder, .sup)"
+
+msgctxt "#30639"
+msgid "VobSub (DVD pictures, .idx/.sub)"
+msgstr "VobSub (DVD-bilder, .idx/.sub)"
+
+msgctxt "#30640"
+msgid "Select the audio track from the rules (first rule with an available audio language)"
+msgstr "Välj ljudspåret från reglerna (första regeln med ett tillgängligt ljudspråk)"
+
+msgctxt "#30641"
+msgid "Subtitle format for this rule"
+msgstr "Undertextformat för den här regeln"
+
+msgctxt "#30642"
+msgid "General order (settings, General)"
+msgstr "Allmän ordning (inställningar, Allmänt)"
+
+msgctxt "#30643"
+msgid "Preferred format 1st first"
+msgstr "Önskat format: 1:a först"
+
+msgctxt "#30644"
+msgid "Preferred format 2nd first"
+msgstr "Önskat format: 2:a först"
+
+msgctxt "#30645"
+msgid "Preferred format 3rd first"
+msgstr "Önskat format: 3:e först"
+
+msgctxt "#30646"
+msgid "Check installation (stale or duplicate copies)"
+msgstr "Kontrollera installation (föråldrade eller dubbla kopior)"
+
+msgctxt "#30647"
+msgid "Installation"
+msgstr "Installation"

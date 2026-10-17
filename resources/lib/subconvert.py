@@ -179,6 +179,50 @@ def vtt_cue(raw, codec=''):
     return lines, '\\an{0}'.format(_TOP), False
 
 
+_BRACES = re.compile(r'\{[^}]*\}')
+_FONT_TAG = re.compile(r'</?font\b[^>]*>', re.I)
+_STYLE_TAG = re.compile(r'<(/?)([ibu])\s*>', re.I)
+_ANY_TAG = re.compile(r'<[^>]*>')
+
+
+def srt_cue(raw):
+    """(lines, placement tag text, positioned) of one Matroska SRT block (S_TEXT/UTF8: the plain text of the cue,
+    with <i> <b> <u> and sometimes {\\an8} / {\\pos(x,y)}). Italic / bold / underline are kept (closed and opened again
+    on each line, so every line stands alone); a cue with an alignment or position tag keeps it, the rest goes to
+    the top."""
+    text = raw.replace('\r', '')
+    tags = ' '.join(_BRACES.findall(text))
+    text = _BRACES.sub('', text)
+    text = _FONT_TAG.sub('', text)
+    open_tags = []
+    lines = []
+    for line in text.split('\n'):
+        prefix = ''.join('<{0}>'.format(t) for t in open_tags)
+        for m in _STYLE_TAG.finditer(line):
+            name = m.group(2).lower()
+            if m.group(1):
+                if name in open_tags:
+                    open_tags.remove(name)
+            elif name not in open_tags:
+                open_tags.append(name)
+        suffix = ''.join('</{0}>'.format(t) for t in reversed(open_tags))
+        line = _ANY_TAG.sub(lambda m: m.group(0) if _STYLE_TAG.fullmatch(m.group(0)) else '', line)
+        if line.strip() and _STYLE_TAG.sub('', line).strip():
+            lines.append(prefix + line.strip() + suffix)
+    an = _AN.search(tags)
+    pos = _POS_FIRST.search(tags)
+    if an and pos:
+        return lines, '\\an{0}\\pos({1},{2})'.format(an.group(1), pos.group(1), pos.group(2)), True
+    if an:
+        value = int(an.group(1))
+        if value in _TOP_OF:                              # a bottom line without a position goes to the top, as in ASS
+            return lines, '\\an{0}'.format(_TOP_OF[value]), False
+        return lines, '\\an{0}'.format(value), True
+    if pos:
+        return lines, '\\an7\\pos({0},{1})'.format(pos.group(1), pos.group(2)), True
+    return lines, '\\an{0}'.format(_TOP), False
+
+
 _TOP_OF = {1: 7, 2: 8, 3: 9}                         # bottom alignment -> the same column at the top
 _AN_FIRST = re.compile(r'\\an([1-9])')
 _A_FIRST = re.compile(r'\\a(\d{1,2})(?!\d)')
@@ -281,6 +325,8 @@ def events_to_srt(events, header='', view=None, codec=''):
     for start, end, raw in sorted(events, key=lambda e: (e[0], e[1])):
         if subcodec.is_webvtt(codec):
             lines, placement, _positioned = vtt_cue(raw, codec)
+        elif subcodec.format_of_codec(codec) == 'srt':
+            lines, placement, _positioned = srt_cue(raw)
         else:
             lines = ass_text(raw)
             placement = None
