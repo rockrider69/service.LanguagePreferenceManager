@@ -742,7 +742,7 @@ class LangPrefMan_Player(xbmc.Player):
                         self._show_subs(True)
         elif settings.sub_prefs_on and regex_sub_matched:
             log(LOG_DEBUG, 'Normal subtitle preferences skipped: the regex subtitle filter already matched')
-        elif not settings.sub_prefs_on:
+        elif not settings.sub_prefs_on and not regex_sub_matched:
             log(LOG_DEBUG, 'Normal subtitle preferences disabled (sub_prefs_on=False), will try conditional subtitles')
 
         # Conditional subtitle preferences — runs if:
@@ -750,6 +750,8 @@ class LangPrefMan_Player(xbmc.Player):
         # - the regex subtitle filter did not select a subtitle (now or on the initial run).
         # It is deliberately NOT limited to the initial run: it is re-evaluated whenever the audio track
         # changes (onAVChange), exactly as in 1.0.8. (An initial-run-only guard here would be a bug.)
+        if settings.condsub_prefs_on and (regex_sub_matched or self.regex_sub_selected) and not protect_sub:
+            log(LOG_DEBUG, 'Conditional subtitle preferences skipped: the regex subtitle filter already selected a subtitle')
         if settings.condsub_prefs_on and not regex_sub_matched and not self.regex_sub_selected and not protect_sub:
             if settings.custom_condsub_prefs_on:
                 trackIndex = self.evalCondSubPrefs(settings.custom_condsub)
@@ -1171,6 +1173,9 @@ class LangPrefMan_Player(xbmc.Player):
             candidates = [s for s in candidates if s['index'] in preferred]
             candidates.sort(key=lambda s: preferred.index(s['index']))
             log(LOG_INFO, 'Regex subtitle preference: choosing among {0}'.format(preferred))
+            log(LOG_INFO, 'Regex subtitle preference: Match found - selecting subtitle track {0} ({1}), the first '
+                          'of the preferred language tracks {2}'.format(
+                              candidates[0]['index'], candidates[0].get('name', ''), preferred))
             return candidates[0]['index']
         non_forced = [s for s in candidates if not self.isForcedTrack(s)]
         if non_forced:
