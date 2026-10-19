@@ -86,7 +86,7 @@ _TITLE_REGIONS = (
              'mexico', 'méxico', 'mexican', 'mx')),
     ('ES', ('spain', 'castilian', 'castellano', 'españa', 'espana', 'european', 'es')),
     ('CA', ('canada', 'canadian', 'canadien', 'quebec', 'québec', 'québécois', 'quebecois', 'quebecoise', 'québécoise', 'canadienne', 'vfq', 'vfc', 'ca')),
-    ('FR', ('france', 'vff', 'fr')),
+    ('FR', ('france', 'vff', 'fr', 'parisian', 'parisien', 'parisienne')),
     ('IN', ('india', 'indian')),
     ('CH', ('switzerland', 'swiss', 'schweiz', 'schweizer', 'suisse', 'svizzera')),
     ('AT', ('austria', 'austrian', 'österreich', 'osterreich', 'österreichisch')),

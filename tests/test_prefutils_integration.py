@@ -785,3 +785,53 @@ class StoredPreferenceAfterAudioChangeTests(unittest.TestCase):
         self.player.evalPrefs = lambda: None
         self.player.onAVChange()
         self.assertEqual(1, len(self.stored))
+
+
+class ParisianTitleTests(unittest.TestCase):
+    def test_parisian_titles_read_as_french_from_france(self):
+        import langutils
+        for name in ("French (Parisian)", "Français (Parisien)", "Française (Parisienne)", "Parisian French"):
+            stream = {"language": "fre", "name": name}
+            self.assertEqual(("fre", "FR"), langutils.stream_tag(stream), name)
+            self.assertEqual(2, langutils.match_score("fr-FR", stream, "Subtitle"), name)
+            self.assertEqual(0, langutils.match_score("fr-CA", stream, "Subtitle"), name)
+            self.assertEqual(1, langutils.match_score("fre", stream, "Subtitle"), name)
+
+    def test_a_parisian_title_without_a_language_tag_is_french_from_france(self):
+        import langutils
+        self.assertEqual(("fre", "FR"), langutils.stream_tag({"language": "und", "name": "French (Parisian)"}))
+
+
+class CondRecheckAfterOwnAudioSwitchTests(unittest.TestCase):
+    """refresh_subtitle_baseline() asks for a second conditional-subtitle run after LPM's own audio switch only when
+    the first run did not already evaluate the rules against the switched track."""
+
+    def player(self, evaluated_target):
+        player = object.__new__(LangPrefMan_Player)
+        player.lpm_audio_target = 1
+        player.lpm_expected_audio_index = 1
+        player.LPM_initial_run_done = False
+        player.cond_recheck_pending = False
+        player.cond_eval_target = evaluated_target
+        player.selected_audio_stream = {"index": 1, "language": "eng", "name": "English"}
+        player.getDetails = lambda: True
+        player.getSelectedAudioIndex = lambda: 1
+        player.remove_ignore_audio_change_index = lambda _i: None
+        return player
+
+    def test_no_second_run_when_the_rules_already_used_the_switched_track(self):
+        player = self.player(evaluated_target=1)
+        player.refresh_subtitle_baseline()
+        self.assertFalse(player.cond_recheck_pending)
+        self.assertIsNone(player.cond_eval_target)
+
+    def test_second_run_when_the_rules_did_not_see_the_switched_track(self):
+        player = self.player(evaluated_target=None)
+        player.refresh_subtitle_baseline()
+        self.assertTrue(player.cond_recheck_pending)
+
+    def test_cond_audio_stream_remembers_the_track_it_returned(self):
+        player = self.player(evaluated_target=None)
+        player.audiostreams = [{"index": 0, "language": "fre"}, {"index": 1, "language": "eng"}]
+        self.assertEqual(1, player.cond_audio_stream()["index"])
+        self.assertEqual(1, player.cond_eval_target)

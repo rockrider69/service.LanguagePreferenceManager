@@ -82,6 +82,8 @@ class LangPrefMan_Player(xbmc.Player):
         self.lpm_audio_target = None
         # LPM's own audio switch was confirmed before the initial run ended: re-check the conditional subtitles then
         self.cond_recheck_pending = False
+        # the audio track the conditional rules were already evaluated against, while LPM's switch to it was pending
+        self.cond_eval_target = None
         # parts of a stored (manually set) preference that were applied on this playback - see apply_to_player()
         self.stored_audio_applied = False
         self.stored_sub_applied = False
@@ -154,6 +156,7 @@ class LangPrefMan_Player(xbmc.Player):
         self.lpm_expected_audio_index = None
         self.lpm_audio_target = None
         self.cond_recheck_pending = False
+        self.cond_eval_target = None
         self.stored_audio_applied = False
         self.stored_sub_applied = False
         self.external_sub_files = (None, [])     # the subtitle files may have changed since the last playback
@@ -494,7 +497,11 @@ class LangPrefMan_Player(xbmc.Player):
                 self.remove_ignore_audio_change_index(target)
                 if self.lpm_expected_audio_index == target:
                     self.lpm_expected_audio_index = None
-                    self.cond_recheck_pending = not self.LPM_initial_run_done
+                    # the rules already ran against this very track (cond_audio_stream): a second run would only
+                    # repeat that result
+                    self.cond_recheck_pending = (not self.LPM_initial_run_done
+                                                 and self.cond_eval_target != target)
+                    self.cond_eval_target = None
             elif saved_audio is not None:
                 self.selected_audio_stream = saved_audio
         except Exception as e:
@@ -1203,6 +1210,7 @@ class LangPrefMan_Player(xbmc.Player):
         if target is not None and not self.LPM_initial_run_done:
             for stream in self.audiostreams or []:
                 if stream.get('index') == target:
+                    self.cond_eval_target = target
                     return stream
         return self.selected_audio_stream
 
