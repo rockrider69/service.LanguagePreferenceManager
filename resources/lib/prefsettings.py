@@ -2,6 +2,7 @@ import xbmc, xbmcaddon
 import re
 import langutils
 import subcodec
+import subconvert
 from prefparser import PrefParser
 from resources.lib import kodi_utils
 from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
@@ -39,6 +40,34 @@ class settings():
                 setting_id, addon.getSetting(setting_id)))
             return ('None', langutils.NON)
         return (name, code)
+
+    SUB_CONVERTER_LANGUAGES = 10
+
+    def read_sub_converter(self, addon):
+        """Sub converter: the colour of the converted text, and the audio languages it works for (all, or up to 10
+        chosen ones - 'None' entries are ignored; the defaults are Japanese, Korean and Chinese)."""
+        self.sub_converter_all = addon.getSetting('subConverterAll') == 'true'
+        self.sub_converter_langs = []
+        for n in range(1, self.SUB_CONVERTER_LANGUAGES + 1):
+            name, code = self.spinner_lang(addon, 'SubConvLang%02d' % n)
+            if code != langutils.NON and code not in self.sub_converter_langs:
+                self.sub_converter_langs.append(code)
+        try:
+            choice = int(addon.getSetting('subConverterColor') or 0)
+        except ValueError:
+            choice = 0
+        if 0 <= choice < len(subconvert.COLOR_PRESETS):
+            self.sub_converter_color = subconvert.COLOR_PRESETS[choice]
+        else:
+            typed = addon.getSetting('subConverterColorHex')
+            self.sub_converter_color = subconvert.normalize_color(typed)
+            if not self.sub_converter_color:
+                log(LOG_INFO, 'Sub converter: {0!r} is not a colour (use RRGGBB, e.g. FF8800) - using yellow'.format(typed))
+                self.sub_converter_color = subconvert.DEFAULT_COLOR
+        if self.sub_converter_on:
+            log(LOG_DEBUG, 'Sub converter: audio {0}, colour {1}'.format(
+                'in any language' if self.sub_converter_all else ','.join(self.sub_converter_langs) or 'none chosen',
+                self.sub_converter_color))
 
     def readSettings(self):
         self.readPrefs()
@@ -100,6 +129,7 @@ class settings():
         self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
         self.ignore_signs_on = addon.getSetting('signs') == 'true'
         self.sub_converter_on = addon.getSetting('subConverter') == 'true'
+        self.read_sub_converter(addon)
         self.regex_sub_filter_enabled = addon.getSetting('regexSubFilter') == 'true'
         self.regex_sub_pattern = addon.getSetting('regexSubPattern')
         if _OLD_SS_PATTERN in self.regex_sub_pattern:
@@ -193,6 +223,7 @@ class settings():
                                     or self.sub_prefs_on
                                     or self.condsub_prefs_on
                                     or self.regex_sub_filter_enabled
+                                    or self.sub_converter_on
                                     or self.useFilename or self.storeCustomMediaPreferences)
 
         log(LOG_DEBUG, 'storeCustomMediaPreferences: {0}'.format(self.storeCustomMediaPreferences))

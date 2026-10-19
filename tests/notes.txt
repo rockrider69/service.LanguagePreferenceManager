@@ -30,6 +30,9 @@ test_selfcheck.py             installation check: another copy of the add-on, co
 test_settings.py              settings.xml: language spinners complete, grouped and unique; every label defined in
                               English; translations (.po) consistent
 test_subconvert_srt.py        sub converter: which codecs are convertible, SRT / ASS / WebVTT cues moved to the top
+test_subconverter_options.py  sub converter options: text color (presets, typed RRGGBB, bad values), up to 10 audio
+                              languages and the "all languages" toggle, settings.xml entries, runs with any setting
+                              (not only with the regex filter or the conditional rules)
 test_subtitle_formats.py      subtitle format preference (SRT, ASS, WebVTT, PGS, VobSub): order, external files
 
 All of them run without any file of yours.
@@ -41,8 +44,9 @@ t1  Subtitle tracks of an .mkv video      asks: path of an .mkv
                                           shows the codec of every embedded subtitle track and whether the sub
                                           converter can convert it (text yes, PGS / VobSub no)
 t2  Convert one subtitle track            asks: path of an .mkv, track number, language code for the file name,
-                                          output folder (default: a folder in the system temp folder)
-                                          writes what the sub converter writes (yellow text at the top, SRT; ASS
+                                          output folder (default: a folder in the system temp folder), text color
+                                          (RRGGBB, default FFFF00)
+                                          writes what the sub converter writes (colored text at the top, SRT; ASS
                                           stays ASS). Reads the whole file: slow on a network drive.
 t3  Languages in a file name              asks: a file name or path
                                           shows the audio and subtitle languages the "use file name" setting reads

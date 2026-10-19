@@ -542,7 +542,7 @@ msgid "The stored preference could not be removed. Please try again."
 msgstr ""
 
 msgctxt "#30620"
-msgid "Sub converter (Japanese, Korean or Chinese audio when the selected subtitle is ASS/SSA: a copy with its styles, fonts and signs kept and the bottom lines moved to the top; other text formats other than SRT become plain yellow SRT at the top)"
+msgid "Sub converter: puts the selected text subtitle at the top of the screen, clear of burned-in subtitles. ASS/SSA keeps its styles, fonts and signs, with the bottom lines moved to the top; SRT and WebVTT become SRT text in the chosen color. Works on any subtitle, whichever setting selected it"
 msgstr ""
 
 msgctxt "#30630"
@@ -615,4 +615,96 @@ msgstr ""
 
 msgctxt "#30647"
 msgid "Installation"
+msgstr ""
+
+msgctxt "#30648"
+msgid "Sub converter"
+msgstr ""
+
+msgctxt "#30649"
+msgid "Subtitle color"
+msgstr ""
+
+msgctxt "#30650"
+msgid "Yellow"
+msgstr ""
+
+msgctxt "#30651"
+msgid "White"
+msgstr ""
+
+msgctxt "#30652"
+msgid "Cyan"
+msgstr ""
+
+msgctxt "#30653"
+msgid "Green"
+msgstr ""
+
+msgctxt "#30654"
+msgid "Orange"
+msgstr ""
+
+msgctxt "#30655"
+msgid "Pink"
+msgstr ""
+
+msgctxt "#30656"
+msgid "Red"
+msgstr ""
+
+msgctxt "#30657"
+msgid "Light blue"
+msgstr ""
+
+msgctxt "#30658"
+msgid "Custom (type the color below)"
+msgstr ""
+
+msgctxt "#30659"
+msgid "Custom color (RRGGBB, e.g. FF8800)"
+msgstr ""
+
+msgctxt "#30660"
+msgid "Convert for audio in all languages"
+msgstr ""
+
+msgctxt "#30661"
+msgid "Convert when the audio is: language 1"
+msgstr ""
+
+msgctxt "#30662"
+msgid "Convert when the audio is: language 2"
+msgstr ""
+
+msgctxt "#30663"
+msgid "Convert when the audio is: language 3"
+msgstr ""
+
+msgctxt "#30664"
+msgid "Convert when the audio is: language 4"
+msgstr ""
+
+msgctxt "#30665"
+msgid "Convert when the audio is: language 5"
+msgstr ""
+
+msgctxt "#30666"
+msgid "Convert when the audio is: language 6"
+msgstr ""
+
+msgctxt "#30667"
+msgid "Convert when the audio is: language 7"
+msgstr ""
+
+msgctxt "#30668"
+msgid "Convert when the audio is: language 8"
+msgstr ""
+
+msgctxt "#30669"
+msgid "Convert when the audio is: language 9"
+msgstr ""
+
+msgctxt "#30670"
+msgid "Convert when the audio is: language 10"
 msgstr ""

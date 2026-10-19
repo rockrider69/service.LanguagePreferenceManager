@@ -9,7 +9,12 @@ import subcodec
 
 FOLDER_NAME = 'converted_subs'
 _TOP = 8                                 # numpad alignment (\an8): top centre
-_YELLOW = '#FFFF00'
+DEFAULT_COLOR = '#FFFF00'                # yellow
+_YELLOW = DEFAULT_COLOR
+
+# the colours of the settings spinner (SubConverterColor 0..7; 8 = the hex value the user types)
+COLOR_PRESETS = ('#FFFF00', '#FFFFFF', '#00FFFF', '#00FF00', '#FFA500', '#FF69B4', '#FF4040', '#87CEFA')
+_HEX = re.compile(r'^#?([0-9a-f]{3}|[0-9a-f]{6})$', re.I)
 
 _DRAWING = re.compile(r'\{[^}]*\\p[1-9]')
 _OVERRIDES = re.compile(r'\{[^}]*\}')
@@ -17,6 +22,17 @@ _MARKUP = re.compile(r'<[^>]*>')
 _AN = re.compile(r'\\an([1-9])')
 _A_LEGACY = re.compile(r'\\a(\d{1,2})(?!\d)')
 _POS = re.compile(r'\\(?:pos|move)\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)')
+
+
+def normalize_color(text):
+    """'#RRGGBB' (upper case) for a colour typed as RRGGBB, #RRGGBB, RGB or #RGB; None when it is not one."""
+    match = _HEX.match(str(text or '').strip())
+    if not match:
+        return None
+    digits = match.group(1).upper()
+    if len(digits) == 3:
+        digits = ''.join(c * 2 for c in digits)
+    return '#' + digits
 
 
 def plain_location(path):
@@ -315,11 +331,13 @@ def _stamp(ms):
     return '{0:02d}:{1:02d}:{2:02d},{3:03d}'.format(ms // 3600000, ms // 60000 % 60, ms // 1000 % 60, ms % 1000)
 
 
-def events_to_srt(events, header='', view=None, codec=''):
-    """SRT text of [(start ms, end ms, raw ASS block text)], in time order; every line is yellow. A line the ASS
+def events_to_srt(events, header='', view=None, codec='', color=None):
+    """SRT text of [(start ms, end ms, raw ASS block text)], in time order; every line has the colour (default
+    yellow). A line the ASS
     file does not position is put at the top of the picture ({\\an8}); a positioned one keeps its place (its
     alignment). Identical lines shown at the same time are written once. header: the track's ASS script header."""
     info = parse_header(header)
+    color = normalize_color(color) or DEFAULT_COLOR
     cues = []
     seen = set()
     for start, end, raw in sorted(events, key=lambda e: (e[0], e[1])):
@@ -339,23 +357,25 @@ def events_to_srt(events, header='', view=None, codec=''):
         cues.append((start, end, lines, placement))
     out = []
     for i, (start, end, lines, alignment) in enumerate(cues, 1):
-        body = '\n'.join('<font color="{0}">{1}</font>'.format(_YELLOW, line) for line in lines)
+        body = '\n'.join('<font color="{0}">{1}</font>'.format(color, line) for line in lines)
         out.append('{0}\n{1} --> {2}\n{{{3}}}{4}\n'.format(i, _stamp(start), _stamp(end), alignment, body))
     return '\n'.join(out), len(cues)
 
 
-def target_path(user_data_path, video_path, ordinal, language, view=None, ext='srt'):
+def target_path(user_data_path, video_path, ordinal, language, view=None, ext='srt', color=None):
     """Where the converted copy of subtitle track number ordinal of video_path goes: the video's name, a short
     hash of its full path (two videos with the same name) and the track, then the language code, which is how
     Kodi reads the language of an external subtitle."""
     base = os.path.splitext(os.path.basename(plain_location(video_path).rstrip('/\\')))[0] or 'video'
     base = re.sub(r'[^\w .()\[\]-]', '_', base)[:80]
-    tag = hashlib.md5((video_path + repr(view)).encode('utf-8')).hexdigest()[:6]     # a new screen size, a new copy
+    # a new screen size or another colour, a new copy (the default colour keeps the name it always had)
+    extra = '' if ext != 'srt' or not color or color == DEFAULT_COLOR else color
+    tag = hashlib.md5((video_path + repr(view) + extra).encode('utf-8')).hexdigest()[:6]
     lang = re.sub(r'[^A-Za-z-]', '', language or '') or 'und'
     return os.path.join(converted_folder(user_data_path), '{0} [{1}-{2}].{3}.{4}'.format(base, tag, ordinal, lang, ext))
 
 
-def convert(video_path, ordinal, destination, should_stop=None, log=None, view=None):
+def convert(video_path, ordinal, destination, should_stop=None, log=None, view=None, color=None):
     """Write the SRT copy of embedded subtitle track number ordinal of the Matroska file video_path to
     destination (a finished copy there is reused). Returns the number of cues, 0 when nothing was written."""
     if os.path.isfile(destination) and os.path.getsize(destination) > 0:
@@ -380,7 +400,7 @@ def convert(video_path, ordinal, destination, should_stop=None, log=None, view=N
     if subcodec.is_ass(info.get('codec', '')) and destination.lower().endswith('.ass'):
         srt, cues = events_to_ass(events, info.get('header', ''))
     else:
-        srt, cues = events_to_srt(events, info.get('header', ''), view, info.get('codec', ''))
+        srt, cues = events_to_srt(events, info.get('header', ''), view, info.get('codec', ''), color)
     if not cues:
         return 0
     os.makedirs(os.path.dirname(destination), exist_ok=True)

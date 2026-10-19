@@ -556,8 +556,8 @@ msgid "The stored preference could not be removed. Please try again."
 msgstr "La préférence enregistrée n'a pas pu être supprimée. Réessayez."
 
 msgctxt "#30620"
-msgid "Sub converter (Japanese, Korean or Chinese audio when the selected subtitle is ASS/SSA: a copy with its styles, fonts and signs kept and the bottom lines moved to the top; other text formats other than SRT become plain yellow SRT at the top)"
-msgstr "Convertisseur de sous-titres (audio japonais, coréen ou chinois quand le sous-titre choisi est ASS/SSA : copie avec styles, polices et panneaux conservés, lignes du bas déplacées en haut ; les autres formats texte hors SRT deviennent du SRT jaune simple en haut)"
+msgid "Sub converter: puts the selected text subtitle at the top of the screen, clear of burned-in subtitles. ASS/SSA keeps its styles, fonts and signs, with the bottom lines moved to the top; SRT and WebVTT become SRT text in the chosen color. Works on any subtitle, whichever setting selected it"
+msgstr "Convertisseur de sous-titres : place le sous-titre texte choisi en haut de l'écran, à l'écart des sous-titres incrustés. L'ASS/SSA garde ses styles, polices et panneaux, les lignes du bas passent en haut ; le SRT et le WebVTT deviennent du SRT dans la couleur choisie. Fonctionne avec tout sous-titre, quel que soit le réglage qui l'a choisi"
 
 msgctxt "#30630"
 msgid "Subtitle format preference (when several subtitles of the preferred language are available, the first format of this list that is present is taken; formats of embedded .mkv tracks and of subtitle files next to the video are known)"
@@ -630,3 +630,95 @@ msgstr "Vérifier l'installation (copies obsolètes ou en double)"
 msgctxt "#30647"
 msgid "Installation"
 msgstr "Installation"
+
+msgctxt "#30648"
+msgid "Sub converter"
+msgstr "Convertisseur de sous-titres"
+
+msgctxt "#30649"
+msgid "Subtitle color"
+msgstr "Couleur des sous-titres"
+
+msgctxt "#30650"
+msgid "Yellow"
+msgstr "Jaune"
+
+msgctxt "#30651"
+msgid "White"
+msgstr "Blanc"
+
+msgctxt "#30652"
+msgid "Cyan"
+msgstr "Cyan"
+
+msgctxt "#30653"
+msgid "Green"
+msgstr "Vert"
+
+msgctxt "#30654"
+msgid "Orange"
+msgstr "Orange"
+
+msgctxt "#30655"
+msgid "Pink"
+msgstr "Rose"
+
+msgctxt "#30656"
+msgid "Red"
+msgstr "Rouge"
+
+msgctxt "#30657"
+msgid "Light blue"
+msgstr "Bleu clair"
+
+msgctxt "#30658"
+msgid "Custom (type the color below)"
+msgstr "Personnalisée (saisir la couleur ci-dessous)"
+
+msgctxt "#30659"
+msgid "Custom color (RRGGBB, e.g. FF8800)"
+msgstr "Couleur personnalisée (RRVVBB, ex. FF8800)"
+
+msgctxt "#30660"
+msgid "Convert for audio in all languages"
+msgstr "Convertir pour l'audio dans toutes les langues"
+
+msgctxt "#30661"
+msgid "Convert when the audio is: language 1"
+msgstr "Convertir quand l'audio est : langue 1"
+
+msgctxt "#30662"
+msgid "Convert when the audio is: language 2"
+msgstr "Convertir quand l'audio est : langue 2"
+
+msgctxt "#30663"
+msgid "Convert when the audio is: language 3"
+msgstr "Convertir quand l'audio est : langue 3"
+
+msgctxt "#30664"
+msgid "Convert when the audio is: language 4"
+msgstr "Convertir quand l'audio est : langue 4"
+
+msgctxt "#30665"
+msgid "Convert when the audio is: language 5"
+msgstr "Convertir quand l'audio est : langue 5"
+
+msgctxt "#30666"
+msgid "Convert when the audio is: language 6"
+msgstr "Convertir quand l'audio est : langue 6"
+
+msgctxt "#30667"
+msgid "Convert when the audio is: language 7"
+msgstr "Convertir quand l'audio est : langue 7"
+
+msgctxt "#30668"
+msgid "Convert when the audio is: language 8"
+msgstr "Convertir quand l'audio est : langue 8"
+
+msgctxt "#30669"
+msgid "Convert when the audio is: language 9"
+msgstr "Convertir quand l'audio est : langue 9"
+
+msgctxt "#30670"
+msgid "Convert when the audio is: language 10"
+msgstr "Convertir quand l'audio est : langue 10"

@@ -192,6 +192,8 @@ class LangPrefMan_Player(xbmc.Player):
                         log(LOG_INFO,
                             'Custom media preferences only partly applicable to current media. The applied part is kept, the rest falls back to the other preferences...')
                         self.evalPrefs()
+                    else:
+                        self.start_sub_converter()      # evalPrefs() (which starts it) did not run
                 else:
                     self.evalPrefs()
             else:
@@ -787,13 +789,16 @@ class LangPrefMan_Player(xbmc.Player):
         return -1
 
     def start_sub_converter(self, user_switch=False):
-        """Sub converter: with Japanese, Korean or Chinese audio and a text subtitle selected (ASS/SSA, SRT or WebVTT;
-        the video may have other subtitle formats as well), that subtitle is copied (subconvert.py) to yellow text at
-        the top (an ASS/SSA track stays ASS, the others become SRT); positioned lines keep their place. The copy is selected.
+        """Sub converter: with audio in one of the chosen languages (Japanese, Korean and Chinese by default; up to 10,
+        or all) and a text subtitle selected (ASS/SSA, SRT or WebVTT; the video may have other subtitle formats as
+        well), that subtitle is copied (subconvert.py) to text of the chosen colour (yellow by default) at the top
+        (an ASS/SSA track stays ASS, the others become SRT); positioned lines keep their place. The copy is selected.
+        It works on whatever subtitle is selected, whichever setting selected it (regex filter, subtitle or
+        conditional preferences, a stored preference, the file name, or the user).
         Runs in a thread: the file is read through for the track's events. user_switch: the user changed the
         subtitle during the playback; when a conversion is still running (of the previous subtitle, which it then
         drops) the new subtitle is converted as soon as it ends."""
-        if not settings.sub_converter_on or not (settings.regex_sub_filter_enabled or settings.condsub_prefs_on):
+        if not settings.sub_converter_on:
             return
         if self.sub_converting:
             if user_switch:
@@ -801,6 +806,14 @@ class LangPrefMan_Player(xbmc.Player):
             return
         self.sub_converting = True
         threading.Thread(target=self._sub_converter_run, daemon=True).start()
+
+    @staticmethod
+    def sub_converter_audio_wanted(audio):
+        """Is the playing audio one the sub converter works for (the setting: all languages, or the chosen ones)?"""
+        if getattr(settings, 'sub_converter_all', False):
+            return True
+        return any(langutils.stream_matches_language(c, audio, 'Audio')
+                   for c in getattr(settings, 'sub_converter_langs', ()))
 
     def _converted_name(self, stream):
         return re.search(r'\[[0-9a-f]{6}-\d+\]', stream.get('name', '') or '') is not None
@@ -812,7 +825,7 @@ class LangPrefMan_Player(xbmc.Player):
         if not self.getDetails() or not self.selected_sub_enabled or not self.selected_sub:
             return None
         audio = self.selected_audio_stream or {}
-        if not any(langutils.stream_matches_language(c, audio, 'Audio') for c in ('jpn', 'kor', 'chi')):
+        if not self.sub_converter_audio_wanted(audio):
             return None
         label = xbmc.getLocalizedString(21602)
         subs = [s for s in (self.subtitles or []) if not self._converted_name(s)]
@@ -858,11 +871,12 @@ class LangPrefMan_Player(xbmc.Player):
             playing = lambda: self.isPlayingVideo() and self.getPlayingFile() == video
             as_ass = subcodec.is_ass(codec)                  # ASS/SSA stays ASS (styles, fonts, places), the rest becomes SRT
             view = None if as_ass else self._picture_view()
+            color = getattr(settings, 'sub_converter_color', subconvert.DEFAULT_COLOR)
             destination = subconvert.target_path(__user_data_path__, video, ordinal, language, view,
-                                                 'ass' if as_ass else 'srt')
+                                                 'ass' if as_ass else 'srt', color)
             started = time.time()
             cues = subconvert.convert(video, ordinal, destination, lambda: not playing(),
-                                      lambda msg: log(LOG_INFO, msg), view)
+                                      lambda msg: log(LOG_INFO, msg), view, color)
             if cues == 0:
                 log(LOG_INFO, 'Sub converter: nothing converted for subtitle track {0}'.format(ordinal + 1))
                 return

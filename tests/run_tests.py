@@ -29,6 +29,7 @@ DESCRIPTIONS = {
     'test_selfcheck': 'installation check: stale copies, compiled files, version/code fingerprint',
     'test_settings': 'settings.xml: spinner order and values, translations (.po) complete and consistent',
     'test_subconvert_srt': 'sub converter: SRT/ASS/WebVTT cue conversion',
+    'test_subconverter_options': 'sub converter options: color, up to 10 audio languages / all, works with any setting',
     'test_subtitle_formats': 'subtitle format preference (SRT, ASS, WebVTT, PGS, VobSub)',
 }
 
@@ -178,10 +179,14 @@ def tool_convert():
         return
     language = ask('Language code for the file name', 'und')
     out = ask('Output folder', os.path.join(tempfile.gettempdir(), 'lpm_converted_test'))
+    color = subconvert.normalize_color(ask('Text color for SRT output (RRGGBB; ASS keeps its styles)', 'FFFF00'))
+    if not color:
+        print('  Not a color, using yellow.')
+        color = subconvert.DEFAULT_COLOR
     ext = 'ass' if subcodec.is_ass(codec) else 'srt'
-    destination = subconvert.target_path(out, path, ordinal, language, None, ext)
+    destination = subconvert.target_path(out, path, ordinal, language, None, ext, color)
     print('  Reading the whole file; this can take a while on a network drive...')
-    cues = subconvert.convert(path, ordinal, destination, None, lambda msg: print('  ' + msg), None)
+    cues = subconvert.convert(path, ordinal, destination, None, lambda msg: print('  ' + msg), None, color)
     if cues == 0:
         print('  Nothing converted.')
     else:
