@@ -18,6 +18,23 @@ from prefsettings import settings
 
 settings = settings()
 
+# Kodi announces subtitle changes (Player.OnPropertyChanged: subtitleenabled / currentsubtitle) from version 22; in
+# 19, 20 and 21 there is nothing to listen to and only the watcher thread can see them
+KODI_ANNOUNCES_SUBTITLES_FROM = 22
+
+
+def kodi_major_version(build_version=None):
+    """Major version of the running Kodi from its build string ('22.0-BETA2 (21.90.802) Git:...', '21.2 (21.2.0)
+    Git:...'); 21.90 and up are the pre-releases of 22. 0 when the string cannot be read."""
+    if build_version is None:
+        build_version = xbmc.getInfoLabel('System.BuildVersion')
+    match = re.match(r'\s*(\d+)(?:\.(\d+))?', build_version or '')
+    if not match:
+        return 0
+    major, minor = int(match.group(1)), int(match.group(2) or 0)
+    return major + 1 if major == 21 and minor >= 90 else major
+
+
 class LangPref_Monitor(xbmc.Monitor):
 
     def __init__(self):
@@ -74,7 +91,9 @@ class LangPrefWatcher(threading.Thread):
                 log(LOG_ERROR, 'Subtitle watcher error: {0}'.format(e))
             waited = 0.0
             # Kodi that announces subtitle changes itself (on_subtitle_event) only needs this as a safety net
-            interval = self.SAFETY_INTERVAL if getattr(self.player, 'subtitle_events_seen', False) else self.check_interval
+            announced = (getattr(self.player, 'subtitle_events_seen', False)
+                         or getattr(self.player, 'subtitle_events_expected', False))
+            interval = self.SAFETY_INTERVAL if announced else self.check_interval
             while waited < interval and not self._stop_event.is_set():
                 if monitor.waitForAbort(0.5):
                     return
@@ -91,6 +110,15 @@ class LangPrefMan_Player(xbmc.Player):
 
     def __init__(self):
         self.LPM_initial_run_done = False
+        # Kodi's version decides how subtitle changes are noticed: announced by Kodi (22 and newer; the watcher is then
+        # only a safety net) or found by the watcher thread (older). Receiving such a notification also counts
+        # (subtitle_events_seen), whatever the version says.
+        build_version = xbmc.getInfoLabel('System.BuildVersion')
+        self.subtitle_events_expected = kodi_major_version(build_version) >= KODI_ANNOUNCES_SUBTITLES_FROM
+        log(LOG_INFO, 'Kodi {0}: subtitle changes are {1}'.format(
+            build_version or '(unknown version)',
+            'announced by Kodi (the subtitle watcher only is a 60 s safety net)' if self.subtitle_events_expected
+            else 'looked for by the subtitle watcher every 10 s'))
         self.selected_sub_enabled = False
         # regex subtitle filter hit on the initial run: it keeps priority over conditional subtitles when
         # the audio track is changed later on (conditional subs are re-evaluated on every audio change)
@@ -143,18 +171,24 @@ class LangPrefMan_Player(xbmc.Player):
 
     def on_subtitle_event(self):
         """Kodi announced a subtitle change (on / off or another track): look at it right away, without waiting for
-        the watcher. Changes LPM made itself are not looked at (they are known; the baseline is adopted)."""
+        the watcher. Within 2 s of a change LPM made itself the look is postponed until then (LPM adopts its own
+        change as the baseline), so a change of the user in that time is not lost."""
         self.subtitle_events_seen = True
-        if getattr(self, 'sub_event_pending', False) or time.time() < getattr(self, 'sub_event_quiet_until', 0):
+        if getattr(self, 'sub_event_pending', False):
             return
+        self._schedule_subtitle_check(max(self.SUB_EVENT_DELAY, getattr(self, 'sub_event_quiet_until', 0) - time.time() + 0.1))
+
+    def _schedule_subtitle_check(self, delay):
         self.sub_event_pending = True
-        timer = threading.Timer(self.SUB_EVENT_DELAY, self._handle_subtitle_event)
+        timer = threading.Timer(delay, self._handle_subtitle_event)
         timer.daemon = True
         timer.start()
 
     def _handle_subtitle_event(self):
         self.sub_event_pending = False
-        if time.time() < getattr(self, 'sub_event_quiet_until', 0):
+        remaining = getattr(self, 'sub_event_quiet_until', 0) - time.time()
+        if remaining > 0:                       # LPM changed the subtitle again meanwhile: look when that is over
+            self._schedule_subtitle_check(remaining + 0.1)
             return
         try:
             if (settings.storeCustomMediaPreferences or settings.sub_converter_on) and self.isPlayingVideo():
@@ -359,7 +393,9 @@ class LangPrefMan_Player(xbmc.Player):
 
     def _check_subtitle_change(self, previous_sub_index, previous_enabled_sub, previous_sub_language):
         """Compare the (freshly read) subtitle state with the previous one; store a manual change."""
-        if time.time() < self.sub_convert_quiet_until:
+        # Only the converter's own copy is ignored (just after it selected it): another subtitle the user picks a
+        # few seconds later is a real change and must be looked at, or it would never be converted.
+        if time.time() < self.sub_convert_quiet_until and self._is_converter_copy(self.selected_sub):
             log(LOG_DEBUG, 'Subtitle change ignored: the sub converter selected its own subtitle')
             return
         if self.getSelectedSubtitleIndex() != previous_sub_index or self.selected_sub_enabled != previous_enabled_sub:
@@ -865,6 +901,12 @@ class LangPrefMan_Player(xbmc.Player):
             return True
         return any(langutils.stream_matches_language(c, audio, 'Audio')
                    for c in getattr(settings, 'sub_converter_langs', ()))
+
+    def _is_converter_copy(self, stream):
+        """A converted copy: Kodi lists it as an external subtitle (and may have mangled its [hash-n] tag)."""
+        stream = stream or {}
+        return (self._converted_name(stream)
+                or langutils.external_name(stream, xbmc.getLocalizedString(21602)) is not None)
 
     def _converted_name(self, stream):
         return re.search(r'\[[0-9a-f]{6}-\d+\]', stream.get('name', '') or '') is not None

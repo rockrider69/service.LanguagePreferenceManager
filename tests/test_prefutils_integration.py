@@ -368,9 +368,20 @@ class PreferenceEvaluationTests(unittest.TestCase):
         import time
         player, mock = self.converter_player()
         player.sub_convert_quiet_until = time.time() + 5
+        # what Kodi shows after the converter selected its copy: an external subtitle
+        player.selected_sub = {"index": 3, "language": "eng", "name": "Movie [abc123-0].eng.srt (External)"}
         with mock.patch("prefutils.threading.Thread") as thread:
             player._check_subtitle_change(0, True, "jpn")
         thread.assert_not_called()
+
+    def test_another_track_picked_right_after_a_conversion_is_a_user_switch(self):
+        import time
+        player, mock = self.converter_player()
+        player.sub_convert_quiet_until = time.time() + 5
+        player.selected_sub = {"index": 2, "language": "ger", "name": "German"}      # an embedded track
+        with mock.patch("prefutils.threading.Thread") as thread:
+            player._check_subtitle_change(0, True, "jpn")
+        thread.assert_called_once()
 
     def flagged_player(self, formats, flagged, names=None):
         """English tracks 0..n-1 in the given formats; the ones in `flagged` carry only the forced flag."""

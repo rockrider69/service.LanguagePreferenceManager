@@ -319,6 +319,116 @@ class ConverterGateTests(unittest.TestCase):
         self.assertTrue(wanted(self.audio("")))
 
 
+class ConverterCopyIgnoreTests(unittest.TestCase):
+    """Right after a conversion only the converter's own copy is ignored: the next subtitle the user picks is not."""
+
+    @classmethod
+    def setUpClass(cls):
+        ConverterGateTests.setUpClass()
+        cls.prefutils = ConverterGateTests.prefutils
+
+    def player(self, selected):
+        prefutils = self.prefutils
+        player = object.__new__(prefutils.LangPrefMan_Player)
+        player.sub_convert_quiet_until = time.time() + 5          # the quiet time after a conversion
+        player.selected_sub = selected
+        player.selected_sub_enabled = True
+        player.started = []
+        player.getSelectedSubtitleIndex = lambda: selected["index"]
+        player.getSelectedSubtitleLanguage = lambda: selected.get("language", "")
+        player.start_sub_converter = lambda **kw: player.started.append(kw)
+        return player
+
+    def run_check(self, selected):
+        prefutils = self.prefutils
+        saved = getattr(prefutils.settings, "is_store_user_preference_for_player", None)
+        prefutils.settings.is_store_user_preference_for_player = staticmethod(lambda _p: False)
+        old_label = getattr(prefutils.xbmc, "getLocalizedString", None)
+        prefutils.xbmc.getLocalizedString = lambda _i: "(External)"
+        try:
+            player = self.player(selected)
+            player._check_subtitle_change(0, True, "eng")          # it was track 0 before
+        finally:
+            prefutils.xbmc.getLocalizedString = old_label
+            if saved is not None:
+                prefutils.settings.is_store_user_preference_for_player = saved
+        return player
+
+    def test_the_converters_own_copy_is_ignored(self):
+        copy = {"index": 3, "language": "eng", "name": "tri [adfd5f-1].fr.srt (External)"}
+        self.assertEqual([], self.run_check(copy).started)
+        mangled = {"index": 3, "language": "fre", "name": "adfd5f 1] (External)"}
+        self.assertEqual([], self.run_check(mangled).started)
+
+    def test_an_embedded_track_the_user_picks_right_after_is_looked_at(self):
+        german = {"index": 2, "language": "ger", "name": "German"}
+        self.assertEqual([{"user_switch": True}], self.run_check(german).started)
+
+
+class KodiVersionTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        ConverterGateTests.setUpClass()
+        cls.prefutils = ConverterGateTests.prefutils
+
+    def test_the_major_version_is_read_from_the_build_string(self):
+        read = self.prefutils.kodi_major_version
+        for text, major in (("22.0-BETA2 (21.90.802) Git:20260831-e513e0ff433", 22),
+                            ("22.0 (22.0.0) Git:20270101-abcdef", 22),
+                            ("21.2 (21.2.0) Git:20250101-abc", 21),
+                            ("21.0-RC1 (20.90.101) Git:abc", 21),
+                            ("20.5 (20.5.0) Git:20240101-abc", 20),
+                            ("19.5 (19.5.0) Git:20221201-abc", 19),
+                            ("  19.4.0 something", 19),
+                            ("21.90.802 Git:abc", 22),          # a pre-release of 22 written as its internal number
+                            ("21.9 (21.9.0)", 21),
+                            ("", 0), ("unknown", 0)):
+            self.assertEqual(major, read(text), repr(text))
+
+    def test_without_a_string_it_asks_kodi(self):
+        xbmc = self.prefutils.xbmc
+        had = hasattr(xbmc, "getInfoLabel")
+        old = getattr(xbmc, "getInfoLabel", None)
+        xbmc.getInfoLabel = lambda label: "22.0-BETA2 (21.90.802) Git:x" if label == "System.BuildVersion" else ""
+        try:
+            self.assertEqual(22, self.prefutils.kodi_major_version())
+        finally:
+            if had:
+                xbmc.getInfoLabel = old
+            else:
+                del xbmc.getInfoLabel
+
+    def test_notifications_are_expected_from_kodi_22(self):
+        self.assertEqual(22, self.prefutils.KODI_ANNOUNCES_SUBTITLES_FROM)
+
+    def watcher_rounds(self, **player_flags):
+        prefutils = self.prefutils
+        waits = []
+
+        class Monitor:
+            def abortRequested(self):
+                return False
+
+            def waitForAbort(self, seconds):
+                waits.append(seconds)
+                return len(waits) > 130
+
+        old = prefutils.xbmc.Monitor
+        prefutils.xbmc.Monitor = Monitor
+        try:
+            player = types.SimpleNamespace(isPlayingVideo=lambda: False, **player_flags)
+            prefutils.LangPrefWatcher(player, check_interval=10).run()
+        finally:
+            prefutils.xbmc.Monitor = old
+        return len(waits)
+
+    def test_the_watcher_starts_relaxed_when_the_version_announces_changes(self):
+        # 130 waits of 0.5 s: 65 s, long enough to see a 10 s round or a 60 s round
+        self.assertEqual(131, self.watcher_rounds(subtitle_events_expected=True))
+        self.assertEqual(131, self.watcher_rounds(subtitle_events_seen=True))
+        self.assertEqual(131, self.watcher_rounds())
+
+
 class WatcherTests(unittest.TestCase):
     """The 10 second subtitle watcher also serves the sub converter (a subtitle switched on or off during playback)."""
 
@@ -437,14 +547,22 @@ class SubtitleEventTests(unittest.TestCase):
         self.assertFalse(player.detected.acquire(timeout=0.3))
         self.assertEqual(1, player.calls)
 
-    def test_a_change_LPM_made_itself_is_not_looked_at_as_the_users(self):
+    def test_just_after_a_change_of_LPM_the_look_is_postponed_not_dropped(self):
         player = self.player()
-        player.sub_event_quiet_until = time.time() + 5
+        player.sub_event_quiet_until = time.time() + 0.6
         player.on_subtitle_event()
-        self.assertFalse(player.detected.acquire(timeout=0.3))
-        player.sub_event_quiet_until = 0
+        self.assertFalse(player.detected.acquire(timeout=0.3))     # still in the quiet time
+        self.assertTrue(player.detected.acquire(timeout=3))        # looked at once it is over
+        self.assertEqual(1, player.calls)
+
+    def test_a_new_change_of_LPM_postpones_the_look_again(self):
+        player = self.player()
+        player.sub_event_quiet_until = time.time() + 0.3
         player.on_subtitle_event()
-        self.assertTrue(player.detected.acquire(timeout=2))
+        player.sub_event_quiet_until = time.time() + 0.9           # LPM changed the subtitle again
+        self.assertFalse(player.detected.acquire(timeout=0.6))
+        self.assertTrue(player.detected.acquire(timeout=3))
+        self.assertEqual(1, player.calls)
 
     def test_nothing_is_looked_at_when_neither_the_converter_nor_stored_preferences_are_on(self):
         self.prefutils.settings.sub_converter_on = False
