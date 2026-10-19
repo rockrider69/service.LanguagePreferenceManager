@@ -132,6 +132,7 @@ class LangPrefMan_Player(xbmc.Player):
         # subtitle files next to the playing video: (playing file, [langutils.subtitle_file_tag() results])
         self.external_sub_files = (None, [])
         self.sub_codecs = (None, None)            # (playing file, embedded subtitle CodecIDs or None)
+        self.sub_scan = (None, None)              # (playing file, events of all its text subtitle tracks) from one read of the file
         self.sub_formats = (None, {})             # (Kodi's subtitle list, {index: format}) - see subtitle_formats()
         self.sub_format_options = {}              # {index: {formats}} of external tracks whose file is not certain
         # sub converter: a converted subtitle is being made / selected (LPM's own change, never a user's)
@@ -268,6 +269,7 @@ class LangPrefMan_Player(xbmc.Player):
         self.stored_sub_applied = False
         self.external_sub_files = (None, [])     # the subtitle files may have changed since the last playback
         self.sub_codecs = (None, None)
+        self.sub_scan = (None, None)             # (video, events of all its text subtitle tracks) from one read of the file
         self.external_sub_tags = (None, {})
         settings.dump_settings()
         if settings.service_enabled and settings.at_least_one_pref_on:
@@ -918,7 +920,8 @@ class LangPrefMan_Player(xbmc.Player):
         if self.sub_converting:
             if user_switch:
                 self.sub_convert_pending = True
-                log(LOG_INFO, 'Sub converter: delayed - a conversion is still running, the new subtitle follows when it ends')
+                log(LOG_INFO, 'Sub converter: delayed - the file is still being read (one read serves all its subtitle tracks), '
+                          'the new subtitle follows when it ends')
             else:
                 log(LOG_INFO, 'Sub converter: skipped - a conversion is already running')
             return
@@ -1016,9 +1019,6 @@ class LangPrefMan_Player(xbmc.Player):
             if not job:
                 return
             video, ordinal, language, chosen, codec = job
-            log(LOG_INFO, 'Sub converter: accepted - converting subtitle track {0} ({1}, {2}) of {3} (the whole file is '
-                          'read: the first time this can take a minute or more)'.format(
-                              ordinal + 1, codec, language, subconvert.plain_location(video)))
             playing = self._still_playing(video)
             as_ass = subcodec.is_ass(codec)                  # ASS/SSA stays ASS (styles, fonts, places), the rest becomes SRT
             view = None if as_ass else self._picture_view()
@@ -1026,8 +1026,29 @@ class LangPrefMan_Player(xbmc.Player):
             destination = subconvert.target_path(__user_data_path__, video, ordinal, language, view,
                                                  'ass' if as_ass else 'srt', color)
             started = time.time()
+            scanned = self.sub_scan[1] if self.sub_scan[0] == video else None
+            if os.path.isfile(destination) and os.path.getsize(destination) > 0:
+                log(LOG_INFO, 'Sub converter: accepted - subtitle track {0} ({1}, {2}) was converted before'.format(
+                    ordinal + 1, codec, language))
+            elif scanned is not None:
+                log(LOG_INFO, 'Sub converter: accepted - converting subtitle track {0} ({1}, {2}) from the earlier read '
+                              'of the file'.format(ordinal + 1, codec, language))
+            else:
+                log(LOG_INFO, 'Sub converter: accepted - converting subtitle track {0} ({1}, {2}) of {3} (the file is '
+                              'read once for all its subtitle tracks: the first time this can take a minute or more)'.format(
+                                  ordinal + 1, codec, language, subconvert.plain_location(video)))
+                scanned = subconvert.scan(video, lambda: not playing(), lambda msg: log(LOG_INFO, msg))
+                if scanned is not None:
+                    self.sub_scan = (video, scanned)
+                    log(LOG_INFO, 'Sub converter: file read in {0:.1f} s, text subtitle tracks found: {1}'.format(
+                        time.time() - started, sorted(t + 1 for t in scanned)))
+                elif not playing():
+                    log(LOG_INFO, 'Sub converter: skipped - playback stopped while reading the file')
+                    return
+                else:
+                    scanned = {}
             cues = subconvert.convert(video, ordinal, destination, lambda: not playing(),
-                                      lambda msg: log(LOG_INFO, msg), view, color)
+                                      lambda msg: log(LOG_INFO, msg), view, color, scanned)
             if cues == 0:
                 log(LOG_INFO, 'Sub converter: skipped - nothing could be converted for subtitle track {0}'.format(ordinal + 1))
                 return

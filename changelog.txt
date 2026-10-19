@@ -2,6 +2,10 @@
 
 This beta builds on 1.1.1Beta1; the changes are listed below.
 
+- Sub converter: the video is read once for all its text subtitle tracks (ASS/SSA, SRT, WebVTT), not once per
+  track. Switching to another subtitle of the same video, also while the first read is still running, then needs no
+  second read of the file: the copy is made at once. The log shows the progress of a long read (part of the file,
+  MB/s, time left) and when the earlier read is reused.
 - Sub converter, new setting "Seek back after a late subtitle switch (Kodi 19-21)" (on by default, 3 s, 1-10 s): Kodi
   before 22 does not announce a subtitle the user picks during the playback, so it is converted at the next pause or
   resume; playback then goes back by that many seconds, so the lines that were shown in the original style are shown

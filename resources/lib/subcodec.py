@@ -314,13 +314,14 @@ def _block(payload, track):
     return rel, payload[n + 3:]
 
 
-def matroska_subtitle_events(reader, ordinal, should_stop=None, info=None):
-    """The events of the ordinal-th (0 = first) subtitle track of the Matroska file behind reader as
-    [(start ms, end ms, raw block text)]; the text of an ASS block is "ReadOrder,Layer,Style,Name,MarginL,
-    MarginR,MarginV,Effect,Text". The whole file is walked, but only the headers of the elements: the bulk
-    (video, audio) is skipped by seeking. None when the file is no Matroska file, the track is missing, or
-    should_stop() says so (called between clusters). When info is a dict, info['header'] gets the track's
-    CodecPrivate text (the ASS script header: resolution and styles)."""
+def matroska_subtitle_scan(reader, wanted=None, should_stop=None, progress=None):
+    """Walks the Matroska file behind reader once and collects the events of several embedded subtitle tracks at
+    the same time: {ordinal (0 = first subtitle track): {'events': [(start ms, end ms, raw block text)], 'header':
+    the track's CodecPrivate text (the ASS script header), 'codec': CodecID}}. wanted: the ordinals, or None for all
+    text tracks (ASS/SSA, SRT, WebVTT; picture formats are left out). The text of an ASS block is "ReadOrder,Layer,
+    Style,Name,MarginL,MarginR,MarginV,Effect,Text". The whole file is walked, but only the headers of the elements:
+    the bulk (video, audio) is skipped by seeking. should_stop() is asked between clusters; progress(position) is
+    called there too. None when the file is no Matroska file, there are no subtitle tracks, or should_stop() says so."""
     reader = _Buffered(reader)
     top = _header(reader, 0)
     if not top or top[0] != _EBML_HEADER or top[1] < 0:
@@ -331,8 +332,8 @@ def matroska_subtitle_events(reader, ordinal, should_stop=None, info=None):
         return None
     pos += seg[2]
     scale = 1000000                      # nanoseconds per tick
-    track = None
-    events = []
+    found = None                         # {ordinal: result entry}
+    by_number = {}                       # track number -> events list
     while True:
         if should_stop and should_stop():
             return None
@@ -351,21 +352,38 @@ def matroska_subtitle_events(reader, ordinal, should_stop=None, info=None):
         elif eid == _TRACKS and size <= _MAX_TRACKS_BYTES:
             reader.seek(body)
             tracks = _subtitle_tracks(reader.read(size))
-            if ordinal >= len(tracks):
+            found = {}
+            for ordinal, (number, codec, private) in enumerate(tracks):
+                if (wanted is None and is_convertible(codec)) or (wanted is not None and ordinal in wanted):
+                    found[ordinal] = {'events': [], 'header': private.decode('utf-8', 'replace'), 'codec': codec}
+                    by_number[number] = found[ordinal]['events']
+            if not found:
                 return None
-            track = tracks[ordinal][0]
-            if info is not None:
-                info['header'] = tracks[ordinal][2].decode('utf-8', 'replace')
-                info['codec'] = tracks[ordinal][1]
         elif eid == _CLUSTER:
-            if track is None:
+            if found is None:
                 return None
-            _cluster_events(reader, body, body + size, track, scale, events)
+            if progress:
+                progress(pos)
+            _cluster_events(reader, body, body + size, by_number, scale)
         pos = body + size
-    return events if track is not None else None
+    return found
 
 
-def _cluster_events(reader, pos, end, track, scale, events):
+def matroska_subtitle_events(reader, ordinal, should_stop=None, info=None):
+    """The events of the ordinal-th (0 = first) subtitle track of the Matroska file behind reader as
+    [(start ms, end ms, raw block text)] (see matroska_subtitle_scan). None when the file is no Matroska file, the
+    track is missing, or should_stop() says so. When info is a dict, info['header'] gets the track's CodecPrivate
+    text and info['codec'] its CodecID."""
+    found = matroska_subtitle_scan(reader, {ordinal}, should_stop)
+    if not found or ordinal not in found:
+        return None
+    if info is not None:
+        info['header'] = found[ordinal]['header']
+        info['codec'] = found[ordinal]['codec']
+    return found[ordinal]['events']
+
+
+def _cluster_events(reader, pos, end, tracks, scale):
     stamp = 0
     to_ms = scale / 1e6
     while pos < end:
@@ -381,20 +399,20 @@ def _cluster_events(reader, pos, end, track, scale, events):
             stamp = _uint(window[body:body + size])
         elif eid == _SIMPLE_BLOCK:
             number, _n = _vint(window, body, False)
-            if number == track:
-                wanted = (pos + body, size, None)
+            if number in tracks:
+                wanted = (pos + body, size, None, number)
         elif eid == _BLOCK_GROUP:
             cid, c1 = _vint(window, body, True)
             csize, c2 = _vint(window, body + c1, False) if cid is not None else (None, 0)
             if cid == _BLOCK and csize is not None:
                 number, _n = _vint(window, body + c1 + c2, False)
-                if number == track:
-                    wanted = (pos + body + c1 + c2, csize, 'group')
+                if number in tracks:
+                    wanted = (pos + body + c1 + c2, csize, 'group', number)
                     group = (pos + body, size)
         if wanted:
-            start, length, kind = wanted
+            start, length, kind, number = wanted
             reader.seek(start)
-            parsed = _block(reader.read(length), track)
+            parsed = _block(reader.read(length), number)
             duration = None
             if kind == 'group':
                 reader.seek(group[0])
@@ -405,5 +423,5 @@ def _cluster_events(reader, pos, end, track, scale, events):
                 rel, data = parsed
                 begin = int(round((stamp + rel) * to_ms))
                 span = int(round(duration * to_ms)) if duration else _DEFAULT_DURATION_MS
-                events.append((begin, begin + span, data.decode('utf-8', 'replace')))
+                tracks[number].append((begin, begin + span, data.decode('utf-8', 'replace')))
         pos += body + size

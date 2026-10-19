@@ -30,6 +30,7 @@ test_selfcheck.py             installation check: another copy of the add-on, co
 test_settings.py              settings.xml: language spinners complete, grouped and unique; every label defined in
                               English; translations (.po) consistent
 test_settingsdump.py            the 'write all settings to the log' toggle: every setting of settings.xml in the Kodi log
+test_subscan.py                 one read of the video serves all its text subtitle tracks (a switch needs no second read), progress lines
 test_kodirpc.py               the JSON-RPC calls for the streams (playing file, loading the converted subtitle, subtitles
                               on / off, info labels): answers, errors, garbage; the sub converter uses no Python player
                               methods for the streams; the playing check between file clusters is rate limited

@@ -3,6 +3,7 @@ Sub converter: written to the add-on's own folder and removed again every time t
 """
 import hashlib
 import os
+import time
 import re
 
 import subcodec
@@ -388,28 +389,60 @@ def target_path(user_data_path, video_path, ordinal, language, view=None, ext='s
     return os.path.join(converted_folder(user_data_path), '{0} [{1}-{2}].{3}.{4}'.format(base, tag, ordinal, lang, ext))
 
 
-def convert(video_path, ordinal, destination, should_stop=None, log=None, view=None, color=None):
-    """Write the SRT copy of embedded subtitle track number ordinal of the Matroska file video_path to
-    destination (a finished copy there is reused). Returns the number of cues, 0 when nothing was written."""
-    if os.path.isfile(destination) and os.path.getsize(destination) > 0:
-        return -1                                    # already converted in this Kodi session
+def scan(video_path, should_stop=None, log=None):
+    """Reads the Matroska file once and returns the events of all its text subtitle tracks ({ordinal: {'events',
+    'header', 'codec'}}, see subcodec.matroska_subtitle_scan), None when nothing could be read. One pass serves every
+    track: switching to another subtitle of the same video needs no second read. log() gets the progress: the part of
+    the file read, the speed and the time left, every 10 %."""
     try:
         import xbmcvfs
         handle = xbmcvfs.File(video_path)
     except Exception as e:
         if log:
             log('Sub converter: cannot open {0}: {1}'.format(plain_location(video_path), e))
-        return 0
+        return None
+    started = time.time()
+    state = {'next': 10}
     try:
-        info = {}
-        events = subcodec.matroska_subtitle_events(subcodec._Reader(handle), ordinal, should_stop, info)
+        try:
+            size = int(handle.size())
+        except Exception:
+            size = 0
+
+        def progress(position):
+            if not log or size <= 0:
+                return
+            percent = int(100.0 * position / size)
+            if percent < state['next']:
+                return
+            state['next'] = percent // 10 * 10 + 10
+            elapsed = max(time.time() - started, 0.001)
+            speed = position / elapsed
+            left = (size - position) / speed if speed > 0 else 0
+            log('Sub converter: reading the file {0}% ({1:.0f} of {2:.0f} MB, {3:.1f} MB/s, about {4} left)'.format(
+                percent, position / 1048576.0, size / 1048576.0, speed / 1048576.0,
+                '{0:.0f} min'.format(left / 60) if left >= 90 else '{0:.0f} s'.format(left)))
+
+        return subcodec.matroska_subtitle_scan(subcodec._Reader(handle), None, should_stop, progress)
     finally:
         try:
             handle.close()
         except Exception:
             pass
-    if not events:
+
+
+def convert(video_path, ordinal, destination, should_stop=None, log=None, view=None, color=None, scanned=None):
+    """Write the SRT / ASS copy of embedded subtitle track number ordinal of the Matroska file video_path to
+    destination (a finished copy there is reused). scanned: the result of scan() for this file, when the file was
+    read before (then it is not read again). Returns the number of cues, 0 when nothing was written."""
+    if os.path.isfile(destination) and os.path.getsize(destination) > 0:
+        return -1                                    # already converted in this Kodi session
+    if scanned is None:
+        scanned = scan(video_path, should_stop, log)
+    track = (scanned or {}).get(ordinal)
+    if not track or not track['events']:
         return 0
+    events, info = track['events'], track
     if subcodec.is_ass(info.get('codec', '')) and destination.lower().endswith('.ass'):
         srt, cues = events_to_ass(events, info.get('header', ''))
     else:
