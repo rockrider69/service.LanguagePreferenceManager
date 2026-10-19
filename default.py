@@ -68,6 +68,7 @@ class Main:
     def _init_vars(self):
         self.Monitor = LangPref_Monitor()
         self.Player = LangPrefMan_Player()
+        self.Monitor.player = self.Player          # Kodi's subtitle change notifications go to the player
 
     def _daemon(self):
         while not self.Monitor.abortRequested():

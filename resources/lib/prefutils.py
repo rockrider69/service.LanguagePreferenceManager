@@ -22,15 +22,31 @@ class LangPref_Monitor(xbmc.Monitor):
 
     def __init__(self):
         xbmc.Monitor.__init__(self)
+        self.player = None                        # set by the service: the player told about subtitle changes
 
     def onSettingsChanged(self):
         settings.init()
         settings.readSettings()
 
+    def onNotification(self, sender, method, data):
+        """Kodi 22 (and newer) announces a subtitle switched on / off or another track as Player.OnPropertyChanged with
+        subtitleenabled / currentsubtitle: no polling needed to see it. Older Kodi never sends it (see
+        LangPrefWatcher, which still looks now and then)."""
+        if method != 'Player.OnPropertyChanged' or self.player is None:
+            return
+        try:
+            changed = (simplejson.loads(data) or {}).get('property') or {}
+        except (TypeError, ValueError):
+            return
+        if 'subtitleenabled' in changed or 'currentsubtitle' in changed:
+            self.player.on_subtitle_event()
+
 class LangPrefWatcher(threading.Thread):
     """
     A thread that periodically checks for subtitle changes.
     """
+
+    SAFETY_INTERVAL = 60
 
     def __init__(self, player, check_interval=10):
         super().__init__()
@@ -57,7 +73,9 @@ class LangPrefWatcher(threading.Thread):
             except Exception as e:
                 log(LOG_ERROR, 'Subtitle watcher error: {0}'.format(e))
             waited = 0.0
-            while waited < self.check_interval and not self._stop_event.is_set():
+            # Kodi that announces subtitle changes itself (on_subtitle_event) only needs this as a safety net
+            interval = self.SAFETY_INTERVAL if getattr(self.player, 'subtitle_events_seen', False) else self.check_interval
+            while waited < interval and not self._stop_event.is_set():
                 if monitor.waitForAbort(0.5):
                     return
                 waited += 0.5
@@ -111,6 +129,38 @@ class LangPrefMan_Player(xbmc.Player):
         # switched on / off. It only looks when one of those two settings is on - now or later.
         self.lang_pref_watcher = LangPrefWatcher(self, check_interval=10)
         self.lang_pref_watcher.start()
+
+    SUB_EVENT_QUIET = 2.0                 # seconds after LPM's own subtitle change in which events are not the user's
+    SUB_EVENT_DELAY = 0.4                 # seconds to let Kodi settle, and to merge the events of one change
+
+    def setSubtitleStream(self, index):
+        self.sub_event_quiet_until = time.time() + self.SUB_EVENT_QUIET
+        return xbmc.Player.setSubtitleStream(self, index)
+
+    def showSubtitles(self, visible):
+        self.sub_event_quiet_until = time.time() + self.SUB_EVENT_QUIET
+        return xbmc.Player.showSubtitles(self, visible)
+
+    def on_subtitle_event(self):
+        """Kodi announced a subtitle change (on / off or another track): look at it right away, without waiting for
+        the watcher. Changes LPM made itself are not looked at (they are known; the baseline is adopted)."""
+        self.subtitle_events_seen = True
+        if getattr(self, 'sub_event_pending', False) or time.time() < getattr(self, 'sub_event_quiet_until', 0):
+            return
+        self.sub_event_pending = True
+        timer = threading.Timer(self.SUB_EVENT_DELAY, self._handle_subtitle_event)
+        timer.daemon = True
+        timer.start()
+
+    def _handle_subtitle_event(self):
+        self.sub_event_pending = False
+        if time.time() < getattr(self, 'sub_event_quiet_until', 0):
+            return
+        try:
+            if (settings.storeCustomMediaPreferences or settings.sub_converter_on) and self.isPlayingVideo():
+                self.detect_subtitle_change()
+        except Exception as e:
+            log(LOG_ERROR, 'Subtitle change handling failed: {0}'.format(e))
 
     def add_ignore_audio_change_index(self, index):
         """

@@ -1,6 +1,7 @@
 import os
 import sys
 import threading
+import time
 import types
 import unittest
 import xml.etree.ElementTree as ET
@@ -362,6 +363,138 @@ class WatcherTests(unittest.TestCase):
     def test_it_does_nothing_when_neither_is_on_or_nothing_plays(self):
         self.assertEqual(0, self.run_one_round())
         self.assertEqual(0, self.run_one_round(converter=True, playing=False))
+
+
+class SubtitleEventTests(unittest.TestCase):
+    """Kodi announces subtitle changes (Player.OnPropertyChanged): no waiting for the watcher."""
+
+    @classmethod
+    def setUpClass(cls):
+        ConverterGateTests.setUpClass()
+        cls.prefutils = ConverterGateTests.prefutils
+
+    def setUp(self):
+        s = self.prefutils.settings
+        self.saved = {k: getattr(s, k, None) for k in ("storeCustomMediaPreferences", "sub_converter_on")}
+        s.storeCustomMediaPreferences, s.sub_converter_on = False, True
+        self.old_delay = self.prefutils.LangPrefMan_Player.SUB_EVENT_DELAY
+        self.prefutils.LangPrefMan_Player.SUB_EVENT_DELAY = 0.02
+
+    def tearDown(self):
+        for k, v in self.saved.items():
+            setattr(self.prefutils.settings, k, v)
+        self.prefutils.LangPrefMan_Player.SUB_EVENT_DELAY = self.old_delay
+
+    def player(self):
+        player = object.__new__(self.prefutils.LangPrefMan_Player)
+        player.detected = threading.Semaphore(0)
+        player.calls = 0
+
+        def detect():
+            player.calls += 1
+            player.detected.release()
+
+        player.detect_subtitle_change = detect
+        player.isPlayingVideo = lambda: True
+        return player
+
+    def monitor(self, player):
+        monitor = object.__new__(self.prefutils.LangPref_Monitor)
+        monitor.player = player
+        return monitor
+
+    def test_a_subtitle_property_notification_makes_the_player_look(self):
+        player = self.player()
+        monitor = self.monitor(player)
+        monitor.onNotification("xbmc", "Player.OnPropertyChanged", '{"player":{"playerid":-1},"property":{"subtitleenabled":true}}')
+        self.assertTrue(player.detected.acquire(timeout=2))
+        self.assertTrue(player.subtitle_events_seen)
+
+    def test_a_track_change_notification_too(self):
+        player = self.player()
+        self.monitor(player).onNotification("xbmc", "Player.OnPropertyChanged", '{"property":{"currentsubtitle":{"index":1}}}')
+        self.assertTrue(player.detected.acquire(timeout=2))
+
+    def test_other_notifications_and_properties_are_ignored(self):
+        player = self.player()
+        monitor = self.monitor(player)
+        monitor.onNotification("xbmc", "Player.OnAVChange", '{"property":{"subtitleenabled":true}}')
+        monitor.onNotification("xbmc", "Player.OnPropertyChanged", '{"property":{"repeat":"all"}}')
+        monitor.onNotification("xbmc", "Player.OnPropertyChanged", "not json")
+        monitor.onNotification("xbmc", "Player.OnPropertyChanged", "null")
+        self.assertFalse(player.detected.acquire(timeout=0.3))
+        self.assertFalse(getattr(player, "subtitle_events_seen", False))
+
+    def test_a_monitor_without_a_player_does_nothing(self):
+        monitor = self.monitor(None)
+        monitor.onNotification("xbmc", "Player.OnPropertyChanged", '{"property":{"subtitleenabled":true}}')
+
+    def test_the_events_of_one_change_are_merged(self):
+        player = self.player()
+        for _ in range(4):
+            player.on_subtitle_event()
+        self.assertTrue(player.detected.acquire(timeout=2))
+        self.assertFalse(player.detected.acquire(timeout=0.3))
+        self.assertEqual(1, player.calls)
+
+    def test_a_change_LPM_made_itself_is_not_looked_at_as_the_users(self):
+        player = self.player()
+        player.sub_event_quiet_until = time.time() + 5
+        player.on_subtitle_event()
+        self.assertFalse(player.detected.acquire(timeout=0.3))
+        player.sub_event_quiet_until = 0
+        player.on_subtitle_event()
+        self.assertTrue(player.detected.acquire(timeout=2))
+
+    def test_nothing_is_looked_at_when_neither_the_converter_nor_stored_preferences_are_on(self):
+        self.prefutils.settings.sub_converter_on = False
+        player = self.player()
+        player.on_subtitle_event()
+        self.assertFalse(player.detected.acquire(timeout=0.3))
+
+    def test_lpm_switching_the_subtitle_starts_the_quiet_time(self):
+        xbmc = self.prefutils.xbmc
+        seen = []
+        xbmc.Player.setSubtitleStream = lambda _self, index: seen.append(("stream", index))
+        xbmc.Player.showSubtitles = lambda _self, visible: seen.append(("show", visible))
+        try:
+            player = self.player()
+            player.setSubtitleStream(2)
+            self.assertGreater(player.sub_event_quiet_until, time.time())
+            player.sub_event_quiet_until = 0
+            player.showSubtitles(True)
+            self.assertGreater(player.sub_event_quiet_until, time.time())
+            self.assertEqual([("stream", 2), ("show", True)], seen)
+        finally:
+            del xbmc.Player.setSubtitleStream, xbmc.Player.showSubtitles
+
+    def test_the_watcher_relaxes_once_kodi_announces_the_changes(self):
+        waits = []
+
+        class Monitor:
+            def abortRequested(self):
+                return len(waits) > 130
+
+            def waitForAbort(self, seconds):
+                waits.append(seconds)
+                return len(waits) > 130              # leave after a while
+
+        prefutils = self.prefutils
+        old = prefutils.xbmc.Monitor
+        prefutils.xbmc.Monitor = Monitor
+        try:
+            player = types.SimpleNamespace(isPlayingVideo=lambda: False, subtitle_events_seen=False)
+            watcher = prefutils.LangPrefWatcher(player, check_interval=10)
+            watcher.run()
+            rounds_without = len(waits)
+            waits.clear()
+            player.subtitle_events_seen = True
+            prefutils.LangPrefWatcher(player, check_interval=10).run()
+        finally:
+            prefutils.xbmc.Monitor = old
+        self.assertGreater(rounds_without, 0)
+        self.assertEqual(131, len(waits))
+        self.assertEqual(60, prefutils.LangPrefWatcher.SAFETY_INTERVAL)
 
 
 if __name__ == "__main__":
