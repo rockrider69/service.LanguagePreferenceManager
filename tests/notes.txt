@@ -29,6 +29,9 @@ test_selfcheck.py             installation check: another copy of the add-on, co
                               fingerprint
 test_settings.py              settings.xml: language spinners complete, grouped and unique; every label defined in
                               English; translations (.po) consistent
+test_kodirpc.py               the JSON-RPC calls for the streams (playing file, loading the converted subtitle, subtitles
+                              on / off, info labels): answers, errors, garbage; the sub converter uses no Python player
+                              methods for the streams; the playing check between file clusters is rate limited
 test_subconvert_srt.py        sub converter: which codecs are convertible, SRT / ASS / WebVTT cues moved to the top
 test_subconverter_options.py  sub converter options: text color (presets, typed RRGGBB, bad values, the color chart
                               button and its fallback list), up to 10 audio languages and the "all languages"

@@ -12,6 +12,7 @@ import json as simplejson
 import langutils
 import subcodec
 import subconvert
+import kodirpc
 
 __user_data_path__ = xbmcvfs.translatePath("special://profile/addon_data/service.languagepreferencemanager/")
 from prefsettings import settings
@@ -197,6 +198,21 @@ class LangPrefMan_Player(xbmc.Player):
                 self.detect_subtitle_change()
         except Exception as e:
             log(LOG_ERROR, 'Subtitle change handling failed: {0}'.format(e))
+
+    def playing_file(self):
+        """The playing file, asked over JSON-RPC (Player.GetItem); '' when nothing plays."""
+        return kodirpc.playing_file()
+
+    def rpc_add_subtitle(self, path):
+        """Load a subtitle file into the video over JSON-RPC (Player.AddSubtitle). Like LPM's own subtitle changes it
+        starts the quiet time of on_subtitle_event()."""
+        self.sub_event_quiet_until = time.time() + self.SUB_EVENT_QUIET
+        return kodirpc.add_subtitle(path)
+
+    def rpc_show_subtitles(self, visible):
+        """Subtitles on / off over JSON-RPC (Player.SetSubtitle)."""
+        self.sub_event_quiet_until = time.time() + self.SUB_EVENT_QUIET
+        return kodirpc.show_subtitles(visible)
 
     def add_ignore_audio_change_index(self, index):
         """
@@ -473,7 +489,7 @@ class LangPrefMan_Player(xbmc.Player):
         word in its title ('English [SRT]'). Kodi itself reports no format. Worked out once per subtitle list."""
         subs = list(self.subtitles or [])
         try:
-            playing = self.getPlayingFile()
+            playing = self.playing_file()
         except RuntimeError:
             playing = None
         key = (playing, tuple((sub.get('index'), sub.get('name'), sub.get('language')) for sub in subs))
@@ -936,7 +952,7 @@ class LangPrefMan_Player(xbmc.Player):
         if codecs is None or len(codecs) != len(embedded):
             log(LOG_INFO, 'Sub converter: the subtitle formats of {0} cannot be read (only local or network Matroska '
                           '.mkv files can; {1} embedded streams, {2} tracks read)'.format(
-                              subconvert.plain_location(self.getPlayingFile()), len(embedded),
+                              subconvert.plain_location(self.playing_file()), len(embedded),
                               None if codecs is None else len(codecs)))
             return None
         position = indexes.index(selected)
@@ -946,13 +962,27 @@ class LangPrefMan_Player(xbmc.Player):
                     codecs[position], 'a picture format, it cannot be turned into text without OCR'
                     if subcodec.is_bitmap(codecs[position]) else 'not a text format LPM can read'))
             return None
-        return self.getPlayingFile(), position, self.selected_sub.get('language') or 'und', selected, codecs[position]
+        return self.playing_file(), position, self.selected_sub.get('language') or 'und', selected, codecs[position]
+
+    def _still_playing(self, video, interval=1.0):
+        """Callable for the converter: is `video` still the playing video? Asked over JSON-RPC at most once per
+        `interval` seconds (the converter calls it between the clusters of the file, thousands of times)."""
+        state = {'at': -interval, 'value': True}
+
+        def check():
+            now = time.time()
+            if now - state['at'] >= interval:
+                state['at'] = now
+                state['value'] = kodirpc.is_playing_video() and self.playing_file() == video
+            return state['value']
+        return check
 
     def _picture_view(self):
         """Where the picture is on the screen (subconvert.video_view), None when Kodi does not tell."""
+        labels = kodirpc.info_labels(('System.ScreenWidth', 'System.ScreenHeight', 'VideoPlayer.VideoAspect'))
         try:
-            number = lambda label: float(xbmc.getInfoLabel(label).replace(',', '') or 0)
-            aspect = float(xbmc.getInfoLabel('VideoPlayer.VideoAspect').replace(',', '.') or 0)
+            number = lambda label: float(str(labels.get(label, '')).replace(',', '') or 0)
+            aspect = float(str(labels.get('VideoPlayer.VideoAspect', '')).replace(',', '.') or 0)
             return subconvert.video_view(number('System.ScreenWidth'), number('System.ScreenHeight'), aspect)
         except ValueError:
             return None
@@ -965,7 +995,7 @@ class LangPrefMan_Player(xbmc.Player):
             video, ordinal, language, chosen, codec = job
             log(LOG_INFO, 'Sub converter: converting subtitle track {0} of {1} (the whole file is read: the first '
                           'time this can take a minute or more)'.format(ordinal + 1, subconvert.plain_location(video)))
-            playing = lambda: self.isPlayingVideo() and self.getPlayingFile() == video
+            playing = self._still_playing(video)
             as_ass = subcodec.is_ass(codec)                  # ASS/SSA stays ASS (styles, fonts, places), the rest becomes SRT
             view = None if as_ass else self._picture_view()
             color = getattr(settings, 'sub_converter_color', subconvert.DEFAULT_COLOR)
@@ -986,9 +1016,9 @@ class LangPrefMan_Player(xbmc.Player):
                 log(LOG_INFO, 'Sub converter: the subtitle was changed while converting - the copy is not selected')
                 return
             self.sub_convert_quiet_until = time.time() + 5
-            self.setSubtitles(destination)
+            self.rpc_add_subtitle(destination)
             xbmc.sleep(1000)
-            self.showSubtitles(True)
+            self.rpc_show_subtitles(True)
             self.refresh_subtitle_baseline()
             self.sub_convert_quiet_until = time.time() + 3
         except Exception as e:                           # never let the converter disturb the playback
@@ -998,7 +1028,7 @@ class LangPrefMan_Player(xbmc.Player):
             if self.sub_convert_pending:
                 self.sub_convert_pending = False
                 try:
-                    if self.isPlayingVideo():
+                    if kodirpc.is_playing_video():
                         self.start_sub_converter()
                 except Exception as e:
                     log(LOG_ERROR, 'Sub converter restart failed: {0}'.format(e))
@@ -1018,7 +1048,7 @@ class LangPrefMan_Player(xbmc.Player):
         """CodecIDs of the embedded subtitle tracks of the playing file in Kodi's order, read once per video
         (Matroska only, None when unknown)."""
         try:
-            playing = self.getPlayingFile()
+            playing = self.playing_file()
         except RuntimeError:
             return None
         if self.sub_codecs[0] != playing:
@@ -1164,7 +1194,7 @@ class LangPrefMan_Player(xbmc.Player):
         log(LOG_DEBUG, 'Evaluating filename preferences')
         audio = -1
         sub = -1
-        filename = self.getPlayingFile()
+        filename = self.playing_file()
         matches = settings.reg.findall(filename)
         fileprefs = []
         for m in matches:
@@ -1541,7 +1571,7 @@ class LangPrefMan_Player(xbmc.Player):
         Kodi's custom subtitle folder), read once per video and again when Kodi's number of external subtitles
         changes (one downloaded during playback). [] for streams without a folder (plugin, http ...)."""
         try:
-            playing = self.getPlayingFile()
+            playing = self.playing_file()
         except RuntimeError:
             return []
         if self.external_sub_files[0] == (playing, externals):

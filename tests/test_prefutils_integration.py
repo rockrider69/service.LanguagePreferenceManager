@@ -355,11 +355,16 @@ class PreferenceEvaluationTests(unittest.TestCase):
         thread.assert_not_called()
         self.assertTrue(player.sub_convert_pending)
         player._sub_converter_job = lambda: None               # the next run finds nothing to do
-        player.isPlayingVideo = lambda: True
         started = []
         player.start_sub_converter = lambda user_switch=False: started.append(user_switch)
         player.sub_converting = True
-        player._sub_converter_run()
+        import prefutils
+        old_playing = prefutils.kodirpc.is_playing_video
+        prefutils.kodirpc.is_playing_video = lambda: True      # asked over JSON-RPC
+        try:
+            player._sub_converter_run()
+        finally:
+            prefutils.kodirpc.is_playing_video = old_playing
         self.assertEqual([False], started)
         self.assertFalse(player.sub_convert_pending)
         self.assertFalse(player.sub_converting)
@@ -442,7 +447,7 @@ class PreferenceEvaluationTests(unittest.TestCase):
                             {"index": 1, "language": "eng", "name": "English (SRT)", "isforced": False},
                             {"index": 2, "language": "eng", "name": "English", "isforced": False}]
         player.selected_sub = player.subtitles[0]
-        player.getPlayingFile = lambda: "/video/movie.mp4"          # not Matroska: no codecs
+        player.playing_file = lambda: "/video/movie.mp4"          # not Matroska: no codecs
         player.embedded_subtitle_codecs = lambda: None
         player.sub_formats = (None, {})
         settings.sub_format_order = ["srt", "pgs"]
@@ -455,7 +460,7 @@ class PreferenceEvaluationTests(unittest.TestCase):
                             {"index": 1, "language": "en", "name": "English", "isforced": False},
                             {"index": 2, "language": "en", "name": "English", "isforced": False},
                             {"index": 3, "language": "fr", "name": "Francais", "isforced": False}]
-        player.getPlayingFile = lambda: "/video/movie.mkv"
+        player.playing_file = lambda: "/video/movie.mkv"
         player.embedded_subtitle_codecs = lambda: ["S_TEXT/UTF8", "S_HDMV/PGS", "S_TEXT/ASS"]
         player.subtitle_file_tags = lambda externals: [{"tag": "en", "words": ["en"], "ext": ".ass"}]
         player.sub_formats = (None, {})
@@ -467,7 +472,7 @@ class PreferenceEvaluationTests(unittest.TestCase):
                             for i in range(streams)]
         if embedded:
             player.subtitles.append({"index": streams, "language": "en", "name": "English", "isforced": False})
-        player.getPlayingFile = lambda: "/video/movie.mkv"
+        player.playing_file = lambda: "/video/movie.mkv"
         player.embedded_subtitle_codecs = lambda: embedded
         player.subtitle_file_tags = lambda externals: tags
         player.sub_formats = (None, {})
@@ -516,7 +521,7 @@ class PreferenceEvaluationTests(unittest.TestCase):
         player.subtitles = [{"index": 0, "language": "en", "name": "(External)", "isforced": False},
                             {"index": 1, "language": "fr", "name": "(External)", "isforced": False},
                             {"index": 2, "language": "en", "name": "(External)", "isforced": False}]
-        player.getPlayingFile = lambda: "/video/movie.mkv"
+        player.playing_file = lambda: "/video/movie.mkv"
         player.embedded_subtitle_codecs = lambda: None
         player.subtitle_file_tags = lambda externals: tags
         player.sub_formats = (None, {})
@@ -537,7 +542,7 @@ class ForcedDefaultRegexTests(unittest.TestCase):
         settings.turn_subs_on = True
         settings.turn_subs_off = False
         self.player = object.__new__(LangPrefMan_Player)
-        self.player.getPlayingFile = lambda: (_ for _ in ()).throw(RuntimeError())
+        self.player.playing_file = lambda: (_ for _ in ()).throw(RuntimeError())
         self.player.sub_codecs = (None, None)
         self.player.subtitles = [
             {"index": 0, "language": "eng", "name": "English Forced", "isforced": True, "isdefault": True},
@@ -701,7 +706,7 @@ class FilenameEvaluationTests(unittest.TestCase):
         settings.split = re.compile(r"[_|.|-]+", re.I)
         player = object.__new__(LangPrefMan_Player)
         player.audiostreams, player.subtitles = self.AUDIO, self.SUBS
-        player.getPlayingFile = lambda: filename
+        player.playing_file = lambda: filename
         return player
 
     def test_track_numbers_still_win(self):
