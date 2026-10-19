@@ -583,6 +583,16 @@ class ForcedDefaultRegexTests(unittest.TestCase):
         self.regex_language_setup({0: "ass", 1: "srt", 2: "srt"}, ["ass", "srt"])
         self.assertEqual(1, self.player.evalRegexSubPrefs())       # jpn ASS is the wrong language
 
+    def test_regex_logs_the_chosen_track_among_the_language_matches(self):
+        self.regex_language_setup({0: "srt", 1: "srt", 2: "srt"}, ["srt"])
+        self.player.subtitles.append({"index": 3, "language": "eng", "name": "Signs & Songs", "isforced": False})
+        from unittest import mock
+        with mock.patch("prefutils.log") as log:
+            self.assertEqual(1, self.player.evalRegexSubPrefs())
+        text = " ".join(str(c.args[1]) for c in log.call_args_list)
+        self.assertIn("selecting subtitle track 1", text)
+        self.assertIn("the first of the preferred language tracks [1, 2]", text)
+
     def test_regex_without_language_match_acts_as_before(self):
         self.regex_language_setup({0: "ass", 1: "srt", 2: "ass"}, ["ass", "srt"])
         settings.SubtitlePrefs = [(set(), [("French", "fre")])]
