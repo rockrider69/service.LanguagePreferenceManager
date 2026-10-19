@@ -708,3 +708,11 @@ msgstr "音声が次の場合に変換：言語 9"
 msgctxt "#30670"
 msgid "Convert when the audio is: language 10"
 msgstr "音声が次の場合に変換：言語 10"
+
+msgctxt "#30671"
+msgid "Pick the color from a color chart..."
+msgstr "カラーチャートから色を選ぶ..."
+
+msgctxt "#30672"
+msgid "Subtitle color set to {0}"
+msgstr "字幕の色を {0} に設定しました"

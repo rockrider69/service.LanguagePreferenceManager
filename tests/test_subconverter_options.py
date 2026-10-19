@@ -22,6 +22,7 @@ if not getattr(sys.modules["xbmcaddon"], "Addon", None):
     sys.modules["xbmcaddon"].Addon = lambda: types.SimpleNamespace(getSetting=lambda _key: "")
 sys.modules["xbmcvfs"].translatePath = getattr(sys.modules["xbmcvfs"], "translatePath", lambda p: p)
 
+import colorpick
 import langutils
 import subconvert
 
@@ -106,6 +107,92 @@ class SettingsFileTests(unittest.TestCase):
         self.assertIsNone(toggle.find("dependencies"))
         self.assertEqual("false", toggle.find("default").text)
         self.assertEqual("false", setting("subConverterAll").find("default").text)
+
+
+class ResolveColorTests(unittest.TestCase):
+    def test_presets_and_the_typed_color(self):
+        self.assertEqual(("#FFFF00", True), subconvert.resolve_color(0))
+        self.assertEqual(("#87CEFA", True), subconvert.resolve_color("7", "ignored"))
+        self.assertEqual(("#FF8800", True), subconvert.resolve_color(8, "ff8800"))
+
+    def test_a_bad_typed_color_or_choice_is_yellow(self):
+        self.assertEqual(("#FFFF00", False), subconvert.resolve_color(8, "red"))
+        self.assertEqual(("#FFFF00", False), subconvert.resolve_color(8))
+        self.assertEqual(("#FFFF00", True), subconvert.resolve_color(""))
+        self.assertEqual(("#FFFF00", True), subconvert.resolve_color("x"))
+
+
+class FakeDialog:
+    def __init__(self, picker=None, selected=-1):
+        self.asked = []
+        self.selected = selected
+        if picker is not None:
+            self.colorpicker = picker
+
+    def select(self, heading, labels):
+        self.asked.append(("select", heading, list(labels)))
+        return self.selected
+
+
+class FakeSettingsStore:
+    def __init__(self):
+        self.values = {}
+
+    def setSetting(self, key, value):
+        self.values[key] = value
+
+
+class ColorPickTests(unittest.TestCase):
+    LABELS = ["Yellow", "White", "Cyan", "Green", "Orange", "Pink", "Red", "Light blue"]
+
+    def test_the_dialog_answer_is_read_with_or_without_alpha(self):
+        self.assertEqual("#FF8800", colorpick.from_dialog("FFFF8800"))
+        self.assertEqual("#FF8800", colorpick.from_dialog("80ff8800"))
+        self.assertEqual("#FF8800", colorpick.from_dialog("FF8800"))
+        self.assertEqual("#FF8800", colorpick.from_dialog("#ff8800"))
+        for nothing in ("", None, "zz", "FF88"):
+            self.assertIsNone(colorpick.from_dialog(nothing), repr(nothing))
+
+    def test_the_chart_starts_on_the_current_color_and_returns_the_pick(self):
+        seen = []
+        dialog = FakeDialog(picker=lambda heading, selected: seen.append((heading, selected)) or "FF123456")
+        self.assertEqual("#123456", colorpick.choose(dialog, "Color", "#FF8800", self.LABELS))
+        self.assertEqual([("Color", "FFFF8800")], seen)
+        self.assertEqual([], dialog.asked)
+
+    def test_cancelling_the_chart_picks_nothing_and_does_not_open_the_list(self):
+        dialog = FakeDialog(picker=lambda *_a: "")
+        self.assertIsNone(colorpick.choose(dialog, "Color", "#FFFF00", self.LABELS))
+        self.assertEqual([], dialog.asked)
+
+    def test_kodi_without_the_chart_gets_the_list_of_presets(self):
+        dialog = FakeDialog(selected=6)
+        self.assertEqual("#FF4040", colorpick.choose(dialog, "Color", "#FFFF00", self.LABELS))
+        self.assertEqual([("select", "Color", self.LABELS)], dialog.asked)
+        self.assertIsNone(colorpick.choose(FakeDialog(selected=-1), "Color", "#FFFF00", self.LABELS))
+
+    def test_a_chart_that_raises_falls_back_to_the_list(self):
+        def broken(*_a):
+            raise RuntimeError("no color dialog")
+        dialog = FakeDialog(picker=broken, selected=1)
+        self.assertEqual("#FFFFFF", colorpick.choose(dialog, "Color", "#FFFF00", self.LABELS))
+
+    def test_a_chosen_preset_is_stored_as_that_preset(self):
+        addon = FakeSettingsStore()
+        colorpick.store(addon, "#00FFFF")
+        self.assertEqual({"subConverterColor": "2"}, addon.values)
+
+    def test_any_other_color_is_stored_as_custom(self):
+        addon = FakeSettingsStore()
+        colorpick.store(addon, "#123456")
+        self.assertEqual({"subConverterColorHex": "123456", "subConverterColor": "8"}, addon.values)
+        self.assertEqual(("#123456", True), subconvert.resolve_color(
+            addon.values["subConverterColor"], addon.values["subConverterColorHex"]))
+
+    def test_the_settings_have_a_pick_button_that_runs_the_script(self):
+        button = setting("subConverterColorPick")
+        self.assertEqual("button", button.find("control").get("type"))
+        self.assertEqual("RunScript(service.languagepreferencemanager,pick_color)", button.find("./control/data").text)
 
 
 class FakeAddon:

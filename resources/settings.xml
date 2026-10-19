@@ -245,6 +245,19 @@
                         </dependency>
                     </dependencies>
                 </setting>
+                <setting id="subConverterColorPick" type="string" label="30671">
+                    <level>0</level>
+                    <default/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="button" format="action">
+                        <data>RunScript(service.languagepreferencemanager,pick_color)</data>
+                    </control>
+                    <dependencies>
+                        <dependency type="visible" setting="subConverter" operator="is">true</dependency>
+                    </dependencies>
+                </setting>
                 <setting id="subConverterColorHex" type="string" label="30659">
                     <default></default>
                     <constraints>

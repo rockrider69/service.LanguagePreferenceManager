@@ -708,3 +708,11 @@ msgstr "当音频为以下语言时转换：语言 9"
 msgctxt "#30670"
 msgid "Convert when the audio is: language 10"
 msgstr "当音频为以下语言时转换：语言 10"
+
+msgctxt "#30671"
+msgid "Pick the color from a color chart..."
+msgstr "从色卡中选择颜色..."
+
+msgctxt "#30672"
+msgid "Subtitle color set to {0}"
+msgstr "字幕颜色已设为 {0}"

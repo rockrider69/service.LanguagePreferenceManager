@@ -52,18 +52,10 @@ class settings():
             name, code = self.spinner_lang(addon, 'SubConvLang%02d' % n)
             if code != langutils.NON and code not in self.sub_converter_langs:
                 self.sub_converter_langs.append(code)
-        try:
-            choice = int(addon.getSetting('subConverterColor') or 0)
-        except ValueError:
-            choice = 0
-        if 0 <= choice < len(subconvert.COLOR_PRESETS):
-            self.sub_converter_color = subconvert.COLOR_PRESETS[choice]
-        else:
-            typed = addon.getSetting('subConverterColorHex')
-            self.sub_converter_color = subconvert.normalize_color(typed)
-            if not self.sub_converter_color:
-                log(LOG_INFO, 'Sub converter: {0!r} is not a colour (use RRGGBB, e.g. FF8800) - using yellow'.format(typed))
-                self.sub_converter_color = subconvert.DEFAULT_COLOR
+        typed = addon.getSetting('subConverterColorHex')
+        self.sub_converter_color, valid = subconvert.resolve_color(addon.getSetting('subConverterColor'), typed)
+        if not valid:
+            log(LOG_INFO, 'Sub converter: {0!r} is not a colour (use RRGGBB, e.g. FF8800) - using yellow'.format(typed))
         if self.sub_converter_on:
             log(LOG_DEBUG, 'Sub converter: audio {0}, colour {1}'.format(
                 'in any language' if self.sub_converter_all else ','.join(self.sub_converter_langs) or 'none chosen',

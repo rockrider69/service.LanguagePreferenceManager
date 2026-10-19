@@ -35,6 +35,19 @@ def normalize_color(text):
     return '#' + digits
 
 
+def resolve_color(choice, typed=''):
+    """The color of the settings: choice = the spinner value (0..len(COLOR_PRESETS)-1 a preset, the next one the
+    typed value). Returns (color, ok): ok is False when the typed value is not a color (yellow is returned then)."""
+    try:
+        choice = int(choice or 0)
+    except (TypeError, ValueError):
+        choice = 0
+    if 0 <= choice < len(COLOR_PRESETS):
+        return COLOR_PRESETS[choice], True
+    color = normalize_color(typed)
+    return (color, True) if color else (DEFAULT_COLOR, False)
+
+
 def plain_location(path):
     """A video location without what must not be logged or used in a file name: the headers after '|' (cookies,
     tokens), the query string and user:password@."""

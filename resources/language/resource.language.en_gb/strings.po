@@ -708,3 +708,11 @@ msgstr ""
 msgctxt "#30670"
 msgid "Convert when the audio is: language 10"
 msgstr ""
+
+msgctxt "#30671"
+msgid "Pick the color from a color chart..."
+msgstr ""
+
+msgctxt "#30672"
+msgid "Subtitle color set to {0}"
+msgstr ""
