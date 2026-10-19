@@ -158,8 +158,10 @@ class LangPrefMan_Player(xbmc.Player):
         self.lang_pref_watcher = LangPrefWatcher(self, check_interval=10)
         self.lang_pref_watcher.start()
 
+    SETTLE_AFTER_LPM_MS = 500             # sub converter: wait before looking at a subtitle LPM selected
+    SETTLE_AFTER_USER_MS = 100            # ... and at one the user picked (Kodi has applied it already)
     SUB_EVENT_QUIET = 2.0                 # seconds after LPM's own subtitle change in which events are not the user's
-    SUB_EVENT_DELAY = 0.4                 # seconds to let Kodi settle, and to merge the events of one change
+    SUB_EVENT_DELAY = 0.15                # seconds to let Kodi settle, and to merge the events of one change
 
     def setSubtitleStream(self, index):
         self.sub_event_quiet_until = time.time() + self.SUB_EVENT_QUIET
@@ -891,6 +893,8 @@ class LangPrefMan_Player(xbmc.Player):
             if user_switch:
                 self.sub_convert_pending = True
             return
+        # what the user picked is already applied by Kodi; after a switch of LPM itself Kodi needs a moment
+        self.sub_converter_settle_ms = self.SETTLE_AFTER_USER_MS if user_switch else self.SETTLE_AFTER_LPM_MS
         self.sub_converting = True
         threading.Thread(target=self._sub_converter_run, daemon=True).start()
 
@@ -914,7 +918,7 @@ class LangPrefMan_Player(xbmc.Player):
     def _sub_converter_job(self):
         """(video path, ordinal of the selected subtitle among the video's embedded subtitles, language) when the
         selected subtitle is to be converted, else None."""
-        xbmc.sleep(500)                                  # Kodi applies LPM's switch
+        xbmc.sleep(getattr(self, 'sub_converter_settle_ms', self.SETTLE_AFTER_LPM_MS))   # Kodi applies a switch of LPM
         if not self.getDetails() or not self.selected_sub_enabled or not self.selected_sub:
             return None
         audio = self.selected_audio_stream or {}

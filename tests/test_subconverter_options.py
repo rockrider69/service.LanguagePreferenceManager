@@ -429,6 +429,55 @@ class KodiVersionTests(unittest.TestCase):
         self.assertEqual(131, self.watcher_rounds())
 
 
+class SettleTimeTests(unittest.TestCase):
+    """The sub converter looks quickly at a subtitle the user picked, and waits longer after one LPM selected."""
+
+    @classmethod
+    def setUpClass(cls):
+        ConverterGateTests.setUpClass()
+        cls.prefutils = ConverterGateTests.prefutils
+
+    def setUp(self):
+        self.prefutils.settings.sub_converter_on = True
+
+    def player(self):
+        player = object.__new__(self.prefutils.LangPrefMan_Player)
+        player.sub_converting = False
+        player.sub_convert_pending = False
+        player._sub_converter_run = lambda: None
+        return player
+
+    def test_settle_times(self):
+        cls = self.prefutils.LangPrefMan_Player
+        self.assertLessEqual(cls.SETTLE_AFTER_USER_MS, 150)
+        self.assertGreaterEqual(cls.SETTLE_AFTER_LPM_MS, 500)
+        self.assertLessEqual(cls.SUB_EVENT_DELAY, 0.2)
+
+    def test_a_user_switch_waits_less_than_a_switch_of_lpm(self):
+        player = self.player()
+        player.start_sub_converter(user_switch=True)
+        self.assertEqual(player.SETTLE_AFTER_USER_MS, player.sub_converter_settle_ms)
+        player.sub_converting = False
+        player.start_sub_converter()
+        self.assertEqual(player.SETTLE_AFTER_LPM_MS, player.sub_converter_settle_ms)
+
+    def test_the_job_waits_for_the_chosen_time(self):
+        prefutils = self.prefutils
+        slept = []
+        old = prefutils.xbmc.sleep
+        prefutils.xbmc.sleep = slept.append
+        try:
+            player = self.player()
+            player.getDetails = lambda: False                   # nothing to convert: stop right after the wait
+            player.sub_converter_settle_ms = 100
+            player._sub_converter_job()
+            player.sub_converter_settle_ms = 500
+            player._sub_converter_job()
+        finally:
+            prefutils.xbmc.sleep = old
+        self.assertEqual([100, 500], slept)
+
+
 class WatcherTests(unittest.TestCase):
     """The 10 second subtitle watcher also serves the sub converter (a subtitle switched on or off during playback)."""
 
