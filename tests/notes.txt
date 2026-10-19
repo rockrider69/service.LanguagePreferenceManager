@@ -36,7 +36,9 @@ test_subconvert_srt.py        sub converter: which codecs are convertible, SRT /
 test_subconverter_options.py  sub converter options: text color (presets, typed RRGGBB, bad values, the color chart
                               button and its fallback list), up to 10 audio languages and the "all languages"
                               toggle, settings.xml entries, runs with any setting (not only with the regex filter
-                              or the conditional rules)
+                              or the conditional rules); Kodi's subtitle notifications; the Kodi version decides
+                              how subtitle changes are noticed: no watcher thread on Kodi 22+, on older Kodi the
+                              thread only for stored preferences, never for the sub converter
 test_subtitle_formats.py      subtitle format preference (SRT, ASS, WebVTT, PGS, VobSub): order, external files
 
 All of them run without any file of yours.

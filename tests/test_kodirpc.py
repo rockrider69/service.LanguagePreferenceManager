@@ -153,6 +153,18 @@ class ConverterUsesJsonRpcTests(unittest.TestCase):
                          "self.setSubtitleStream(", "self.getAvailableSubtitleStreams", "xbmc.getInfoLabel"):
                 self.assertNotIn(call, source, "{0} uses {1}".format(name, call))
 
+    def test_the_converter_has_no_polling_of_its_own(self):
+        for name, source in self.converter_source().items():
+            for call in ("LangPrefWatcher", "waitForAbort", "time.sleep", "while True", "threading.Timer(", "check_interval"):
+                self.assertNotIn(call, source, "{0} uses {1}".format(name, call))
+
+    def test_a_seek_makes_the_player_look_at_the_subtitle(self):
+        player = object.__new__(self.prefutils.LangPrefMan_Player)
+        seen = []
+        player.detect_subtitle_change = lambda: seen.append("looked")
+        player.onPlayBackSeek(12, 5)
+        self.assertEqual(["looked"], seen)
+
     def player(self):
         player = object.__new__(self.prefutils.LangPrefMan_Player)
         player.sub_event_quiet_until = 0

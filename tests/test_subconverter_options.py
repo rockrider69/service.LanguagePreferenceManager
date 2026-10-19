@@ -401,32 +401,53 @@ class KodiVersionTests(unittest.TestCase):
     def test_notifications_are_expected_from_kodi_22(self):
         self.assertEqual(22, self.prefutils.KODI_ANNOUNCES_SUBTITLES_FROM)
 
-    def watcher_rounds(self, **player_flags):
+
+
+    def player(self, expected):
+        player = object.__new__(self.prefutils.LangPrefMan_Player)
+        player.subtitle_events_expected = expected
+        return player
+
+    def start(self, expected, store):
         prefutils = self.prefutils
-        waits = []
+        settings = prefutils.settings
+        saved = getattr(settings, "storeCustomMediaPreferences", None)
+        settings.storeCustomMediaPreferences = store
+        started = []
 
-        class Monitor:
-            def abortRequested(self):
-                return False
+        class Watcher:
+            def __init__(self, player, check_interval):
+                self.interval = check_interval
 
-            def waitForAbort(self, seconds):
-                waits.append(seconds)
-                return len(waits) > 130
+            def start(self):
+                started.append(self.interval)
 
-        old = prefutils.xbmc.Monitor
-        prefutils.xbmc.Monitor = Monitor
+        old = prefutils.LangPrefWatcher
+        prefutils.LangPrefWatcher = Watcher
         try:
-            player = types.SimpleNamespace(isPlayingVideo=lambda: False, **player_flags)
-            prefutils.LangPrefWatcher(player, check_interval=10).run()
+            result = self.player(expected).start_subtitle_watcher()
         finally:
-            prefutils.xbmc.Monitor = old
-        return len(waits)
+            prefutils.LangPrefWatcher = old
+            settings.storeCustomMediaPreferences = saved
+        return result, started
 
-    def test_the_watcher_starts_relaxed_when_the_version_announces_changes(self):
-        # 130 waits of 0.5 s: 65 s, long enough to see a 10 s round or a 60 s round
-        self.assertEqual(131, self.watcher_rounds(subtitle_events_expected=True))
-        self.assertEqual(131, self.watcher_rounds(subtitle_events_seen=True))
-        self.assertEqual(131, self.watcher_rounds())
+    def test_no_thread_at_all_on_a_kodi_that_announces_subtitle_changes(self):
+        self.assertEqual((False, []), self.start(expected=True, store=True))
+        self.assertEqual((False, []), self.start(expected=True, store=False))
+
+    def test_older_kodi_runs_the_thread_only_for_stored_preferences_every_10_s(self):
+        self.assertEqual((True, [10]), self.start(expected=False, store=True))
+        self.assertEqual((False, []), self.start(expected=False, store=False))
+
+    def test_the_sub_converter_alone_never_starts_the_thread(self):
+        settings = self.prefutils.settings
+        saved = getattr(settings, "sub_converter_on", None)
+        settings.sub_converter_on = True
+        try:
+            self.assertEqual((False, []), self.start(expected=False, store=False))
+            self.assertEqual((False, []), self.start(expected=True, store=False))
+        finally:
+            settings.sub_converter_on = saved
 
 
 class SettleTimeTests(unittest.TestCase):
@@ -513,8 +534,8 @@ class WatcherTests(unittest.TestCase):
                 setattr(settings, k, v)
         return len(calls)
 
-    def test_it_looks_for_the_sub_converter_without_stored_preferences(self):
-        self.assertEqual(1, self.run_one_round(converter=True))
+    def test_it_does_not_look_for_the_sub_converter(self):
+        self.assertEqual(0, self.run_one_round(converter=True))
 
     def test_it_still_looks_for_stored_preferences(self):
         self.assertEqual(1, self.run_one_round(store=True))
@@ -567,7 +588,6 @@ class SubtitleEventTests(unittest.TestCase):
         monitor = self.monitor(player)
         monitor.onNotification("xbmc", "Player.OnPropertyChanged", '{"player":{"playerid":-1},"property":{"subtitleenabled":true}}')
         self.assertTrue(player.detected.acquire(timeout=2))
-        self.assertTrue(player.subtitle_events_seen)
 
     def test_a_track_change_notification_too(self):
         player = self.player()
@@ -582,7 +602,6 @@ class SubtitleEventTests(unittest.TestCase):
         monitor.onNotification("xbmc", "Player.OnPropertyChanged", "not json")
         monitor.onNotification("xbmc", "Player.OnPropertyChanged", "null")
         self.assertFalse(player.detected.acquire(timeout=0.3))
-        self.assertFalse(getattr(player, "subtitle_events_seen", False))
 
     def test_a_monitor_without_a_player_does_nothing(self):
         monitor = self.monitor(None)
@@ -635,33 +654,6 @@ class SubtitleEventTests(unittest.TestCase):
         finally:
             del xbmc.Player.setSubtitleStream, xbmc.Player.showSubtitles
 
-    def test_the_watcher_relaxes_once_kodi_announces_the_changes(self):
-        waits = []
-
-        class Monitor:
-            def abortRequested(self):
-                return len(waits) > 130
-
-            def waitForAbort(self, seconds):
-                waits.append(seconds)
-                return len(waits) > 130              # leave after a while
-
-        prefutils = self.prefutils
-        old = prefutils.xbmc.Monitor
-        prefutils.xbmc.Monitor = Monitor
-        try:
-            player = types.SimpleNamespace(isPlayingVideo=lambda: False, subtitle_events_seen=False)
-            watcher = prefutils.LangPrefWatcher(player, check_interval=10)
-            watcher.run()
-            rounds_without = len(waits)
-            waits.clear()
-            player.subtitle_events_seen = True
-            prefutils.LangPrefWatcher(player, check_interval=10).run()
-        finally:
-            prefutils.xbmc.Monitor = old
-        self.assertGreater(rounds_without, 0)
-        self.assertEqual(131, len(waits))
-        self.assertEqual(60, prefutils.LangPrefWatcher.SAFETY_INTERVAL)
 
 
 if __name__ == "__main__":

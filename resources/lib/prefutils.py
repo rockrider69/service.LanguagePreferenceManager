@@ -61,10 +61,9 @@ class LangPref_Monitor(xbmc.Monitor):
 
 class LangPrefWatcher(threading.Thread):
     """
-    A thread that periodically checks for subtitle changes.
+    A thread that periodically checks for subtitle changes, to store them as the preference of the media. Only on
+    Kodi that does not announce subtitle changes itself (before 22), and only when stored preferences are on.
     """
-
-    SAFETY_INTERVAL = 60
 
     def __init__(self, player, check_interval=10):
         super().__init__()
@@ -85,17 +84,12 @@ class LangPrefWatcher(threading.Thread):
         monitor = xbmc.Monitor()
         while not self._stop_event.is_set() and not monitor.abortRequested():
             try:
-                # looked up at every round: the settings can change while Kodi runs
-                if (settings.storeCustomMediaPreferences or settings.sub_converter_on) and self.player.isPlayingVideo():
+                if settings.storeCustomMediaPreferences and self.player.isPlayingVideo():
                     self.player.detect_subtitle_change()
             except Exception as e:
                 log(LOG_ERROR, 'Subtitle watcher error: {0}'.format(e))
             waited = 0.0
-            # Kodi that announces subtitle changes itself (on_subtitle_event) only needs this as a safety net
-            announced = (getattr(self.player, 'subtitle_events_seen', False)
-                         or getattr(self.player, 'subtitle_events_expected', False))
-            interval = self.SAFETY_INTERVAL if announced else self.check_interval
-            while waited < interval and not self._stop_event.is_set():
+            while waited < self.check_interval and not self._stop_event.is_set():
                 if monitor.waitForAbort(0.5):
                     return
                 waited += 0.5
@@ -111,15 +105,15 @@ class LangPrefMan_Player(xbmc.Player):
 
     def __init__(self):
         self.LPM_initial_run_done = False
-        # Kodi's version decides how subtitle changes are noticed: announced by Kodi (22 and newer; the watcher is then
-        # only a safety net) or found by the watcher thread (older). Receiving such a notification also counts
-        # (subtitle_events_seen), whatever the version says.
+        # Kodi's version decides how subtitle changes are noticed: Kodi 22 and newer announces them (no polling at
+        # all); older Kodi does not, then they are looked at when Kodi reports a stream change, a pause, a resume or
+        # a seek (and, for the stored preferences only, by the watcher thread as before).
         build_version = xbmc.getInfoLabel('System.BuildVersion')
         self.subtitle_events_expected = kodi_major_version(build_version) >= KODI_ANNOUNCES_SUBTITLES_FROM
         log(LOG_INFO, 'Kodi {0}: subtitle changes are {1}'.format(
             build_version or '(unknown version)',
-            'announced by Kodi (the subtitle watcher only is a 60 s safety net)' if self.subtitle_events_expected
-            else 'looked for by the subtitle watcher every 10 s'))
+            'announced by Kodi (no polling)' if self.subtitle_events_expected
+            else 'looked at when Kodi reports a stream change, pause, resume or seek'))
         self.selected_sub_enabled = False
         # regex subtitle filter hit on the initial run: it keeps priority over conditional subtitles when
         # the audio track is changed later on (conditional subs are re-evaluated on every audio change)
@@ -153,11 +147,18 @@ class LangPrefMan_Player(xbmc.Player):
         settings.readSettings()
         xbmc.Player.__init__(self)
 
-        # Start the LangPrefWatcher thread. This thread will periodically check for subtitle changes (to store them,
-        # and for the sub converter), because onAVChange does not always get called when the subtitle changes or is
-        # switched on / off. It only looks when one of those two settings is on - now or later.
+        self.start_subtitle_watcher()
+
+    def start_subtitle_watcher(self):
+        """The LangPrefWatcher thread checks every 10 s for a changed subtitle to store it as the preference of the
+        media (as it always did), because Kodi before 22 does not announce subtitle changes. Kodi 22 and newer does
+        (LangPref_Monitor.onNotification): no thread there. The sub converter never uses the thread.
+        :return: True when the thread was started"""
+        if self.subtitle_events_expected or not settings.storeCustomMediaPreferences:
+            return False
         self.lang_pref_watcher = LangPrefWatcher(self, check_interval=10)
         self.lang_pref_watcher.start()
+        return True
 
     SETTLE_AFTER_LPM_MS = 500             # sub converter: wait before looking at a subtitle LPM selected
     SETTLE_AFTER_USER_MS = 100            # ... and at one the user picked (Kodi has applied it already)
@@ -176,7 +177,6 @@ class LangPrefMan_Player(xbmc.Player):
         """Kodi announced a subtitle change (on / off or another track): look at it right away, without waiting for
         the watcher. Within 2 s of a change LPM made itself the look is postponed until then (LPM adopts its own
         change as the baseline), so a change of the user in that time is not lost."""
-        self.subtitle_events_seen = True
         if getattr(self, 'sub_event_pending', False):
             return
         self._schedule_subtitle_check(max(self.SUB_EVENT_DELAY, getattr(self, 'sub_event_quiet_until', 0) - time.time() + 0.1))
@@ -252,6 +252,10 @@ class LangPrefMan_Player(xbmc.Player):
     def onPlayBackResumed(self):
         """ Will be called when [user] stops Kodi playing a file """
         log(LOG_DEBUG, 'Player: [onPlayBackResumed] called')
+        self.detect_subtitle_change()
+
+    def onPlayBackSeek(self, seek_time, seek_offset):
+        """ Will be called when the user seeks: a moment at which a subtitle changed earlier is looked at """
         self.detect_subtitle_change()
 
     def onPlayBackStarted(self):
