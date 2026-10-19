@@ -318,5 +318,51 @@ class ConverterGateTests(unittest.TestCase):
         self.assertTrue(wanted(self.audio("")))
 
 
+class WatcherTests(unittest.TestCase):
+    """The 10 second subtitle watcher also serves the sub converter (a subtitle switched on or off during playback)."""
+
+    @classmethod
+    def setUpClass(cls):
+        ConverterGateTests.setUpClass()
+        cls.prefutils = ConverterGateTests.prefutils
+
+    def run_one_round(self, **flags):
+        prefutils = self.prefutils
+        settings = prefutils.settings
+        saved = {k: getattr(settings, k, None) for k in ("storeCustomMediaPreferences", "sub_converter_on")}
+        settings.storeCustomMediaPreferences = flags.get("store", False)
+        settings.sub_converter_on = flags.get("converter", False)
+        calls = []
+
+        class Monitor:
+            def abortRequested(self):
+                return False
+
+            def waitForAbort(self, _seconds):
+                return True                       # stop after the first round
+
+        player = types.SimpleNamespace(isPlayingVideo=lambda: flags.get("playing", True),
+                                       detect_subtitle_change=lambda: calls.append(1))
+        old_monitor = prefutils.xbmc.Monitor
+        prefutils.xbmc.Monitor = Monitor
+        try:
+            prefutils.LangPrefWatcher(player, check_interval=10).run()
+        finally:
+            prefutils.xbmc.Monitor = old_monitor
+            for k, v in saved.items():
+                setattr(settings, k, v)
+        return len(calls)
+
+    def test_it_looks_for_the_sub_converter_without_stored_preferences(self):
+        self.assertEqual(1, self.run_one_round(converter=True))
+
+    def test_it_still_looks_for_stored_preferences(self):
+        self.assertEqual(1, self.run_one_round(store=True))
+
+    def test_it_does_nothing_when_neither_is_on_or_nothing_plays(self):
+        self.assertEqual(0, self.run_one_round())
+        self.assertEqual(0, self.run_one_round(converter=True, playing=False))
+
+
 if __name__ == "__main__":
     unittest.main()

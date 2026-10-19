@@ -51,7 +51,8 @@ class LangPrefWatcher(threading.Thread):
         monitor = xbmc.Monitor()
         while not self._stop_event.is_set() and not monitor.abortRequested():
             try:
-                if self.player.isPlayingVideo():
+                # looked up at every round: the settings can change while Kodi runs
+                if (settings.storeCustomMediaPreferences or settings.sub_converter_on) and self.player.isPlayingVideo():
                     self.player.detect_subtitle_change()
             except Exception as e:
                 log(LOG_ERROR, 'Subtitle watcher error: {0}'.format(e))
@@ -105,11 +106,11 @@ class LangPrefMan_Player(xbmc.Player):
         settings.readSettings()
         xbmc.Player.__init__(self)
 
-        if settings.storeCustomMediaPreferences:
-            # Start the LangPrefWatcher thread. This thread will periodically check for subtitle changes.
-            # This is because onAVChange does not get called when the subtitle stream changes.
-            self.lang_pref_watcher = LangPrefWatcher(self, check_interval=10)
-            self.lang_pref_watcher.start()
+        # Start the LangPrefWatcher thread. This thread will periodically check for subtitle changes (to store them,
+        # and for the sub converter), because onAVChange does not always get called when the subtitle changes or is
+        # switched on / off. It only looks when one of those two settings is on - now or later.
+        self.lang_pref_watcher = LangPrefWatcher(self, check_interval=10)
+        self.lang_pref_watcher.start()
 
     def add_ignore_audio_change_index(self, index):
         """
