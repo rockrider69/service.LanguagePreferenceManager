@@ -716,3 +716,7 @@ msgstr "カラーチャートから色を選ぶ..."
 msgctxt "#30672"
 msgid "Subtitle color set to {0}"
 msgstr "字幕の色を {0} に設定しました"
+
+msgctxt "#30673"
+msgid "Write all settings to the Kodi log (for bug reports)"
+msgstr "すべての設定をKodiのログに書き込む（不具合報告用）"

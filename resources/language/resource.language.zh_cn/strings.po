@@ -716,3 +716,7 @@ msgstr "从色卡中选择颜色..."
 msgctxt "#30672"
 msgid "Subtitle color set to {0}"
 msgstr "字幕颜色已设为 {0}"
+
+msgctxt "#30673"
+msgid "Write all settings to the Kodi log (for bug reports)"
+msgstr "将所有设置写入Kodi日志（用于错误报告）"

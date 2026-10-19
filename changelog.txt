@@ -2,6 +2,9 @@
 
 This beta builds on 1.1.1Beta1; the changes are listed below.
 
+- New General setting "Write all settings to the Kodi log (for bug reports)": when on, every add-on setting is written
+  to the Kodi log at the start of the service, when a setting changes and at the start of each playback, whatever
+  the log level is, so a log shows the exact settings next to the preference flow.
 - Regional/script language preferences now use one common engine (langutils), which includes the variants of
   1.1.1Beta1 (Thanks to Hugs11): English (UK / US / Australia / India / Canada), Spanish (Spain / Latin America),
   French (France / Canada / Belgium / Switzerland), Portuguese (Portugal / Brazil), Chinese (Simplified / Traditional),

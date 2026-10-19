@@ -269,6 +269,7 @@ class LangPrefMan_Player(xbmc.Player):
         self.external_sub_files = (None, [])     # the subtitle files may have changed since the last playback
         self.sub_codecs = (None, None)
         self.external_sub_tags = (None, {})
+        settings.dump_settings()
         if settings.service_enabled and settings.at_least_one_pref_on:
             log(LOG_DEBUG, 'New AV Playback initiated - Resetting LPM Initial Flag')
             self.LPM_initial_run_done = False

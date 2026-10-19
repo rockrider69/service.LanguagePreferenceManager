@@ -3,6 +3,7 @@ import re
 import langutils
 import subcodec
 import subconvert
+import settingsdump
 from prefparser import PrefParser
 from resources.lib import kodi_utils
 from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
@@ -98,6 +99,12 @@ class settings():
                          self.regex_sub_filter_enabled
                         )
                  )
+        self.dump_settings()
+
+    def dump_settings(self):
+        # for bug reports: every setting in the log, whatever the log level (the 'logSettings' toggle)
+        if getattr(self, 'log_settings', False):
+            settingsdump.write()
 
     def readPrefs(self):
         addon = xbmcaddon.Addon()    
@@ -120,6 +127,7 @@ class settings():
         self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'
         self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
         self.ignore_signs_on = addon.getSetting('signs') == 'true'
+        self.log_settings = addon.getSetting('logSettings') == 'true'
         self.sub_converter_on = addon.getSetting('subConverter') == 'true'
         self.read_sub_converter(addon)
         self.regex_sub_filter_enabled = addon.getSetting('regexSubFilter') == 'true'

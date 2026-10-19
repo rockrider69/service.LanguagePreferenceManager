@@ -730,3 +730,7 @@ msgstr "Choisir la couleur dans une palette..."
 msgctxt "#30672"
 msgid "Subtitle color set to {0}"
 msgstr "Couleur des sous-titres réglée sur {0}"
+
+msgctxt "#30673"
+msgid "Write all settings to the Kodi log (for bug reports)"
+msgstr "Écrire tous les réglages dans le journal Kodi (pour les rapports de bogue)"

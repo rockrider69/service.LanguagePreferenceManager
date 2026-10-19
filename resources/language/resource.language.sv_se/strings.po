@@ -736,3 +736,7 @@ msgstr "Välj färg i en färgtabell..."
 msgctxt "#30672"
 msgid "Subtitle color set to {0}"
 msgstr "Undertextfärgen satt till {0}"
+
+msgctxt "#30673"
+msgid "Write all settings to the Kodi log (for bug reports)"
+msgstr "Skriv alla inställningar till Kodis logg (för felrapporter)"

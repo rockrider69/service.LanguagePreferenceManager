@@ -28,6 +28,7 @@ DESCRIPTIONS = {
                                   'preferences, file-name preferences',
     'test_selfcheck': 'installation check: stale copies, compiled files, version/code fingerprint',
     'test_settings': 'settings.xml: spinner order and values, translations (.po) complete and consistent',
+    'test_settingsdump': 'the log-all-settings toggle: every setting id of settings.xml written to the Kodi log',
     'test_kodirpc': 'Kodi JSON-RPC calls for the streams (playing file, subtitle file, on/off) used by the sub converter',
     'test_subconvert_srt': 'sub converter: SRT/ASS/WebVTT cue conversion',
     'test_subconverter_options': 'sub converter options: color, up to 10 audio languages / all, works with any setting',
