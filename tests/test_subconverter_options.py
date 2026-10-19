@@ -251,6 +251,31 @@ class ReadSettingsTests(unittest.TestCase):
         self.assertEqual("#FFFF00", self.read(subConverterColor="x").sub_converter_color)
 
 
+class SeekBackSettingTests(ReadSettingsTests):
+    """The seek back after a late subtitle switch (Kodi 19-21): on by default, 3 s, 1-10 s."""
+
+    def test_default_is_on_with_three_seconds(self):
+        self.assertEqual(3, self.read().sub_converter_seekback)
+
+    def test_the_seconds_are_kept_between_one_and_ten(self):
+        self.assertEqual(7, self.read(subConverterSeekBackSeconds=7).sub_converter_seekback)
+        self.assertEqual(1, self.read(subConverterSeekBackSeconds=0).sub_converter_seekback)
+        self.assertEqual(10, self.read(subConverterSeekBackSeconds=99).sub_converter_seekback)
+        self.assertEqual(3, self.read(subConverterSeekBackSeconds="x").sub_converter_seekback)
+
+    def test_the_toggle_switches_it_off(self):
+        self.assertEqual(0, self.read(subConverterSeekBack="false", subConverterSeekBackSeconds=5).sub_converter_seekback)
+
+    def test_the_settings_xml_has_the_toggle_and_a_slider_of_1_to_10_with_default_3(self):
+        root = ET.parse(os.path.join(ROOT, "resources", "settings.xml")).getroot()
+        by_id = {n.get("id"): n for n in root.iter("setting")}
+        self.assertEqual("true", by_id["subConverterSeekBack"].find("default").text)
+        node = by_id["subConverterSeekBackSeconds"]
+        self.assertEqual("3", node.find("default").text)
+        self.assertEqual(("1", "10"), (node.find("constraints/minimum").text, node.find("constraints/maximum").text))
+        self.assertEqual("slider", node.find("control").get("type"))
+
+
 class ConverterGateTests(unittest.TestCase):
     """The converter works with any setting, not only with the regex filter or the conditional rules."""
 
@@ -523,7 +548,7 @@ class WatcherTests(unittest.TestCase):
                 return True                       # stop after the first round
 
         player = types.SimpleNamespace(isPlayingVideo=lambda: flags.get("playing", True),
-                                       detect_subtitle_change=lambda: calls.append(1))
+                                       detect_subtitle_change=lambda trigger="": calls.append(1))
         old_monitor = prefutils.xbmc.Monitor
         prefutils.xbmc.Monitor = Monitor
         try:
@@ -570,7 +595,7 @@ class SubtitleEventTests(unittest.TestCase):
         player.detected = threading.Semaphore(0)
         player.calls = 0
 
-        def detect():
+        def detect(trigger=""):
             player.calls += 1
             player.detected.release()
 

@@ -53,6 +53,13 @@ class settings():
             name, code = self.spinner_lang(addon, 'SubConvLang%02d' % n)
             if code != langutils.NON and code not in self.sub_converter_langs:
                 self.sub_converter_langs.append(code)
+        # seconds to seek back after a subtitle switch that was only noticed late (Kodi 19-21): 0 = off, else 1-10
+        self.sub_converter_seekback = 0
+        if addon.getSetting('subConverterSeekBack') != 'false':
+            try:
+                self.sub_converter_seekback = min(10, max(1, int(addon.getSetting('subConverterSeekBackSeconds') or 3)))
+            except ValueError:
+                self.sub_converter_seekback = 3
         typed = addon.getSetting('subConverterColorHex')
         self.sub_converter_color, valid = subconvert.resolve_color(addon.getSetting('subConverterColor'), typed)
         if not valid:
@@ -61,6 +68,8 @@ class settings():
             log(LOG_DEBUG, 'Sub converter: audio {0}, colour {1}'.format(
                 'in any language' if self.sub_converter_all else ','.join(self.sub_converter_langs) or 'none chosen',
                 self.sub_converter_color))
+            log(LOG_DEBUG, 'Sub converter: seek back after a late subtitle switch: {0}'.format(
+                '{0} s'.format(self.sub_converter_seekback) if self.sub_converter_seekback else 'off'))
 
     def readSettings(self):
         self.readPrefs()

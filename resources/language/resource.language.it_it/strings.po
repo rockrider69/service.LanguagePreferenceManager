@@ -720,3 +720,11 @@ msgstr "Colore dei sottotitoli impostato su {0}"
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr "Scrivi tutte le impostazioni nel log di Kodi (per le segnalazioni di errori)"
+
+msgctxt "#30674"
+msgid "Seek back after a late subtitle switch (Kodi 19-21)"
+msgstr "Riavvolgi dopo un cambio di sottotitolo rilevato in ritardo (Kodi 19-21)"
+
+msgctxt "#30675"
+msgid "Seconds to seek back"
+msgstr "Secondi di riavvolgimento"

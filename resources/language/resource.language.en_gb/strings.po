@@ -720,3 +720,11 @@ msgstr ""
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr ""
+
+msgctxt "#30674"
+msgid "Seek back after a late subtitle switch (Kodi 19-21)"
+msgstr ""
+
+msgctxt "#30675"
+msgid "Seconds to seek back"
+msgstr ""

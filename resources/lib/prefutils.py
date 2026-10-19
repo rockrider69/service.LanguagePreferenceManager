@@ -85,7 +85,7 @@ class LangPrefWatcher(threading.Thread):
         while not self._stop_event.is_set() and not monitor.abortRequested():
             try:
                 if settings.storeCustomMediaPreferences and self.player.isPlayingVideo():
-                    self.player.detect_subtitle_change()
+                    self.player.detect_subtitle_change('watcher')
             except Exception as e:
                 log(LOG_ERROR, 'Subtitle watcher error: {0}'.format(e))
             waited = 0.0
@@ -195,7 +195,7 @@ class LangPrefMan_Player(xbmc.Player):
             return
         try:
             if (settings.storeCustomMediaPreferences or settings.sub_converter_on) and self.isPlayingVideo():
-                self.detect_subtitle_change()
+                self.detect_subtitle_change('announced')
         except Exception as e:
             log(LOG_ERROR, 'Subtitle change handling failed: {0}'.format(e))
 
@@ -247,16 +247,16 @@ class LangPrefMan_Player(xbmc.Player):
     def onPlayBackPaused(self):
         """ Will be called when [user] stops Kodi playing a file """
         log(LOG_DEBUG, 'Player: [onPlayBackPaused] called')
-        self.detect_subtitle_change()
+        self.detect_subtitle_change('pause')
 
     def onPlayBackResumed(self):
         """ Will be called when [user] stops Kodi playing a file """
         log(LOG_DEBUG, 'Player: [onPlayBackResumed] called')
-        self.detect_subtitle_change()
+        self.detect_subtitle_change('resume')
 
     def onPlayBackSeek(self, seek_time, seek_offset):
         """ Will be called when the user seeks: a moment at which a subtitle changed earlier is looked at """
-        self.detect_subtitle_change()
+        self.detect_subtitle_change('seek')
 
     def onPlayBackStarted(self):
         self.regex_sub_selected = False
@@ -398,11 +398,14 @@ class LangPrefMan_Player(xbmc.Player):
             else:
                 self._check_subtitle_change(previous_sub_index, previous_sub_enabled, previous_sub_language)
 
-    def detect_subtitle_change(self):
+    def detect_subtitle_change(self, trigger=''):
         """
         This method detects if the subtitle track has changed and stores the new preference if it has.
+        :param trigger: what made us look: 'pause', 'resume', 'seek', 'watcher' (all late: Kodi before 22 does not
+            announce the change) or 'announced' (Kodi 22 told us at once)
         :return: None
         """
+        self.sub_change_trigger = trigger
         if self.LPM_initial_run_done and settings.service_enabled and settings.at_least_one_pref_on and self.isPlayingVideo():
             log(LOG_DEBUG, 'Running subtitle change detect')
             previous_sub_index = self.getSelectedSubtitleIndex()
@@ -419,7 +422,7 @@ class LangPrefMan_Player(xbmc.Player):
         # Only the converter's own copy is ignored (just after it selected it): another subtitle the user picks a
         # few seconds later is a real change and must be looked at, or it would never be converted.
         if time.time() < self.sub_convert_quiet_until and self._is_converter_copy(self.selected_sub):
-            log(LOG_DEBUG, 'Subtitle change ignored: the sub converter selected its own subtitle')
+            log(LOG_DEBUG, 'Subtitle change skipped: the sub converter selected its own subtitle')
             return
         if self.getSelectedSubtitleIndex() != previous_sub_index or self.selected_sub_enabled != previous_enabled_sub:
             log(LOG_DEBUG, 'Subtitle track changed from {0} to {1}'.format(previous_sub_language,
@@ -915,9 +918,13 @@ class LangPrefMan_Player(xbmc.Player):
         if self.sub_converting:
             if user_switch:
                 self.sub_convert_pending = True
+                log(LOG_INFO, 'Sub converter: delayed - a conversion is still running, the new subtitle follows when it ends')
+            else:
+                log(LOG_INFO, 'Sub converter: skipped - a conversion is already running')
             return
         # what the user picked is already applied by Kodi; after a switch of LPM itself Kodi needs a moment
         self.sub_converter_settle_ms = self.SETTLE_AFTER_USER_MS if user_switch else self.SETTLE_AFTER_LPM_MS
+        self.sub_converter_trigger = getattr(self, 'sub_change_trigger', '') if user_switch else ''
         self.sub_converting = True
         threading.Thread(target=self._sub_converter_run, daemon=True).start()
 
@@ -942,18 +949,26 @@ class LangPrefMan_Player(xbmc.Player):
         """(video path, ordinal of the selected subtitle among the video's embedded subtitles, language) when the
         selected subtitle is to be converted, else None."""
         xbmc.sleep(getattr(self, 'sub_converter_settle_ms', self.SETTLE_AFTER_LPM_MS))   # Kodi applies a switch of LPM
-        if not self.getDetails() or not self.selected_sub_enabled or not self.selected_sub:
+        if not self.getDetails():
+            log(LOG_INFO, 'Sub converter: skipped - Kodi gave no stream details (playback stopped)')
+            return None
+        if not self.selected_sub_enabled or not self.selected_sub:
+            log(LOG_INFO, 'Sub converter: skipped - subtitles are off')
             return None
         audio = self.selected_audio_stream or {}
         if not self.sub_converter_audio_wanted(audio):
+            log(LOG_INFO, 'Sub converter: skipped - the audio language ({0}) is not one the converter works for'.format(
+                audio.get('language') or 'unknown'))
             return None
         label = xbmc.getLocalizedString(21602)
         subs = [s for s in (self.subtitles or []) if not self._converted_name(s)]
         embedded = sorted((s for s in subs if langutils.external_name(s, label) is None), key=lambda s: s['index'])
         indexes = [s['index'] for s in embedded]
         selected = self.selected_sub.get('index')
-        if selected not in indexes:
-            return None                                  # an external (or an already converted) subtitle
+        if selected not in indexes:                      # an external (or an already converted) subtitle
+            log(LOG_INFO, 'Sub converter: skipped - the selected subtitle is an external file or an already converted '
+                          'copy, only embedded subtitles are converted')
+            return None
         # the video may have any other subtitle formats too (PGS, SUP ...): only the selected track counts (any text format: SRT, ASS/SSA, WebVTT)
         codecs = self.embedded_subtitle_codecs()
         if codecs is None or len(codecs) != len(embedded):
@@ -961,11 +976,12 @@ class LangPrefMan_Player(xbmc.Player):
                           '.mkv files can; {1} embedded streams, {2} tracks read)'.format(
                               subconvert.plain_location(self.playing_file()), len(embedded),
                               None if codecs is None else len(codecs)))
+            log(LOG_INFO, 'Sub converter: skipped - the subtitle formats of the file are unknown')
             return None
         position = indexes.index(selected)
         if not subcodec.is_convertible(codecs[position]):
-            log(LOG_INFO if subcodec.is_bitmap(codecs[position]) else LOG_DEBUG,
-                'Sub converter: the selected subtitle is {0}: {1}'.format(
+            log(LOG_INFO,
+                'Sub converter: skipped - the selected subtitle is {0}: {1}'.format(
                     codecs[position], 'a picture format, it cannot be turned into text without OCR'
                     if subcodec.is_bitmap(codecs[position]) else 'not a text format LPM can read'))
             return None
@@ -1000,8 +1016,9 @@ class LangPrefMan_Player(xbmc.Player):
             if not job:
                 return
             video, ordinal, language, chosen, codec = job
-            log(LOG_INFO, 'Sub converter: converting subtitle track {0} of {1} (the whole file is read: the first '
-                          'time this can take a minute or more)'.format(ordinal + 1, subconvert.plain_location(video)))
+            log(LOG_INFO, 'Sub converter: accepted - converting subtitle track {0} ({1}, {2}) of {3} (the whole file is '
+                          'read: the first time this can take a minute or more)'.format(
+                              ordinal + 1, codec, language, subconvert.plain_location(video)))
             playing = self._still_playing(video)
             as_ass = subcodec.is_ass(codec)                  # ASS/SSA stays ASS (styles, fonts, places), the rest becomes SRT
             view = None if as_ass else self._picture_view()
@@ -1012,15 +1029,16 @@ class LangPrefMan_Player(xbmc.Player):
             cues = subconvert.convert(video, ordinal, destination, lambda: not playing(),
                                       lambda msg: log(LOG_INFO, msg), view, color)
             if cues == 0:
-                log(LOG_INFO, 'Sub converter: nothing converted for subtitle track {0}'.format(ordinal + 1))
+                log(LOG_INFO, 'Sub converter: skipped - nothing could be converted for subtitle track {0}'.format(ordinal + 1))
                 return
             log(LOG_INFO, 'Sub converter: subtitle track {0} converted ({1}) in {2:.1f} s: {3}'.format(
                 ordinal + 1, 'reused' if cues < 0 else '{0} lines'.format(cues), time.time() - started,
                 os.path.basename(destination)))
             if not playing():
+                log(LOG_INFO, 'Sub converter: skipped - playback stopped while converting, the copy is not selected')
                 return
             if not self.getDetails() or (self.selected_sub or {}).get('index') != chosen:
-                log(LOG_INFO, 'Sub converter: the subtitle was changed while converting - the copy is not selected')
+                log(LOG_INFO, 'Sub converter: skipped - the subtitle was changed while converting, the copy is not selected')
                 return
             self.sub_convert_quiet_until = time.time() + 5
             self.rpc_add_subtitle(destination)
@@ -1028,6 +1046,8 @@ class LangPrefMan_Player(xbmc.Player):
             self.rpc_show_subtitles(True)
             self.refresh_subtitle_baseline()
             self.sub_convert_quiet_until = time.time() + 3
+            log(LOG_INFO, 'Sub converter: done - the converted copy is selected')
+            self.seek_back_after_conversion()
         except Exception as e:                           # never let the converter disturb the playback
             log(LOG_ERROR, 'Sub converter failed: {0}'.format(e))
         finally:
@@ -1036,9 +1056,36 @@ class LangPrefMan_Player(xbmc.Player):
                 self.sub_convert_pending = False
                 try:
                     if kodirpc.is_playing_video():
-                        self.start_sub_converter()
+                        self.start_sub_converter(user_switch=True)
                 except Exception as e:
                     log(LOG_ERROR, 'Sub converter restart failed: {0}'.format(e))
+
+    SEEK_BACK_TRIGGERS = ('pause', 'resume', 'watcher')   # late detections: the picked subtitle has been showing a while
+
+    def seek_back_after_conversion(self):
+        """Kodi before 22 does not announce a subtitle the user picks during the playback: it is noticed at the next
+        pause, resume (or, when the subtitle watcher runs, within 10 s), so the first lines show in the original
+        style. Playback is moved back a few seconds (the 'seek back' setting) so those lines show again, converted.
+        Not after a seek of the user (the user chose the position), and not on Kodi 22, which announces the change."""
+        seconds = getattr(settings, 'sub_converter_seekback', 0)
+        trigger = getattr(self, 'sub_converter_trigger', '')
+        if not trigger:
+            return                                       # not a switch of the user: nothing was shown in the old style
+        if not seconds:
+            log(LOG_INFO, 'Sub converter: seek back skipped - the setting is off')
+        elif trigger == 'announced':
+            log(LOG_INFO, 'Sub converter: seek back skipped - Kodi announced the change at once, nothing was missed')
+        elif trigger not in self.SEEK_BACK_TRIGGERS:
+            log(LOG_INFO, 'Sub converter: seek back skipped - the change was noticed at a seek of the user, who chose '
+                          'the position')
+        elif not kodirpc.is_playing_video():
+            log(LOG_INFO, 'Sub converter: seek back skipped - playback stopped')
+        elif kodirpc.seek_back(seconds):
+            log(LOG_INFO, 'Sub converter: seek back {0} s done - the change was only noticed at the next {1}'.format(
+                seconds, 'pause' if trigger == 'pause' else 'resume' if trigger == 'resume' else 'check'))
+            self.sub_convert_quiet_until = time.time() + 3
+        else:
+            log(LOG_INFO, 'Sub converter: seek back skipped - Kodi did not accept the seek')
 
     def regex_whole_word_hit(self, name):
         """True when the subtitle regex matches a whole word of the title ('Signs' in 'Signs and Song Subtitles'),

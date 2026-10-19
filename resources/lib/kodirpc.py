@@ -1,7 +1,7 @@
 """
 Kodi's JSON-RPC interface, for what the add-on does with the playing video's streams: which file is playing, loading a
 subtitle file, switching subtitles on or off and picking a track, and the screen / picture sizes. The JSON-RPC
-methods used (Player.GetActivePlayers, Player.GetItem, Player.AddSubtitle, Player.SetSubtitle, XBMC.GetInfoLabels)
+methods used (Player.GetActivePlayers, Player.GetItem, Player.AddSubtitle, Player.SetSubtitle, Player.Seek, XBMC.GetInfoLabels)
 exist in Kodi 19 and newer. Every function returns a plain value and never raises: None / '' / False when Kodi
 does not answer or playback stopped meanwhile.
 """
@@ -66,6 +66,16 @@ def set_subtitle(subtitle, player_id=None):
 
 def show_subtitles(visible, player_id=None):
     return set_subtitle('on' if visible else 'off', player_id)
+
+
+def seek_back(seconds, player_id=None):
+    """Player.Seek by a relative number of seconds backwards (Kodi's own relative seek, 19 and newer).
+    True when Kodi accepted it."""
+    if player_id is None:
+        player_id = video_player_id()
+    if player_id is None:
+        return False
+    return call('Player.Seek', {'playerid': player_id, 'value': {'seconds': -abs(int(seconds))}}) is not None
 
 
 def info_labels(labels):

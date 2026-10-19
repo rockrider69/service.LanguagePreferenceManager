@@ -2,6 +2,11 @@
 
 This beta builds on 1.1.1Beta1; the changes are listed below.
 
+- Sub converter, new setting "Seek back after a late subtitle switch (Kodi 19-21)" (on by default, 3 s, 1-10 s): Kodi
+  before 22 does not announce a subtitle the user picks during the playback, so it is converted at the next pause or
+  resume; playback then goes back by that many seconds, so the lines that were shown in the original style are shown
+  again, converted. Not after a seek of the user, and not on Kodi 22 (the change is announced at once).
+- The sub converter log now says plainly what it did and why: "accepted", "skipped - <reason>", "delayed", "done".
 - New General setting "Write all settings to the Kodi log (for bug reports)": when on, every add-on setting is written
   to the Kodi log at the start of the service, when a setting changes and at the start of each playback, whatever
   the log level is, so a log shows the exact settings next to the preference flow.

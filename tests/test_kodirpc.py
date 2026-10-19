@@ -75,6 +75,20 @@ class KodiRpcTests(unittest.TestCase):
         self.assertFalse(kodirpc.add_subtitle("/tmp/x.srt"))
         self.assertFalse(kodirpc.show_subtitles(True))
 
+    def test_seek_back_is_a_relative_player_seek(self):
+        kodi = self.kodi(**{"Player.GetActivePlayers": {"result": [{"playerid": 1, "type": "video"}]},
+                            "Player.Seek": {"result": {"percentage": 10}}})
+        self.assertTrue(kodirpc.seek_back(3))
+        self.assertEqual(("Player.Seek", {"playerid": 1, "value": {"seconds": -3}}), kodi.requests[-1])
+        self.assertTrue(kodirpc.seek_back(-5))                  # the sign does not matter: always backwards
+        self.assertEqual({"seconds": -5}, kodi.requests[-1][1]["value"])
+
+    def test_seek_back_without_a_video_or_when_kodi_refuses(self):
+        self.kodi(**{"Player.GetActivePlayers": {"result": []}})
+        self.assertFalse(kodirpc.seek_back(3))
+        self.kodi(**{"Player.GetActivePlayers": {"result": [{"playerid": 1, "type": "video"}]}})
+        self.assertFalse(kodirpc.seek_back(3))                  # no Player.Seek answer: an error
+
     def test_the_playing_file_comes_from_player_getitem(self):
         kodi = self.kodi(**{"Player.GetActivePlayers": {"result": [{"playerid": 1, "type": "video"}]},
                             "Player.GetItem": {"result": {"item": {"file": "smb://nas/movies/A.mkv", "type": "movie"}}}})
@@ -161,7 +175,7 @@ class ConverterUsesJsonRpcTests(unittest.TestCase):
     def test_a_seek_makes_the_player_look_at_the_subtitle(self):
         player = object.__new__(self.prefutils.LangPrefMan_Player)
         seen = []
-        player.detect_subtitle_change = lambda: seen.append("looked")
+        player.detect_subtitle_change = lambda trigger="": seen.append("looked")
         player.onPlayBackSeek(12, 5)
         self.assertEqual(["looked"], seen)
 

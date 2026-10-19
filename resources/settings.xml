@@ -1150,6 +1150,32 @@
                         </dependency>
                     </dependencies>
                 </setting>
+                <setting id="subConverterSeekBack" label="30674" type="boolean">
+                    <default>true</default>
+                    <control type="toggle"/>
+                    <dependencies>
+                        <dependency type="visible" setting="subConverter" operator="is">true</dependency>
+                    </dependencies>
+                </setting>
+                <setting id="subConverterSeekBackSeconds" label="30675" type="integer">
+                    <default>3</default>
+                    <constraints>
+                        <minimum>1</minimum>
+                        <step>1</step>
+                        <maximum>10</maximum>
+                    </constraints>
+                    <control type="slider" format="integer">
+                        <popup>false</popup>
+                    </control>
+                    <dependencies>
+                        <dependency type="visible">
+                            <and>
+                                <condition setting="subConverter" operator="is">true</condition>
+                                <condition setting="subConverterSeekBack" operator="is">true</condition>
+                            </and>
+                        </dependency>
+                    </dependencies>
+                </setting>
             </group>
             <group id="7" label="30647">
                 <setting id="checkInstallation" type="string" label="30646">

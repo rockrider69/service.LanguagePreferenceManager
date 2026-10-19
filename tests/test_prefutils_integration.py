@@ -341,6 +341,68 @@ class PreferenceEvaluationTests(unittest.TestCase):
         thread.assert_called_once()
         self.assertTrue(player.sub_converting)
 
+    def seek_back_result(self, trigger, seconds=3, playing=True, accepted=True):
+        player, mock = self.converter_player()
+        settings.sub_converter_seekback = seconds
+        player.sub_converter_trigger = trigger
+        import prefutils
+        seeks = []
+        with mock.patch("prefutils.log") as log, \
+                mock.patch.object(prefutils.kodirpc, "is_playing_video", lambda: playing), \
+                mock.patch.object(prefutils.kodirpc, "seek_back", lambda s: seeks.append(s) or accepted):
+            player.seek_back_after_conversion()
+        return seeks, " | ".join(str(c.args[1]) for c in log.call_args_list)
+
+    def test_seek_back_after_a_late_pause_resume_or_watcher_detection(self):
+        for trigger in ("pause", "resume", "watcher"):
+            seeks, text = self.seek_back_result(trigger, 4)
+            self.assertEqual([4], seeks, trigger)
+            self.assertIn("seek back 4 s done", text)
+
+    def test_no_seek_back_when_the_user_seeked_or_kodi_announced_it(self):
+        seeks, text = self.seek_back_result("seek")
+        self.assertEqual([], seeks)
+        self.assertIn("seek back skipped - the change was noticed at a seek of the user", text)
+        seeks, text = self.seek_back_result("announced")
+        self.assertEqual([], seeks)
+        self.assertIn("seek back skipped - Kodi announced the change at once", text)
+
+    def test_no_seek_back_when_off_or_playback_stopped_or_kodi_refuses(self):
+        seeks, text = self.seek_back_result("pause", 0)
+        self.assertEqual([], seeks)
+        self.assertIn("seek back skipped - the setting is off", text)
+        seeks, text = self.seek_back_result("pause", playing=False)
+        self.assertEqual([], seeks)
+        self.assertIn("seek back skipped - playback stopped", text)
+        seeks, text = self.seek_back_result("pause", accepted=False)
+        self.assertIn("seek back skipped - Kodi did not accept the seek", text)
+
+    def test_no_seek_back_or_log_for_a_subtitle_LPM_chose_itself(self):
+        seeks, text = self.seek_back_result("")
+        self.assertEqual(([], ""), (seeks, text))
+
+    def test_the_trigger_of_the_detection_reaches_the_converter(self):
+        player, mock = self.converter_player()
+        with mock.patch("prefutils.threading.Thread"):
+            player.sub_change_trigger = "resume"
+            player.start_sub_converter(user_switch=True)
+        self.assertEqual("resume", player.sub_converter_trigger)
+        with mock.patch("prefutils.threading.Thread"):
+            player.sub_converting = False
+            player.start_sub_converter()
+        self.assertEqual("", player.sub_converter_trigger)
+
+    def test_a_switch_while_converting_is_logged_as_delayed_and_keeps_the_running_trigger(self):
+        player, mock = self.converter_player()
+        player.sub_converting = True
+        player.sub_converter_trigger = "pause"
+        player.sub_change_trigger = "seek"
+        with mock.patch("prefutils.log") as log:
+            player.start_sub_converter(user_switch=True)
+        self.assertEqual("pause", player.sub_converter_trigger)
+        self.assertTrue(player.sub_convert_pending)
+        self.assertIn("Sub converter: delayed", log.call_args.args[1])
+
     def test_no_change_does_not_start_the_sub_converter(self):
         player, mock = self.converter_player()
         with mock.patch("prefutils.threading.Thread") as thread:
@@ -365,7 +427,7 @@ class PreferenceEvaluationTests(unittest.TestCase):
             player._sub_converter_run()
         finally:
             prefutils.kodirpc.is_playing_video = old_playing
-        self.assertEqual([False], started)
+        self.assertEqual([True], started)
         self.assertFalse(player.sub_convert_pending)
         self.assertFalse(player.sub_converting)
 

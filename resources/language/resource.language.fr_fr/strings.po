@@ -734,3 +734,11 @@ msgstr "Couleur des sous-titres réglée sur {0}"
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr "Écrire tous les réglages dans le journal Kodi (pour les rapports de bogue)"
+
+msgctxt "#30674"
+msgid "Seek back after a late subtitle switch (Kodi 19-21)"
+msgstr "Revenir en arrière après un changement de sous-titre détecté tardivement (Kodi 19-21)"
+
+msgctxt "#30675"
+msgid "Seconds to seek back"
+msgstr "Secondes de retour en arrière"

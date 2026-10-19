@@ -740,3 +740,11 @@ msgstr "Undertextfärgen satt till {0}"
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr "Skriv alla inställningar till Kodis logg (för felrapporter)"
+
+msgctxt "#30674"
+msgid "Seek back after a late subtitle switch (Kodi 19-21)"
+msgstr "Spola tillbaka efter ett sent upptäckt undertextbyte (Kodi 19-21)"
+
+msgctxt "#30675"
+msgid "Seconds to seek back"
+msgstr "Sekunder att spola tillbaka"
