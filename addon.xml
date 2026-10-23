@@ -40,14 +40,12 @@
   French France/Canada/Belgium/Switzerland, Portuguese Portugal/Brazil, Chinese Simplified/Traditional,
   German Switzerland/Austria, Dutch Belgium) share one engine; the region is read from the track tag, title or
   external subtitle file name.
-- New "Sub converter": ASS/SSA and other text subtitles keep their styles, only bottom lines move to the top.
 - New: subtitle format preference (issue #30): rank SRT, ASS/SSA, WebVTT, PGS and VobSub in General settings; among
   subtitles that fit your language preference equally well, the first format of your list that is present is used.
 - Reworked seekback / "Fast Subtitles Display" ("Start &amp; Resume" by default).
 - Regex subtitle filter fixes; external subtitle languages read from file names; safer stored preferences.
 - The settings values of the 1.1.1Beta1 language variants were renumbered: re-select regional languages in settings.
 - New: each conditional subtitle rule can use its own preferred subtitle format (general order, or the 1st / 2nd / 3rd format of the General settings); custom rules: -f1 / -f2 / -f3.
-- Fix: the sub converter also runs when subtitles are switched by hand during the playback, and converts embedded SRT as well.
 - Fix: subtitle format preference with external subtitle files of the same language (Movie.en.ass + Movie.en.srt): a preferred ASS is no longer passed over for an embedded PGS (.sup).
 - New: protection against a stale copy: no compiled Python files are used, the log shows the running version and code, and a warning is shown when another copy of the add-on is installed. Settings, General, Installation: "Check installation" says whether the installation is clean.
 - Fixed: with a subtitle format preference set, a text track (ASS/SRT/WebVTT) that only has the forced/default flag (no "forced" in its name) is no longer excluded from non-forced rules, so the format preference can choose it (e.g. English ASS flagged forced+default with Japanese audio). Flagged image tracks (PGS/VobSub) and tracks named "forced" stay excluded; the unflagged track wins a tie within the same format; without a format preference nothing changes.

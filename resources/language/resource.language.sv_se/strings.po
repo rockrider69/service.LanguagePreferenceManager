@@ -561,10 +561,6 @@ msgctxt "#30614"
 msgid "The stored preference could not be removed. Please try again."
 msgstr "Den sparade inställningen kunde inte tas bort. Försök igen."
 
-msgctxt "#30620"
-msgid "Sub converter (Japanese, Korean or Chinese audio when the selected subtitle is ASS/SSA: a copy with its styles, fonts and signs kept and the bottom lines moved to the top; other text formats other than SRT become plain yellow SRT at the top)"
-msgstr "Undertextkonverterare (japanskt, koreanskt eller kinesiskt ljud när den valda undertexten är ASS/SSA: kopia med stilar, typsnitt och skyltar bevarade och nedre rader flyttade överst; andra textformat än SRT blir enkel gul SRT överst)"
-
 msgctxt "#30630"
 msgid "Subtitle format preference (when several subtitles of the preferred language are available, the first format of this list that is present is taken; formats of embedded .mkv tracks and of subtitle files next to the video are known)"
 msgstr "Önskat undertextformat (när flera undertexter på det önskade språket finns väljs det första formatet i listan som finns; formaten för inbäddade .mkv-spår och för undertextfiler bredvid videon känns igen)"
@@ -636,3 +632,7 @@ msgstr "Kontrollera installation (föråldrade eller dubbla kopior)"
 msgctxt "#30647"
 msgid "Installation"
 msgstr "Installation"
+
+msgctxt "#30673"
+msgid "Write all settings to the Kodi log (for bug reports)"
+msgstr "Skriv alla inställningar till Kodis logg (för felrapporter)"
