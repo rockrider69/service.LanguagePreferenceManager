@@ -1,9 +1,8 @@
 import xbmc, xbmcaddon
 import re
 import langutils
-import subcodec
-import subconvert
 import settingsdump
+import subformat
 from prefparser import PrefParser
 from resources.lib import kodi_utils
 from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
@@ -41,35 +40,6 @@ class settings():
                 setting_id, addon.getSetting(setting_id)))
             return ('None', langutils.NON)
         return (name, code)
-
-    SUB_CONVERTER_LANGUAGES = 10
-
-    def read_sub_converter(self, addon):
-        """Sub converter: the colour of the converted text, and the audio languages it works for (all, or up to 10
-        chosen ones - 'None' entries are ignored; the defaults are Japanese, Korean and Chinese)."""
-        self.sub_converter_all = addon.getSetting('subConverterAll') == 'true'
-        self.sub_converter_langs = []
-        for n in range(1, self.SUB_CONVERTER_LANGUAGES + 1):
-            name, code = self.spinner_lang(addon, 'SubConvLang%02d' % n)
-            if code != langutils.NON and code not in self.sub_converter_langs:
-                self.sub_converter_langs.append(code)
-        # seconds to seek back after a subtitle switch that was only noticed late (Kodi 19-21): 0 = off, else 1-10
-        self.sub_converter_seekback = 0
-        if addon.getSetting('subConverterSeekBack') != 'false':
-            try:
-                self.sub_converter_seekback = min(10, max(1, int(addon.getSetting('subConverterSeekBackSeconds') or 3)))
-            except ValueError:
-                self.sub_converter_seekback = 3
-        typed = addon.getSetting('subConverterColorHex')
-        self.sub_converter_color, valid = subconvert.resolve_color(addon.getSetting('subConverterColor'), typed)
-        if not valid:
-            log(LOG_INFO, 'Sub converter: {0!r} is not a colour (use RRGGBB, e.g. FF8800) - using yellow'.format(typed))
-        if self.sub_converter_on:
-            log(LOG_DEBUG, 'Sub converter: audio {0}, colour {1}'.format(
-                'in any language' if self.sub_converter_all else ','.join(self.sub_converter_langs) or 'none chosen',
-                self.sub_converter_color))
-            log(LOG_DEBUG, 'Sub converter: seek back after a late subtitle switch: {0}'.format(
-                '{0} s'.format(self.sub_converter_seekback) if self.sub_converter_seekback else 'off'))
 
     def readSettings(self):
         self.readPrefs()
@@ -137,8 +107,6 @@ class settings():
         self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
         self.ignore_signs_on = addon.getSetting('signs') == 'true'
         self.log_settings = addon.getSetting('logSettings') == 'true'
-        self.sub_converter_on = addon.getSetting('subConverter') == 'true'
-        self.read_sub_converter(addon)
         self.regex_sub_filter_enabled = addon.getSetting('regexSubFilter') == 'true'
         self.regex_sub_pattern = addon.getSetting('regexSubPattern')
         if _OLD_SS_PATTERN in self.regex_sub_pattern:
@@ -185,7 +153,7 @@ class settings():
         else:
             self.audio_keyword_blacklist = []
         self.fast_subs_display = int(addon.getSetting('FastSubsDisplay'))
-        # preferred subtitle formats, best first (names of subcodec.SUBTITLE_FORMATS); [] = no preference
+        # preferred subtitle formats, best first (names of subformat.SUBTITLE_FORMATS); [] = no preference
         self.sub_format_order = []
         # the format of each of the three slots (1st, 2nd, 3rd), None for an empty slot: a conditional rule can
         # choose one of them as its own first choice (CondSubFormat01..12)
@@ -195,10 +163,10 @@ class settings():
                 number = int(addon.getSetting(setting) or 0)
             except ValueError:
                 number = 0
-            if 1 <= number <= len(subcodec.SUBTITLE_FORMATS):
-                self.sub_format_slots[slot] = subcodec.SUBTITLE_FORMATS[number - 1]
-                if subcodec.SUBTITLE_FORMATS[number - 1] not in self.sub_format_order:
-                    self.sub_format_order.append(subcodec.SUBTITLE_FORMATS[number - 1])
+            if 1 <= number <= len(subformat.SUBTITLE_FORMATS):
+                self.sub_format_slots[slot] = subformat.SUBTITLE_FORMATS[number - 1]
+                if subformat.SUBTITLE_FORMATS[number - 1] not in self.sub_format_order:
+                    self.sub_format_order.append(subformat.SUBTITLE_FORMATS[number - 1])
         self.useFilename = addon.getSetting('useFilename') == 'true'
         self.filenameRegex = addon.getSetting('filenameRegex')
         if self.useFilename:
@@ -232,7 +200,6 @@ class settings():
                                     or self.sub_prefs_on
                                     or self.condsub_prefs_on
                                     or self.regex_sub_filter_enabled
-                                    or self.sub_converter_on
                                     or self.useFilename or self.storeCustomMediaPreferences)
 
         log(LOG_DEBUG, 'storeCustomMediaPreferences: {0}'.format(self.storeCustomMediaPreferences))

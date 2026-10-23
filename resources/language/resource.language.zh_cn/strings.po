@@ -541,10 +541,6 @@ msgctxt "#30614"
 msgid "The stored preference could not be removed. Please try again."
 msgstr "无法删除已保存的偏好设置，请重试。"
 
-msgctxt "#30620"
-msgid "Sub converter: puts the selected text subtitle at the top of the screen, clear of burned-in subtitles. ASS/SSA keeps its styles, fonts and signs, with the bottom lines moved to the top; SRT and WebVTT become SRT text in the chosen color. Works on any subtitle, whichever setting selected it"
-msgstr "字幕转换器：将所选文本字幕移到屏幕顶部，避免与视频中的内嵌字幕重叠。ASS/SSA 保留样式、字体和标牌文字，底部的行移到顶部；SRT 和 WebVTT 会变为所选颜色的 SRT。无论字幕由哪项设置选中，均可使用"
-
 msgctxt "#30630"
 msgid "Subtitle format preference (when several subtitles of the preferred language are available, the first format of this list that is present is taken; formats of embedded .mkv tracks and of subtitle files next to the video are known)"
 msgstr "字幕格式偏好（当有多个首选语言的字幕可用时，选用此列表中第一个存在的格式；可识别内嵌 .mkv 轨道以及视频旁字幕文件的格式）"
@@ -617,114 +613,6 @@ msgctxt "#30647"
 msgid "Installation"
 msgstr "安装"
 
-msgctxt "#30648"
-msgid "Sub converter"
-msgstr "字幕转换器"
-
-msgctxt "#30649"
-msgid "Subtitle color"
-msgstr "字幕颜色"
-
-msgctxt "#30650"
-msgid "Yellow"
-msgstr "黄色"
-
-msgctxt "#30651"
-msgid "White"
-msgstr "白色"
-
-msgctxt "#30652"
-msgid "Cyan"
-msgstr "青色"
-
-msgctxt "#30653"
-msgid "Green"
-msgstr "绿色"
-
-msgctxt "#30654"
-msgid "Orange"
-msgstr "橙色"
-
-msgctxt "#30655"
-msgid "Pink"
-msgstr "粉色"
-
-msgctxt "#30656"
-msgid "Red"
-msgstr "红色"
-
-msgctxt "#30657"
-msgid "Light blue"
-msgstr "浅蓝色"
-
-msgctxt "#30658"
-msgid "Custom (type the color below)"
-msgstr "自定义（在下方输入颜色）"
-
-msgctxt "#30659"
-msgid "Custom color (RRGGBB, e.g. FF8800)"
-msgstr "自定义颜色（RRGGBB，例如 FF8800）"
-
-msgctxt "#30660"
-msgid "Convert for audio in all languages"
-msgstr "所有语言的音频都转换"
-
-msgctxt "#30661"
-msgid "Convert when the audio is: language 1"
-msgstr "当音频为以下语言时转换：语言 1"
-
-msgctxt "#30662"
-msgid "Convert when the audio is: language 2"
-msgstr "当音频为以下语言时转换：语言 2"
-
-msgctxt "#30663"
-msgid "Convert when the audio is: language 3"
-msgstr "当音频为以下语言时转换：语言 3"
-
-msgctxt "#30664"
-msgid "Convert when the audio is: language 4"
-msgstr "当音频为以下语言时转换：语言 4"
-
-msgctxt "#30665"
-msgid "Convert when the audio is: language 5"
-msgstr "当音频为以下语言时转换：语言 5"
-
-msgctxt "#30666"
-msgid "Convert when the audio is: language 6"
-msgstr "当音频为以下语言时转换：语言 6"
-
-msgctxt "#30667"
-msgid "Convert when the audio is: language 7"
-msgstr "当音频为以下语言时转换：语言 7"
-
-msgctxt "#30668"
-msgid "Convert when the audio is: language 8"
-msgstr "当音频为以下语言时转换：语言 8"
-
-msgctxt "#30669"
-msgid "Convert when the audio is: language 9"
-msgstr "当音频为以下语言时转换：语言 9"
-
-msgctxt "#30670"
-msgid "Convert when the audio is: language 10"
-msgstr "当音频为以下语言时转换：语言 10"
-
-msgctxt "#30671"
-msgid "Pick the color from a color chart..."
-msgstr "从色卡中选择颜色..."
-
-msgctxt "#30672"
-msgid "Subtitle color set to {0}"
-msgstr "字幕颜色已设为 {0}"
-
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr "将所有设置写入Kodi日志（用于错误报告）"
-
-msgctxt "#30674"
-msgid "Seek back after a late subtitle switch (Kodi 19-21)"
-msgstr "检测到字幕切换较晚时回退（Kodi 19-21）"
-
-msgctxt "#30675"
-msgid "Seconds to seek back"
-msgstr "回退秒数"

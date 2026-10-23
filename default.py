@@ -20,7 +20,6 @@ from prefsettings import settings
 from prefutils import LangPref_Monitor
 from prefutils import LangPrefMan_Player
 from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
-import subconvert
 
 settings = settings()
 
@@ -29,10 +28,6 @@ settings = settings()
 class Main:
     def __init__(self):
         self._init_vars()
-        # the converted subtitles of the sub converter only live until the next start of Kodi
-        removed = subconvert.clean_folder(__user_data_path__, lambda msg: log(LOG_INFO, msg))
-        if removed:
-            log(LOG_INFO, 'Sub converter: {0} converted subtitle(s) of the last session removed'.format(removed))
         if not settings.service_enabled:
             log(LOG_INFO, "Service not enabled")
 
@@ -91,29 +86,11 @@ def check_installation():
     xbmcgui.Dialog().textviewer(__addonname__ + ' - installation check', text)
 
 
-def pick_color():
-    """Settings button: a color chart for the text color of the sub converter (see colorpick.py)."""
-    import colorpick
-    current, _valid = subconvert.resolve_color(__addon__.getSetting('subConverterColor'),
-                                               __addon__.getSetting('subConverterColorHex'))
-    heading = __addon__.getLocalizedString(30649)
-    labels = [__addon__.getLocalizedString(30650 + n) for n in range(len(subconvert.COLOR_PRESETS))]
-    color = colorpick.choose(xbmcgui.Dialog(), heading, current, labels)
-    if not color:
-        return
-    colorpick.store(__addon__, color)
-    log(LOG_INFO, 'Sub converter: text color set to {0}'.format(color))
-    xbmcgui.Dialog().notification(__addonname__, __addon__.getLocalizedString(30672).format(color),
-                                  __addonIconFile__, 3000)
-
-
 # Allow this to be called as a script with parameters
 if len(sys.argv) > 1 and sys.argv[1] == 'show_overrides':
     from resources.lib.override_preference_dialog import *
 elif len(sys.argv) > 1 and sys.argv[1] == 'check_install':
     check_installation()
-elif len(sys.argv) > 1 and sys.argv[1] == 'pick_color':
-    pick_color()
 elif __name__ == "__main__":
     if xbmcgui.Window(10000).getProperty(__addonid__ + '_isrunning') == 'True':
         log(LOG_INFO, 'service {0} version {1} is already started. Doing nothing.'.format(__addonname__, __addonversion__))

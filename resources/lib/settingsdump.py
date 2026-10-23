@@ -6,7 +6,7 @@ import xbmcaddon
 import xbmcvfs
 
 # settings without a value of their own (buttons)
-_SKIPPED = ('checkInstallation', 'subConverterColorPick')
+_SKIPPED = ('checkInstallation',)
 
 
 def setting_ids(settings_xml):

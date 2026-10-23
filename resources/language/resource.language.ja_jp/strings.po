@@ -541,10 +541,6 @@ msgctxt "#30614"
 msgid "The stored preference could not be removed. Please try again."
 msgstr "保存された設定を削除できませんでした。もう一度お試しください。"
 
-msgctxt "#30620"
-msgid "Sub converter: puts the selected text subtitle at the top of the screen, clear of burned-in subtitles. ASS/SSA keeps its styles, fonts and signs, with the bottom lines moved to the top; SRT and WebVTT become SRT text in the chosen color. Works on any subtitle, whichever setting selected it"
-msgstr "字幕コンバーター：選択したテキスト字幕を画面の上部に移動し、映像に焼き込まれた字幕と重ならないようにします。ASS/SSA はスタイル、フォント、看板文字を保持したまま下部の行を上部へ移動し、SRT と WebVTT は選択した色の SRT になります。どの設定で選ばれた字幕でも動作します"
-
 msgctxt "#30630"
 msgid "Subtitle format preference (when several subtitles of the preferred language are available, the first format of this list that is present is taken; formats of embedded .mkv tracks and of subtitle files next to the video are known)"
 msgstr "字幕フォーマットの優先順位（優先言語の字幕が複数ある場合は、このリストで最初に見つかったフォーマットを選びます。埋め込みの .mkv トラックと、動画と同じフォルダーにある字幕ファイルのフォーマットを判別できます）"
@@ -617,114 +613,6 @@ msgctxt "#30647"
 msgid "Installation"
 msgstr "インストール"
 
-msgctxt "#30648"
-msgid "Sub converter"
-msgstr "字幕コンバーター"
-
-msgctxt "#30649"
-msgid "Subtitle color"
-msgstr "字幕の色"
-
-msgctxt "#30650"
-msgid "Yellow"
-msgstr "黄色"
-
-msgctxt "#30651"
-msgid "White"
-msgstr "白"
-
-msgctxt "#30652"
-msgid "Cyan"
-msgstr "シアン"
-
-msgctxt "#30653"
-msgid "Green"
-msgstr "緑"
-
-msgctxt "#30654"
-msgid "Orange"
-msgstr "オレンジ"
-
-msgctxt "#30655"
-msgid "Pink"
-msgstr "ピンク"
-
-msgctxt "#30656"
-msgid "Red"
-msgstr "赤"
-
-msgctxt "#30657"
-msgid "Light blue"
-msgstr "水色"
-
-msgctxt "#30658"
-msgid "Custom (type the color below)"
-msgstr "カスタム（下に色を入力）"
-
-msgctxt "#30659"
-msgid "Custom color (RRGGBB, e.g. FF8800)"
-msgstr "カスタム色（RRGGBB、例：FF8800）"
-
-msgctxt "#30660"
-msgid "Convert for audio in all languages"
-msgstr "すべての言語の音声で変換する"
-
-msgctxt "#30661"
-msgid "Convert when the audio is: language 1"
-msgstr "音声が次の場合に変換：言語 1"
-
-msgctxt "#30662"
-msgid "Convert when the audio is: language 2"
-msgstr "音声が次の場合に変換：言語 2"
-
-msgctxt "#30663"
-msgid "Convert when the audio is: language 3"
-msgstr "音声が次の場合に変換：言語 3"
-
-msgctxt "#30664"
-msgid "Convert when the audio is: language 4"
-msgstr "音声が次の場合に変換：言語 4"
-
-msgctxt "#30665"
-msgid "Convert when the audio is: language 5"
-msgstr "音声が次の場合に変換：言語 5"
-
-msgctxt "#30666"
-msgid "Convert when the audio is: language 6"
-msgstr "音声が次の場合に変換：言語 6"
-
-msgctxt "#30667"
-msgid "Convert when the audio is: language 7"
-msgstr "音声が次の場合に変換：言語 7"
-
-msgctxt "#30668"
-msgid "Convert when the audio is: language 8"
-msgstr "音声が次の場合に変換：言語 8"
-
-msgctxt "#30669"
-msgid "Convert when the audio is: language 9"
-msgstr "音声が次の場合に変換：言語 9"
-
-msgctxt "#30670"
-msgid "Convert when the audio is: language 10"
-msgstr "音声が次の場合に変換：言語 10"
-
-msgctxt "#30671"
-msgid "Pick the color from a color chart..."
-msgstr "カラーチャートから色を選ぶ..."
-
-msgctxt "#30672"
-msgid "Subtitle color set to {0}"
-msgstr "字幕の色を {0} に設定しました"
-
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr "すべての設定をKodiのログに書き込む（不具合報告用）"
-
-msgctxt "#30674"
-msgid "Seek back after a late subtitle switch (Kodi 19-21)"
-msgstr "字幕の切り替えが遅れて検出された後に巻き戻す（Kodi 19-21）"
-
-msgctxt "#30675"
-msgid "Seconds to seek back"
-msgstr "巻き戻す秒数"

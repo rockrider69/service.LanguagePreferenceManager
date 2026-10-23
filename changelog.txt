@@ -2,15 +2,9 @@
 
 This beta builds on 1.1.1Beta1; the changes are listed below.
 
-- Sub converter: the video is read once for all its text subtitle tracks (ASS/SSA, SRT, WebVTT), not once per
-  track. Switching to another subtitle of the same video, also while the first read is still running, then needs no
-  second read of the file: the copy is made at once. The log shows the progress of a long read (part of the file,
-  MB/s, time left) and when the earlier read is reused.
-- Sub converter, new setting "Seek back after a late subtitle switch (Kodi 19-21)" (on by default, 3 s, 1-10 s): Kodi
-  before 22 does not announce a subtitle the user picks during the playback, so it is converted at the next pause or
-  resume; playback then goes back by that many seconds, so the lines that were shown in the original style are shown
-  again, converted. Not after a seek of the user, and not on Kodi 22 (the change is announced at once).
-- The sub converter log now says plainly what it did and why: "accepted", "skipped - <reason>", "delayed", "done".
+- The part that tells the format of a subtitle (the codec of an embedded track read from the Matroska header, the
+  extension of a file, a format word in a title) for the subtitle format preference is its own small module,
+  subformat.py.
 - New General setting "Write all settings to the Kodi log (for bug reports)": when on, every add-on setting is written
   to the Kodi log at the start of the service, when a setting changes and at the start of each playback, whatever
   the log level is, so a log shows the exact settings next to the preference flow.
@@ -37,23 +31,12 @@ This beta builds on 1.1.1Beta1; the changes are listed below.
 - Fixed: the log no longer shows "Language setting AudioLang07 .. 12 has no valid value" at start (the settings have 6 audio preferences).
 - Added: a track title with "Parisian", "Parisien" or "Parisienne" (e.g. French (Parisian)) is read as French from France (fr-FR).
 - Changed: after LPM switches the audio at the start, the conditional subtitle rules are no longer evaluated a second time when the first evaluation already used the switched audio track (same result, one log block less).
-- Sub converter: new group "Sub converter" in the General settings. The text color is now your choice (yellow, white, cyan, green, orange, pink, red, light blue, or any color typed as RRGGBB, or picked from a color chart with the button "Pick the color from a color chart..." (Kodi 21 and newer; an older Kodi shows the list of the preset colors); yellow stays the default; ASS/SSA subtitles keep their own styles).
-- Sub converter: the audio languages it works for are your choice: up to 10 languages, or the new "Convert for audio in all languages" toggle. Japanese, Korean and Chinese stay the default, so nothing changes unless you change it.
-- Sub converter: it no longer needs the regex filter or the conditional rules: it converts the selected subtitle whichever setting selected it (subtitle preferences, a stored preference, the file name, the regex filter, the conditional rules, or you). It also runs when only the sub converter is turned on. A subtitle you switch on, off or to another track during the playback is converted at once on Kodi 22 and newer, which announces such changes to the add-on (Player.OnPropertyChanged): the sub converter does no polling. On older Kodi it is looked at when Kodi reports a stream change, a pause, a resume or a seek.
-- Fixed: sub converter: a subtitle you pick a few seconds after another one was converted was ignored (the add-on ignored every change for 5-8 seconds after a conversion, so it stayed unconverted). Now only the converter's own copy is ignored.
 - Subtitle changes: the add-on reads the Kodi version (System.BuildVersion) and logs how it follows subtitle changes: announced by Kodi from version 22 (no subtitle watcher thread at all there), looked at when Kodi reports a stream change, pause, resume or seek on older Kodi (the existing watcher thread then only stores your subtitle changes as the preference of the media, every 10 seconds, as before). A change that happens just after a change made by the add-on is looked at when that is over, no longer dropped.
-- Sub converter: faster after a subtitle you pick: the add-on now takes about 0.4 seconds (was about 1.1) from your switch to handing the converted copy to Kodi (shorter wait before it looks at the change: 0.15 s instead of 0.4 s, and 0.1 s instead of 0.5 s before it starts; the longer wait stays after a subtitle the add-on selected itself). The first conversion of a track still reads the whole file.
-- Sub converter: it talks to Kodi about the streams over the JSON-RPC interface (new kodirpc.py): the playing file (Player.GetItem), loading the converted subtitle file (Player.AddSubtitle), subtitles on / off (Player.SetSubtitle), the screen and picture size (XBMC.GetInfoLabels), whether a video plays (Player.GetActivePlayers). All of them exist since Kodi 19. The same JSON-RPC lookup of the playing file is used for the file-name preferences, the external subtitle files and the subtitle format preference.
 - Changed: the regex subtitle filter now respects the preferred subtitle language and format. Among the tracks the regex matches, it takes the language of the conditional rule for the playing audio (else the subtitle preferences), then the best format (the rule's 1st/2nd/3rd choice or the general order); the forced/default/original flags and "forced" names do not count there. If no matching track is in a preferred language, the filter works as before (ASS first, forced tracks deferred).
 - New: every conditional subtitle rule (settings, Conditional Subtitle Preferences) has its own "Subtitle format for this rule" choice:
   the general order (default), or the 1st / 2nd / 3rd preferred format of the General settings put first for that rule only
   (the other formats follow in the general order; if the chosen format is not present the order still applies). In the custom
   rule field add -f1, -f2 or -f3 to the subtitle language, e.g. jpn:eng-f2 or jpn:eng-f3-ff.
-- fix: sub converter: it now also runs when you switch subtitles by hand during the playback (to another ASS, WebVTT ... track of the
-  video), not only at the start and after an audio change. A switch made while an earlier conversion is still running is
-  converted as soon as that one ends; a copy already made for a track is reused.
-- fix: sub converter: embedded SRT subtitles are converted as well (they were skipped): yellow, at the top; italic / bold / underline
-  are kept, lines with a position or a non-bottom alignment tag keep their place.
 - fix: subtitle format preference with external subtitle files. Two files of one language and name (Movie.en.ass and Movie.en.srt,
   Movie.en.ass and Movie.en.sup) could not be told apart, their format stayed unknown and an embedded PGS (.sup) track of the
   video won over a preferred ASS file. Kodi lists such files in the reverse of the folder's listing order; the tracks are now
@@ -67,7 +50,6 @@ This beta builds on 1.1.1Beta1; the changes are listed below.
 - fix: on the initial run the conditional subtitle rules are matched against the audio track LPM has just switched to,
   not the track Kodi started on (often the default-flagged one) while the switch is still pending.
 - Language codes can be typed as 2-letter, 3-letter or BCP47 codes everywhere (custom preferences, Original audio list).
-- New "Sub converter" for ASS/SSA and other text subtitles: lines are moved to the top, keeping styles and positions.
 - Reworked seekback / "Fast Subtitles Display" ("Start & Resume" by default).
 - Regex subtitle filter fixes (first match, no false "Signs & Songs" matches).
 - The language of external subtitles is read from their file names; stored preferences save region and track title
@@ -83,26 +65,15 @@ Details (newest first):
 - fix: conditional audio rules "Undefined" / "Unknown" no longer take a track whose title names a language (an untagged track titled "Japanese" matches the Japanese rule), nor a tagged track that has "unknown" in its title.
 
 
-- change: sub converter: an ASS/SSA subtitle is no longer turned into plain SRT. The copy is an .ass file with the track's own header (styles, fonts, colours) and every line's tags untouched; only lines at the bottom (alignment 1-3 from the style or an \an tag, with no \pos or one in the lower part of the picture) go to the top, a \pos line is mirrored. Signs, songs, effects and anything placed elsewhere stay where they are. Other text formats (WebVTT) still become yellow SRT at the top
 
-- change: sub converter: the file is read in large sequential blocks (4 MB) instead of one small read per video/audio block, the way a demuxer such as ffmpeg reads it. Over http a 1.8 GB file went from tens of thousands of requests to a few hundred; locally the scan takes under a second on PC, nvidia shield based devices avg 5-90seconds dependening on filesize of playback, no interaction required will automatically work once rendered. 
 
-- change: sub converter: tested with a video served over http and with an add-on (plugin://) item that resolves to an http address, also with '|' headers; the converted copy's name and the log no longer contain the headers, query string or user:password of the address
 - note: it reads the file through Kodi's file layer, so nfs://, smb://, http(s):// and plugin streams that resolve to a Matroska (.mkv) file work; streams that are not a plain Matroska file (HLS, DASH, MP4) are logged as unreadable
 
-- fix: sub converter: while it reads the video (the first time, a big file takes a minute or more) a subtitle change by the user was ignored by the watcher; now it is seen and stored as usual, and the converted copy is not selected over the user's choice
-- change: sub converter: the log now says (INFO) when a conversion starts and why a video cannot be converted (not a readable Matroska file, e.g. a plugin stream)
 
-- reworked sub converter to keep font & styling insteas pf converting to srt.
-- change: sub converter: it now converts whenever the subtitle LPM selected is any text non picture based example :  SRT (ASS/SSA, WebVTT), with the same placement: lines that are positioned keep their place, the rest goes to the top, all in yellow
 - note: PGS/SUP, VobSub and other picture subtitles are bitmaps; they cannot be turned into text without OCR, which Kodi add-ons do not have, so they are left as they are (the log says so)
 
-- change: sub converter: it now works whenever the subtitle LPM selected is an ASS/SSA track, even if the video also has SRT, PGS or other subtitle tracks (before, every subtitle had to be ASS)
-- change: sub converter: a line that the ASS file positions with a point (\pos / \move) is placed at that exact spot on the screen, moved from the script's resolution into the picture's place on the screen (also for films with black bars); lines with an alignment tag or a non-bottom style keep that alignment
 
-- change: sub converter: only the lines the ASS file does not position itself (the usual bottom-centre dialogue) are moved to the top. A line that says where it goes, with an alignment tag, a \pos / \move, or a style that is not bottom centre (signs, top-style lines), keeps its place; every line stays yellow plain text
 
-- new: "Sub converter" (shown with the regex subtitle filter or the conditional subtitles): with Japanese, Korean or Chinese audio and nothing but ASS/SSA subtitles in the video, the subtitle LPM selected is copied to a plain SRT (ASS styling removed, timings converted), shown at the top of the picture in yellow, and that copy is selected. It is made in the background from the Matroska (.mkv) file and kept in the add-on's own folder (converted_subs), which is emptied every time Kodi starts. Videos with any other subtitle format (SRT, PGS ...) are left alone
 
 - change: the regex subtitle filter looks at every subtitle in track order and takes the first match (it says which tracks matched in the log); when several tracks match and some are ASS (the format with the styled signs & songs), the first ASS track is taken. The format is read from the video's header, for Matroska (.mkv) files; other containers keep the first match
 - change: the regex exclusion pattern no longer removes a subtitle in which the filter matched a whole word: "Signs and Song Subtitles" or "Forced Subtitles" are kept, only a piece of a word ("titles" in "Subtitles") is still excluded

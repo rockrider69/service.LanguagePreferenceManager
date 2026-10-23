@@ -541,10 +541,6 @@ msgctxt "#30614"
 msgid "The stored preference could not be removed. Please try again."
 msgstr "Non è stato possibile rimuovere la preferenza salvata. Riprova."
 
-msgctxt "#30620"
-msgid "Sub converter: puts the selected text subtitle at the top of the screen, clear of burned-in subtitles. ASS/SSA keeps its styles, fonts and signs, with the bottom lines moved to the top; SRT and WebVTT become SRT text in the chosen color. Works on any subtitle, whichever setting selected it"
-msgstr "Convertitore di sottotitoli: porta il sottotitolo di testo scelto in alto sullo schermo, lontano dai sottotitoli incorporati nel video. L'ASS/SSA mantiene stili, caratteri e cartelli, le righe in basso passano in alto; SRT e WebVTT diventano SRT nel colore scelto. Funziona con qualsiasi sottotitolo, qualunque impostazione lo abbia scelto"
-
 msgctxt "#30630"
 msgid "Subtitle format preference (when several subtitles of the preferred language are available, the first format of this list that is present is taken; formats of embedded .mkv tracks and of subtitle files next to the video are known)"
 msgstr "Preferenza del formato dei sottotitoli (quando sono disponibili più sottotitoli nella lingua preferita, viene scelto il primo formato di questo elenco che è presente; vengono riconosciuti i formati delle tracce .mkv incorporate e dei file di sottotitoli accanto al video)"
@@ -617,114 +613,6 @@ msgctxt "#30647"
 msgid "Installation"
 msgstr "Installazione"
 
-msgctxt "#30648"
-msgid "Sub converter"
-msgstr "Convertitore di sottotitoli"
-
-msgctxt "#30649"
-msgid "Subtitle color"
-msgstr "Colore dei sottotitoli"
-
-msgctxt "#30650"
-msgid "Yellow"
-msgstr "Giallo"
-
-msgctxt "#30651"
-msgid "White"
-msgstr "Bianco"
-
-msgctxt "#30652"
-msgid "Cyan"
-msgstr "Ciano"
-
-msgctxt "#30653"
-msgid "Green"
-msgstr "Verde"
-
-msgctxt "#30654"
-msgid "Orange"
-msgstr "Arancione"
-
-msgctxt "#30655"
-msgid "Pink"
-msgstr "Rosa"
-
-msgctxt "#30656"
-msgid "Red"
-msgstr "Rosso"
-
-msgctxt "#30657"
-msgid "Light blue"
-msgstr "Azzurro"
-
-msgctxt "#30658"
-msgid "Custom (type the color below)"
-msgstr "Personalizzato (scrivi il colore qui sotto)"
-
-msgctxt "#30659"
-msgid "Custom color (RRGGBB, e.g. FF8800)"
-msgstr "Colore personalizzato (RRGGBB, es. FF8800)"
-
-msgctxt "#30660"
-msgid "Convert for audio in all languages"
-msgstr "Converti per l'audio in tutte le lingue"
-
-msgctxt "#30661"
-msgid "Convert when the audio is: language 1"
-msgstr "Converti quando l'audio è: lingua 1"
-
-msgctxt "#30662"
-msgid "Convert when the audio is: language 2"
-msgstr "Converti quando l'audio è: lingua 2"
-
-msgctxt "#30663"
-msgid "Convert when the audio is: language 3"
-msgstr "Converti quando l'audio è: lingua 3"
-
-msgctxt "#30664"
-msgid "Convert when the audio is: language 4"
-msgstr "Converti quando l'audio è: lingua 4"
-
-msgctxt "#30665"
-msgid "Convert when the audio is: language 5"
-msgstr "Converti quando l'audio è: lingua 5"
-
-msgctxt "#30666"
-msgid "Convert when the audio is: language 6"
-msgstr "Converti quando l'audio è: lingua 6"
-
-msgctxt "#30667"
-msgid "Convert when the audio is: language 7"
-msgstr "Converti quando l'audio è: lingua 7"
-
-msgctxt "#30668"
-msgid "Convert when the audio is: language 8"
-msgstr "Converti quando l'audio è: lingua 8"
-
-msgctxt "#30669"
-msgid "Convert when the audio is: language 9"
-msgstr "Converti quando l'audio è: lingua 9"
-
-msgctxt "#30670"
-msgid "Convert when the audio is: language 10"
-msgstr "Converti quando l'audio è: lingua 10"
-
-msgctxt "#30671"
-msgid "Pick the color from a color chart..."
-msgstr "Scegli il colore da una tavolozza..."
-
-msgctxt "#30672"
-msgid "Subtitle color set to {0}"
-msgstr "Colore dei sottotitoli impostato su {0}"
-
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr "Scrivi tutte le impostazioni nel log di Kodi (per le segnalazioni di errori)"
-
-msgctxt "#30674"
-msgid "Seek back after a late subtitle switch (Kodi 19-21)"
-msgstr "Riavvolgi dopo un cambio di sottotitolo rilevato in ritardo (Kodi 19-21)"
-
-msgctxt "#30675"
-msgid "Seconds to seek back"
-msgstr "Secondi di riavvolgimento"
