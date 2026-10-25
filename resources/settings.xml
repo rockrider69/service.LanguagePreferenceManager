@@ -18,6 +18,10 @@
                     </constraints>
                     <control type="spinner" format="string"/>
                 </setting>
+                <setting id="logSettings" label="30673" type="boolean">
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
             </group>
             <group id="2" label="30115">
                 <setting id="turnSubsOn" label="30113" type="boolean">
@@ -88,18 +92,6 @@
                     </control>
                     <dependencies>
                         <dependency type="visible" setting="regexSubExclusionEnabled" operator="is">true</dependency>
-                    </dependencies>
-                </setting>
-                <setting id="subConverter" label="30620" type="boolean">
-                    <default>false</default>
-                    <control type="toggle"/>
-                    <dependencies>
-                        <dependency type="visible">
-                            <or>
-                                <condition setting="regexSubFilter" operator="is">true</condition>
-                                <condition setting="enableCondSub" operator="is">true</condition>
-                            </or>
-                        </dependency>
                     </dependencies>
                 </setting>
             </group>

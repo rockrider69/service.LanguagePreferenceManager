@@ -1,7 +1,8 @@
 import xbmc, xbmcaddon
 import re
 import langutils
-import subcodec
+import settingsdump
+import subformat
 from prefparser import PrefParser
 from resources.lib import kodi_utils
 from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
@@ -77,6 +78,12 @@ class settings():
                          self.regex_sub_filter_enabled
                         )
                  )
+        self.dump_settings()
+
+    def dump_settings(self):
+        # for bug reports: every setting in the log, whatever the log level (the 'logSettings' toggle)
+        if getattr(self, 'log_settings', False):
+            settingsdump.write()
 
     def readPrefs(self):
         addon = xbmcaddon.Addon()    
@@ -99,7 +106,7 @@ class settings():
         self.turn_subs_on = addon.getSetting('turnSubsOn') == 'true'
         self.turn_subs_off = addon.getSetting('turnSubsOff') == 'true'
         self.ignore_signs_on = addon.getSetting('signs') == 'true'
-        self.sub_converter_on = addon.getSetting('subConverter') == 'true'
+        self.log_settings = addon.getSetting('logSettings') == 'true'
         self.regex_sub_filter_enabled = addon.getSetting('regexSubFilter') == 'true'
         self.regex_sub_pattern = addon.getSetting('regexSubPattern')
         if _OLD_SS_PATTERN in self.regex_sub_pattern:
@@ -146,7 +153,7 @@ class settings():
         else:
             self.audio_keyword_blacklist = []
         self.fast_subs_display = int(addon.getSetting('FastSubsDisplay'))
-        # preferred subtitle formats, best first (names of subcodec.SUBTITLE_FORMATS); [] = no preference
+        # preferred subtitle formats, best first (names of subformat.SUBTITLE_FORMATS); [] = no preference
         self.sub_format_order = []
         # the format of each of the three slots (1st, 2nd, 3rd), None for an empty slot: a conditional rule can
         # choose one of them as its own first choice (CondSubFormat01..12)
@@ -156,10 +163,10 @@ class settings():
                 number = int(addon.getSetting(setting) or 0)
             except ValueError:
                 number = 0
-            if 1 <= number <= len(subcodec.SUBTITLE_FORMATS):
-                self.sub_format_slots[slot] = subcodec.SUBTITLE_FORMATS[number - 1]
-                if subcodec.SUBTITLE_FORMATS[number - 1] not in self.sub_format_order:
-                    self.sub_format_order.append(subcodec.SUBTITLE_FORMATS[number - 1])
+            if 1 <= number <= len(subformat.SUBTITLE_FORMATS):
+                self.sub_format_slots[slot] = subformat.SUBTITLE_FORMATS[number - 1]
+                if subformat.SUBTITLE_FORMATS[number - 1] not in self.sub_format_order:
+                    self.sub_format_order.append(subformat.SUBTITLE_FORMATS[number - 1])
         self.useFilename = addon.getSetting('useFilename') == 'true'
         self.filenameRegex = addon.getSetting('filenameRegex')
         if self.useFilename:

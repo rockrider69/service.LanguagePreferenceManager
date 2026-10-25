@@ -541,10 +541,6 @@ msgctxt "#30614"
 msgid "The stored preference could not be removed. Please try again."
 msgstr "保存された設定を削除できませんでした。もう一度お試しください。"
 
-msgctxt "#30620"
-msgid "Sub converter (Japanese, Korean or Chinese audio when the selected subtitle is ASS/SSA: a copy with its styles, fonts and signs kept and the bottom lines moved to the top; other text formats other than SRT become plain yellow SRT at the top)"
-msgstr "字幕コンバーター（日本語・韓国語・中国語の音声で選択された字幕がASS/SSAの場合：スタイル・フォント・看板を保持し、下部の行を上部へ移動したコピー。SRT以外のその他のテキスト形式は上部の黄色いSRTに変換）"
-
 msgctxt "#30630"
 msgid "Subtitle format preference (when several subtitles of the preferred language are available, the first format of this list that is present is taken; formats of embedded .mkv tracks and of subtitle files next to the video are known)"
 msgstr "字幕フォーマットの優先順位（優先言語の字幕が複数ある場合は、このリストで最初に見つかったフォーマットを選びます。埋め込みの .mkv トラックと、動画と同じフォルダーにある字幕ファイルのフォーマットを判別できます）"
@@ -616,3 +612,7 @@ msgstr "インストールを確認（古いコピーまたは重複したコピ
 msgctxt "#30647"
 msgid "Installation"
 msgstr "インストール"
+
+msgctxt "#30673"
+msgid "Write all settings to the Kodi log (for bug reports)"
+msgstr "すべての設定をKodiのログに書き込む（不具合報告用）"
