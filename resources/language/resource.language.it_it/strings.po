@@ -616,3 +616,39 @@ msgstr "Installazione"
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr "Scrivi tutte le impostazioni nel log di Kodi (per le segnalazioni di errori)"
+
+msgctxt "#30680"
+msgid "Regex profile for subtitle filtering"
+msgstr "Profilo regex per filtrare i sottotitoli"
+
+msgctxt "#30681"
+msgid "Anime & forced foreign subtitles"
+msgstr "Anime e sottotitoli stranieri forzati"
+
+msgctxt "#30682"
+msgid "Anime & foreign subtitles, not forced"
+msgstr "Anime e sottotitoli stranieri, non forzati"
+
+msgctxt "#30683"
+msgid "Regex pattern for subtitle filtering (anime & foreign, not forced)"
+msgstr "Motivo regex per filtrare i sottotitoli (anime e stranieri, non forzati)"
+
+msgctxt "#30684"
+msgid "Additional words (comma separated)"
+msgstr "Parole aggiuntive (separate da virgole)"
+
+msgctxt "#30685"
+msgid "Match added words as whole words only"
+msgstr "Cerca le parole aggiunte solo come parole intere"
+
+msgctxt "#30686"
+msgid "Words to add to this profile, separated by commas; spaces around the commas are ignored, for example: karaoke, commentary. They are used in addition to the built-in pattern of this profile. The built-in pattern is not changed - only the words you add here."
+msgstr "Parole da aggiungere a questo profilo, separate da virgole; gli spazi attorno alle virgole vengono ignorati, ad esempio: karaoke, commentary. Vengono usate in aggiunta al motivo integrato di questo profilo. Il motivo integrato non viene modificato - solo le parole che aggiungi qui."
+
+msgctxt "#30687"
+msgid "On: an added word must be a whole word in the track name (\"non\" does not match \"Nonna\"). Off: an added word matches anywhere in the name. This only affects the words you add; the built-in pattern is not changed."
+msgstr "Attivo: una parola aggiunta deve essere una parola intera nel titolo della traccia (\"non\" non corrisponde a \"Nonna\"). Disattivo: una parola aggiunta corrisponde ovunque nel nome. Riguarda solo le parole aggiunte; il motivo integrato non viene modificato."
+
+msgctxt "#30688"
+msgid "Advanced: the built-in pattern of this profile (regular expression). Leave it as it is to use the built-in words; the added words above are used in addition to it. If you edit it, your pattern replaces the built-in one."
+msgstr "Avanzato: il motivo integrato di questo profilo (espressione regolare). Lascialo com'è per usare le parole integrate; le parole aggiunte sopra si sommano. Se lo modifichi, il tuo motivo sostituisce quello integrato."

@@ -616,3 +616,39 @@ msgstr "インストール"
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr "すべての設定をKodiのログに書き込む（不具合報告用）"
+
+msgctxt "#30680"
+msgid "Regex profile for subtitle filtering"
+msgstr "字幕フィルター用の正規表現プロファイル"
+
+msgctxt "#30681"
+msgid "Anime & forced foreign subtitles"
+msgstr "アニメと強制外国語字幕"
+
+msgctxt "#30682"
+msgid "Anime & foreign subtitles, not forced"
+msgstr "アニメと外国語字幕(強制を除く)"
+
+msgctxt "#30683"
+msgid "Regex pattern for subtitle filtering (anime & foreign, not forced)"
+msgstr "字幕フィルター用の正規表現パターン(アニメと外国語、強制を除く)"
+
+msgctxt "#30684"
+msgid "Additional words (comma separated)"
+msgstr "追加する単語(カンマ区切り)"
+
+msgctxt "#30685"
+msgid "Match added words as whole words only"
+msgstr "追加した単語を完全な単語としてのみ照合する"
+
+msgctxt "#30686"
+msgid "Words to add to this profile, separated by commas; spaces around the commas are ignored, for example: karaoke, commentary. They are used in addition to the built-in pattern of this profile. The built-in pattern is not changed - only the words you add here."
+msgstr "このプロファイルに追加する単語をカンマで区切って入力します。カンマの前後の空白は無視されます(例: karaoke, commentary)。このプロファイルの組み込みパターンに加えて使用されます。組み込みパターンは変更されず、ここで追加した単語だけが対象です。"
+
+msgctxt "#30687"
+msgid "On: an added word must be a whole word in the track name (\"non\" does not match \"Nonna\"). Off: an added word matches anywhere in the name. This only affects the words you add; the built-in pattern is not changed."
+msgstr "オン: 追加した単語はトラック名の中で完全な単語である必要があります(「non」は「Nonna」に一致しません)。オフ: 追加した単語は名前のどこにでも一致します。追加した単語にのみ影響し、組み込みパターンは変更されません。"
+
+msgctxt "#30688"
+msgid "Advanced: the built-in pattern of this profile (regular expression). Leave it as it is to use the built-in words; the added words above are used in addition to it. If you edit it, your pattern replaces the built-in one."
+msgstr "詳細設定: このプロファイルの組み込みパターン(正規表現)です。組み込みの単語を使うにはそのままにしてください。上で追加した単語はこれに加えて使用されます。編集すると、あなたのパターンが組み込みのものに置き換わります。"

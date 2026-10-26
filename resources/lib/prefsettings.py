@@ -1,6 +1,7 @@
 import xbmc, xbmcaddon
 import re
 import langutils
+import regexwords
 import settingsdump
 import subformat
 from prefparser import PrefParser
@@ -10,6 +11,13 @@ from logger import log, LOG_NONE, LOG_INFO, LOG_DEBUG, LOG_ERROR
 # Signs & Songs part of the subtitle regex pattern ("S&S", "S + S", "S and S", "S.S"): the two s stand alone
 _OLD_SS_PATTERN = r's[\s._+\-\/\\]*(?:&|\+)?[\s._+\-\/\\]*s|'
 _SS_PATTERN = r'(?<![^\W\d_])s[\s._+\-\/\\]*(?:&|\+|and)?[\s._+\-\/\\]*s(?![^\W\d_])|'
+
+
+# the profiles of the regex subtitle filter and the setting that holds the pattern of each
+REGEX_PROFILES = ('anime & forced foreign subtitles', 'anime & foreign subtitles, not forced')
+REGEX_PATTERN_SETTINGS = ('regexSubPattern', 'regexSubPatternNoForced')
+REGEX_WORDS_SETTINGS = ('regexSubWords', 'regexSubWordsNoForced')               # the words the user adds to a profile
+REGEX_WHOLE_WORD_SETTINGS = ('regexSubWholeWord', 'regexSubWholeWordNoForced')   # ... as whole words only, or anywhere
 
 
 class settings():
@@ -75,15 +83,48 @@ class settings():
                          ','.join(self.audio_keyword_blacklist),
                          self.fast_subs_display,
                          ','.join(self.audio_original_preflist),
-                         self.regex_sub_filter_enabled
+                         '{0} (profile: {1})'.format(self.regex_sub_filter_enabled, REGEX_PROFILES[self.regex_sub_profile])
                         )
                  )
-        self.dump_settings()
+        if not getattr(self, 'settings_remembered', False):
+            self.settings_remembered = True
+            settingsdump.remember()                  # what a later change is compared with
+
+    def choices_text(self, changed=None):
+        """What the settings mean together, in words, for the dump: the order of the subtitle formats, the regex
+        profile and its pattern. changed: the ids that changed (only the lines they affect), None for all."""
+        lines = []
+        if changed is None or any(i.startswith('SubFormat') or i.startswith('CondSubFormat') for i in changed):
+            order = getattr(self, 'sub_format_order', [])
+            lines.append('subtitle format preference: {0}'.format(
+                ' > '.join(subformat.format_label(f) for f in order) if order else 'none (the first matching track)'))
+        if changed is None or any(i.startswith('regexSub') for i in changed):
+            if getattr(self, 'regex_sub_filter_enabled', False):
+                words = getattr(self, 'regex_sub_words', [])
+                lines.append('regex subtitle filter: on, profile "{0}", pattern {1}{2}{3}'.format(
+                    REGEX_PROFILES[getattr(self, 'regex_sub_profile', 0)], getattr(self, 'regex_sub_pattern', ''),
+                    ', added words ({0}): {1}'.format('whole words only' if getattr(self, 'regex_sub_whole_word', True)
+                                                      else 'anywhere in the name', ', '.join(words)) if words else '',
+                    ', exclusion {0}'.format(self.regex_sub_exclusion_pattern)
+                    if getattr(self, 'regex_sub_exclusion', None) else ''))
+            else:
+                lines.append('regex subtitle filter: off')
+        return lines
 
     def dump_settings(self):
-        # for bug reports: every setting in the log, whatever the log level (the 'logSettings' toggle)
+        # for bug reports: every setting in the log, whatever the log level (the 'logSettings' toggle). Written once
+        # for each playback, when the preferences are matched; a changed setting is written by log_changed_settings
         if getattr(self, 'log_settings', False):
-            settingsdump.write()
+            settingsdump.write(self.choices_text())
+        else:
+            settingsdump.remember()
+
+    def log_changed_settings(self):
+        # the settings that changed since the last dump, and only those (the 'logSettings' toggle)
+        if getattr(self, 'log_settings', False):
+            settingsdump.write_changes(self.choices_text)
+        else:
+            settingsdump.remember()
 
     def readPrefs(self):
         addon = xbmcaddon.Addon()    
@@ -108,7 +149,15 @@ class settings():
         self.ignore_signs_on = addon.getSetting('signs') == 'true'
         self.log_settings = addon.getSetting('logSettings') == 'true'
         self.regex_sub_filter_enabled = addon.getSetting('regexSubFilter') == 'true'
-        self.regex_sub_pattern = addon.getSetting('regexSubPattern')
+        # the profile chooses which pattern is used: each has its own, and the user can add words to either
+        try:
+            self.regex_sub_profile = int(addon.getSetting('regexSubProfile') or 0)
+        except ValueError:
+            self.regex_sub_profile = 0
+        if self.regex_sub_profile not in range(len(REGEX_PROFILES)):
+            self.regex_sub_profile = 0
+        pattern_setting = REGEX_PATTERN_SETTINGS[self.regex_sub_profile]
+        self.regex_sub_pattern = addon.getSetting(pattern_setting)
         if _OLD_SS_PATTERN in self.regex_sub_pattern:
             # the old S&S part of the pattern allowed nothing between the two s, so it matched the "ss" of
             # any title (Russian, Swiss German, Classic ...): replace it in the stored setting too
@@ -116,17 +165,24 @@ class settings():
             log(LOG_INFO, 'Regex pattern: the Signs & Songs part matched any "ss" in a title, corrected to {0}'.format(
                 _SS_PATTERN))
             try:
-                addon.setSetting('regexSubPattern', self.regex_sub_pattern)
+                addon.setSetting(pattern_setting, self.regex_sub_pattern)
             except Exception as e:
                 log(LOG_ERROR, 'Could not store the corrected regex pattern: {0}'.format(e))
-        if self.regex_sub_filter_enabled and self.regex_sub_pattern:
-            try:
-                self.regex_sub_filter = re.compile(self.regex_sub_pattern)
-            except re.error as e:
-                log(LOG_ERROR, 'Invalid regex pattern: {0} - {1}'.format(self.regex_sub_pattern, str(e)))
-                self.regex_sub_filter = None
-        else:
-            self.regex_sub_filter = None
+        # the words the user adds to this profile: used in addition to the pattern, which is not changed by them
+        self.regex_sub_words = regexwords.parse_words(addon.getSetting(REGEX_WORDS_SETTINGS[self.regex_sub_profile]))
+        self.regex_sub_whole_word = addon.getSetting(REGEX_WHOLE_WORD_SETTINGS[self.regex_sub_profile]) != 'false'
+        self.regex_sub_filter = None
+        if self.regex_sub_filter_enabled:
+            base = extra = None
+            if self.regex_sub_pattern:
+                try:
+                    base = re.compile(self.regex_sub_pattern)
+                except re.error as e:
+                    log(LOG_ERROR, 'Invalid regex pattern: {0} - {1}'.format(self.regex_sub_pattern, str(e)))
+            if self.regex_sub_words:
+                extra = re.compile(regexwords.words_pattern(self.regex_sub_words, self.regex_sub_whole_word))
+            if base is not None or extra is not None:
+                self.regex_sub_filter = regexwords.RegexFilter(base, extra)
 
         # Exclusion pattern
         self.regex_sub_exclusion_enabled = addon.getSetting('regexSubExclusionEnabled') == 'true'

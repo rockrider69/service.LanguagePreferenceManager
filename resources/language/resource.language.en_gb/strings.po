@@ -616,3 +616,39 @@ msgstr ""
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr ""
+
+msgctxt "#30680"
+msgid "Regex profile for subtitle filtering"
+msgstr ""
+
+msgctxt "#30681"
+msgid "Anime & forced foreign subtitles"
+msgstr ""
+
+msgctxt "#30682"
+msgid "Anime & foreign subtitles, not forced"
+msgstr ""
+
+msgctxt "#30683"
+msgid "Regex pattern for subtitle filtering (anime & foreign, not forced)"
+msgstr ""
+
+msgctxt "#30684"
+msgid "Additional words (comma separated)"
+msgstr ""
+
+msgctxt "#30685"
+msgid "Match added words as whole words only"
+msgstr ""
+
+msgctxt "#30686"
+msgid "Words to add to this profile, separated by commas; spaces around the commas are ignored, for example: karaoke, commentary. They are used in addition to the built-in pattern of this profile. The built-in pattern is not changed - only the words you add here."
+msgstr ""
+
+msgctxt "#30687"
+msgid "On: an added word must be a whole word in the track name (\"non\" does not match \"Nonna\"). Off: an added word matches anywhere in the name. This only affects the words you add; the built-in pattern is not changed."
+msgstr ""
+
+msgctxt "#30688"
+msgid "Advanced: the built-in pattern of this profile (regular expression). Leave it as it is to use the built-in words; the added words above are used in addition to it. If you edit it, your pattern replaces the built-in one."
+msgstr ""

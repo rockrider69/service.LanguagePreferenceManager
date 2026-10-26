@@ -199,6 +199,13 @@ def is_webvtt(codec):
 # The subtitle formats a user can rank (settings SubFormat1..3: value n = SUBTITLE_FORMATS[n - 1], 0 = none)
 SUBTITLE_FORMATS = ('srt', 'ass', 'webvtt', 'pgs', 'vobsub')
 
+_FORMAT_LABELS = {'srt': 'SRT', 'ass': 'ASS', 'webvtt': 'WebVTT', 'pgs': 'PGS', 'vobsub': 'VobSub'}
+
+
+def format_label(name):
+    """How a format is written for people (in the settings and the log)."""
+    return _FORMAT_LABELS.get(name, name)
+
 _EXTENSION_FORMATS = {'.srt': 'srt', '.ass': 'ass', '.ssa': 'ass', '.vtt': 'webvtt', '.sup': 'pgs', '.idx': 'vobsub'}
 # format words in a track title: "English [SRT]", "Signs (ASS)", "PGS", "SubRip" ...
 _NAME_FORMATS = (('srt', re.compile(r'(?<![A-Za-z0-9])(?:srt|subrip)(?![A-Za-z0-9])', re.I)),
