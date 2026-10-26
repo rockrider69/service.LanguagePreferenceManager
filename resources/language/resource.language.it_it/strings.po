@@ -616,3 +616,19 @@ msgstr "Installazione"
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr "Scrivi tutte le impostazioni nel log di Kodi (per le segnalazioni di errori)"
+
+msgctxt "#30680"
+msgid "Regex profile for subtitle filtering"
+msgstr "Profilo regex per filtrare i sottotitoli"
+
+msgctxt "#30681"
+msgid "Anime & forced foreign subtitles"
+msgstr "Anime e sottotitoli stranieri forzati"
+
+msgctxt "#30682"
+msgid "Anime & foreign subtitles, not forced"
+msgstr "Anime e sottotitoli stranieri, non forzati"
+
+msgctxt "#30683"
+msgid "Regex pattern for subtitle filtering (anime & foreign, not forced)"
+msgstr "Motivo regex per filtrare i sottotitoli (anime e stranieri, non forzati)"

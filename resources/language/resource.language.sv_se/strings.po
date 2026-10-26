@@ -636,3 +636,19 @@ msgstr "Installation"
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr "Skriv alla inställningar till Kodis logg (för felrapporter)"
+
+msgctxt "#30680"
+msgid "Regex profile for subtitle filtering"
+msgstr "Regex-profil för filtrering av undertexter"
+
+msgctxt "#30681"
+msgid "Anime & forced foreign subtitles"
+msgstr "Anime & tvingade utländska undertexter"
+
+msgctxt "#30682"
+msgid "Anime & foreign subtitles, not forced"
+msgstr "Anime & utländska undertexter, inte tvingade"
+
+msgctxt "#30683"
+msgid "Regex pattern for subtitle filtering (anime & foreign, not forced)"
+msgstr "Regex-mönster för filtrering av undertexter (anime & utländska, inte tvingade)"

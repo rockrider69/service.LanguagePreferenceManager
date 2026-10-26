@@ -43,6 +43,7 @@ class LangPref_Monitor(xbmc.Monitor):
     def onSettingsChanged(self):
         settings.init()
         settings.readSettings()
+        settings.log_changed_settings()
 
     def onNotification(self, sender, method, data):
         """Kodi 22 (and newer) announces a subtitle switched on / off or another track as Player.OnPropertyChanged with
@@ -246,7 +247,7 @@ class LangPrefMan_Player(xbmc.Player):
         self.external_sub_files = (None, [])     # the subtitle files may have changed since the last playback
         self.sub_codecs = (None, None)
         self.external_sub_tags = (None, {})
-        settings.dump_settings()
+        self.settings_dumped = False             # every setting is written once for this playback, when the match runs
         if settings.service_enabled and settings.at_least_one_pref_on:
             log(LOG_DEBUG, 'New AV Playback initiated - Resetting LPM Initial Flag')
             self.LPM_initial_run_done = False
@@ -588,7 +589,12 @@ class LangPrefMan_Player(xbmc.Player):
             log(LOG_DEBUG, 'refresh_subtitle_baseline failed: {0}'.format(e))
 
     def evalPrefs(self, fast_subs=True):
-        
+        if not getattr(self, 'settings_dumped', False):
+            self.settings_dumped = True
+            dump = getattr(settings, 'dump_settings', None)
+            if dump:
+                dump()
+
         # Separate flag for regex filter to allow conditional subs fallback
         regex_sub_matched = False
         sub_preference_matched = False

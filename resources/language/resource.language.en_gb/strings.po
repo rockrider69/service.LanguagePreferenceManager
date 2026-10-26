@@ -616,3 +616,19 @@ msgstr ""
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr ""
+
+msgctxt "#30680"
+msgid "Regex profile for subtitle filtering"
+msgstr ""
+
+msgctxt "#30681"
+msgid "Anime & forced foreign subtitles"
+msgstr ""
+
+msgctxt "#30682"
+msgid "Anime & foreign subtitles, not forced"
+msgstr ""
+
+msgctxt "#30683"
+msgid "Regex pattern for subtitle filtering (anime & foreign, not forced)"
+msgstr ""

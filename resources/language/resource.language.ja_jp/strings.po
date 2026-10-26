@@ -616,3 +616,19 @@ msgstr "インストール"
 msgctxt "#30673"
 msgid "Write all settings to the Kodi log (for bug reports)"
 msgstr "すべての設定をKodiのログに書き込む（不具合報告用）"
+
+msgctxt "#30680"
+msgid "Regex profile for subtitle filtering"
+msgstr "字幕フィルター用の正規表現プロファイル"
+
+msgctxt "#30681"
+msgid "Anime & forced foreign subtitles"
+msgstr "アニメと強制外国語字幕"
+
+msgctxt "#30682"
+msgid "Anime & foreign subtitles, not forced"
+msgstr "アニメと外国語字幕(強制を除く)"
+
+msgctxt "#30683"
+msgid "Regex pattern for subtitle filtering (anime & foreign, not forced)"
+msgstr "字幕フィルター用の正規表現パターン(アニメと外国語、強制を除く)"
