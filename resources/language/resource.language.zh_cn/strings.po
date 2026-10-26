@@ -632,3 +632,23 @@ msgstr "动画和外语字幕(不含强制)"
 msgctxt "#30683"
 msgid "Regex pattern for subtitle filtering (anime & foreign, not forced)"
 msgstr "字幕过滤的正则表达式(动画和外语,不含强制)"
+
+msgctxt "#30684"
+msgid "Additional words (comma separated)"
+msgstr "附加词语(以逗号分隔)"
+
+msgctxt "#30685"
+msgid "Match added words as whole words only"
+msgstr "附加词语仅按完整单词匹配"
+
+msgctxt "#30686"
+msgid "Words to add to this profile, separated by commas; spaces around the commas are ignored, for example: karaoke, commentary. They are used in addition to the built-in pattern of this profile. The built-in pattern is not changed - only the words you add here."
+msgstr "要添加到此配置文件的词语,以逗号分隔;逗号前后的空格会被忽略,例如:karaoke, commentary。它们与此配置文件的内置模式一起使用。内置模式不会被更改,只有您在此添加的词语。"
+
+msgctxt "#30687"
+msgid "On: an added word must be a whole word in the track name (\"non\" does not match \"Nonna\"). Off: an added word matches anywhere in the name. This only affects the words you add; the built-in pattern is not changed."
+msgstr "开:附加词语必须是轨道名称中的完整单词(\"non\"不匹配\"Nonna\")。关:附加词语可匹配名称中的任意位置。这只影响您添加的词语;内置模式不会被更改。"
+
+msgctxt "#30688"
+msgid "Advanced: the built-in pattern of this profile (regular expression). Leave it as it is to use the built-in words; the added words above are used in addition to it. If you edit it, your pattern replaces the built-in one."
+msgstr "高级:此配置文件的内置模式(正则表达式)。保持原样即可使用内置词语;上面添加的词语会与之一起使用。如果您编辑它,您的模式将取代内置模式。"

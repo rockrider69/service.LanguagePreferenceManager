@@ -36,7 +36,7 @@
 		<disclaimer lang="fr_FR">Pour signaler des bugs, faire des demandes ou poser des questions générales, consultez le fil « Language Preference Manager » sur le forum Kodi.</disclaimer>
 		<platform>all</platform>
 		<news>1.1.1Beta2 : - Builds on 1.1.1Beta1.
-- New: two regex subtitle filter profiles - "Anime & forced foreign subtitles" (as before) and "Anime & foreign subtitles, not forced" (no "forced" in the pattern); each has its own pattern.
+- New: two regex subtitle filter profiles - "Anime & forced foreign subtitles" (as before) and "Anime & foreign subtitles, not forced" (no "forced" in the pattern); each has its own list of additional words (comma separated, whole words only or anywhere in the name) that is used in addition to the built-in pattern, which is not changed.
 - Fix: the settings dump shows what a spinner stands for and the order of the subtitle formats; all settings are written once per playback, a changed setting is written on its own.
 - Regional/script language variants (English UK/US/Australia/India/Canada, Spanish Spain/Latin America,
   French France/Canada/Belgium/Switzerland, Portuguese Portugal/Brazil, Chinese Simplified/Traditional,

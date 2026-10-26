@@ -652,3 +652,23 @@ msgstr "Anime & utländska undertexter, inte tvingade"
 msgctxt "#30683"
 msgid "Regex pattern for subtitle filtering (anime & foreign, not forced)"
 msgstr "Regex-mönster för filtrering av undertexter (anime & utländska, inte tvingade)"
+
+msgctxt "#30684"
+msgid "Additional words (comma separated)"
+msgstr "Extra ord (kommaseparerade)"
+
+msgctxt "#30685"
+msgid "Match added words as whole words only"
+msgstr "Matcha tillagda ord endast som hela ord"
+
+msgctxt "#30686"
+msgid "Words to add to this profile, separated by commas; spaces around the commas are ignored, for example: karaoke, commentary. They are used in addition to the built-in pattern of this profile. The built-in pattern is not changed - only the words you add here."
+msgstr "Ord att lägga till i den här profilen, separerade med kommatecken; mellanslag kring kommatecknen ignoreras, till exempel: karaoke, commentary. De används utöver profilens inbyggda mönster. Det inbyggda mönstret ändras inte - bara orden du lägger till här."
+
+msgctxt "#30687"
+msgid "On: an added word must be a whole word in the track name (\"non\" does not match \"Nonna\"). Off: an added word matches anywhere in the name. This only affects the words you add; the built-in pattern is not changed."
+msgstr "På: ett tillagt ord måste vara ett helt ord i spårets namn (\"non\" matchar inte \"Nonna\"). Av: ett tillagt ord matchar var som helst i namnet. Detta påverkar bara de tillagda orden; det inbyggda mönstret ändras inte."
+
+msgctxt "#30688"
+msgid "Advanced: the built-in pattern of this profile (regular expression). Leave it as it is to use the built-in words; the added words above are used in addition to it. If you edit it, your pattern replaces the built-in one."
+msgstr "Avancerat: profilens inbyggda mönster (reguljärt uttryck). Lämna det som det är för att använda de inbyggda orden; orden du lagt till ovan används utöver det. Om du ändrar det ersätter ditt mönster det inbyggda."

@@ -5,8 +5,10 @@ This beta builds on 1.1.1Beta1; the changes are listed below.
 - New: the regex subtitle filter has two profiles (setting "Regex profile for subtitle filtering"): "Anime & forced foreign
   subtitles" is the filter as it was (its pattern has "forced" in it, so a track named forced is taken first), and
   "Anime & foreign subtitles, not forced" has the same words without "forced": a track like "French (forced)" no longer
-  makes the regex win over the conditional rules. Each profile has its own pattern in the settings, so words can be added
-  to either one.
+  makes the regex win over the conditional rules. Each profile has its own list of additional words (comma separated,
+  spaces around the commas are ignored; "whole words only" or "anywhere in the name", set for each profile), which are
+  used in addition to the built-in pattern: the built-in pattern is not changed, only the added words are. The full
+  pattern of each profile stays in the settings as an advanced field.
 - Fix: the settings dump (setting "Log all settings") shows what a spinner stands for ("SubFormat1 = 3 (PGS)") and what
   the settings mean together (the order of the subtitle formats, the regex profile and its pattern). All settings are
   written once for each playback, when the preferences are matched; when a setting is changed only that setting is

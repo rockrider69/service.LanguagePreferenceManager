@@ -76,7 +76,36 @@
                         <dependency type="visible" setting="regexSubFilter" operator="is">true</dependency>
                     </dependencies>
                 </setting>
-                <setting label="30147" type="string" id="regexSubPattern">
+                <setting id="regexSubWords" label="30684" help="30686" type="string">
+                    <default></default>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>30684</heading>
+                    </control>
+                    <dependencies>
+                        <dependency type="visible">
+                            <and>
+                                <condition setting="regexSubFilter" operator="is">true</condition>
+                                <condition setting="regexSubProfile" operator="is">0</condition>
+                            </and>
+                        </dependency>
+                    </dependencies>
+                </setting>
+                <setting id="regexSubWholeWord" label="30685" help="30687" type="boolean">
+                    <default>true</default>
+                    <control type="toggle"/>
+                    <dependencies>
+                        <dependency type="visible">
+                            <and>
+                                <condition setting="regexSubFilter" operator="is">true</condition>
+                                <condition setting="regexSubProfile" operator="is">0</condition>
+                            </and>
+                        </dependency>
+                    </dependencies>
+                </setting>
+                <setting label="30147" help="30688" type="string" id="regexSubPattern">
                     <default>(?i:(?&lt;![^\W\d_])s[\s._+\-\/\\]*(?:&amp;|\+|and)?[\s._+\-\/\\]*s(?![^\W\d_])|forced|foreign|songs?|signs?|only|non|parts?|alien|navi|dothraki|elvish|titles?)</default>
                     <constraints>
                         <allowempty>false</allowempty>
@@ -93,7 +122,36 @@
                         </dependency>
                     </dependencies>
                 </setting>
-                <setting label="30683" type="string" id="regexSubPatternNoForced">
+                <setting id="regexSubWordsNoForced" label="30684" help="30686" type="string">
+                    <default></default>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>30684</heading>
+                    </control>
+                    <dependencies>
+                        <dependency type="visible">
+                            <and>
+                                <condition setting="regexSubFilter" operator="is">true</condition>
+                                <condition setting="regexSubProfile" operator="is">1</condition>
+                            </and>
+                        </dependency>
+                    </dependencies>
+                </setting>
+                <setting id="regexSubWholeWordNoForced" label="30685" help="30687" type="boolean">
+                    <default>true</default>
+                    <control type="toggle"/>
+                    <dependencies>
+                        <dependency type="visible">
+                            <and>
+                                <condition setting="regexSubFilter" operator="is">true</condition>
+                                <condition setting="regexSubProfile" operator="is">1</condition>
+                            </and>
+                        </dependency>
+                    </dependencies>
+                </setting>
+                <setting label="30683" help="30688" type="string" id="regexSubPatternNoForced">
                     <default>(?i:(?&lt;![^\W\d_])s[\s._+\-\/\\]*(?:&amp;|\+|and)?[\s._+\-\/\\]*s(?![^\W\d_])|foreign|songs?|signs?|only|non|parts?|alien|navi|dothraki|elvish|titles?)</default>
                     <constraints>
                         <allowempty>false</allowempty>

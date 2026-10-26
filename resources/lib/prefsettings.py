@@ -1,6 +1,7 @@
 import xbmc, xbmcaddon
 import re
 import langutils
+import regexwords
 import settingsdump
 import subformat
 from prefparser import PrefParser
@@ -15,6 +16,8 @@ _SS_PATTERN = r'(?<![^\W\d_])s[\s._+\-\/\\]*(?:&|\+|and)?[\s._+\-\/\\]*s(?![^\W\
 # the profiles of the regex subtitle filter and the setting that holds the pattern of each
 REGEX_PROFILES = ('anime & forced foreign subtitles', 'anime & foreign subtitles, not forced')
 REGEX_PATTERN_SETTINGS = ('regexSubPattern', 'regexSubPatternNoForced')
+REGEX_WORDS_SETTINGS = ('regexSubWords', 'regexSubWordsNoForced')               # the words the user adds to a profile
+REGEX_WHOLE_WORD_SETTINGS = ('regexSubWholeWord', 'regexSubWholeWordNoForced')   # ... as whole words only, or anywhere
 
 
 class settings():
@@ -97,8 +100,11 @@ class settings():
                 ' > '.join(subformat.format_label(f) for f in order) if order else 'none (the first matching track)'))
         if changed is None or any(i.startswith('regexSub') for i in changed):
             if getattr(self, 'regex_sub_filter_enabled', False):
-                lines.append('regex subtitle filter: on, profile "{0}", pattern {1}{2}'.format(
+                words = getattr(self, 'regex_sub_words', [])
+                lines.append('regex subtitle filter: on, profile "{0}", pattern {1}{2}{3}'.format(
                     REGEX_PROFILES[getattr(self, 'regex_sub_profile', 0)], getattr(self, 'regex_sub_pattern', ''),
+                    ', added words ({0}): {1}'.format('whole words only' if getattr(self, 'regex_sub_whole_word', True)
+                                                      else 'anywhere in the name', ', '.join(words)) if words else '',
                     ', exclusion {0}'.format(self.regex_sub_exclusion_pattern)
                     if getattr(self, 'regex_sub_exclusion', None) else ''))
             else:
@@ -162,14 +168,21 @@ class settings():
                 addon.setSetting(pattern_setting, self.regex_sub_pattern)
             except Exception as e:
                 log(LOG_ERROR, 'Could not store the corrected regex pattern: {0}'.format(e))
-        if self.regex_sub_filter_enabled and self.regex_sub_pattern:
-            try:
-                self.regex_sub_filter = re.compile(self.regex_sub_pattern)
-            except re.error as e:
-                log(LOG_ERROR, 'Invalid regex pattern: {0} - {1}'.format(self.regex_sub_pattern, str(e)))
-                self.regex_sub_filter = None
-        else:
-            self.regex_sub_filter = None
+        # the words the user adds to this profile: used in addition to the pattern, which is not changed by them
+        self.regex_sub_words = regexwords.parse_words(addon.getSetting(REGEX_WORDS_SETTINGS[self.regex_sub_profile]))
+        self.regex_sub_whole_word = addon.getSetting(REGEX_WHOLE_WORD_SETTINGS[self.regex_sub_profile]) != 'false'
+        self.regex_sub_filter = None
+        if self.regex_sub_filter_enabled:
+            base = extra = None
+            if self.regex_sub_pattern:
+                try:
+                    base = re.compile(self.regex_sub_pattern)
+                except re.error as e:
+                    log(LOG_ERROR, 'Invalid regex pattern: {0} - {1}'.format(self.regex_sub_pattern, str(e)))
+            if self.regex_sub_words:
+                extra = re.compile(regexwords.words_pattern(self.regex_sub_words, self.regex_sub_whole_word))
+            if base is not None or extra is not None:
+                self.regex_sub_filter = regexwords.RegexFilter(base, extra)
 
         # Exclusion pattern
         self.regex_sub_exclusion_enabled = addon.getSetting('regexSubExclusionEnabled') == 'true'
