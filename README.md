@@ -6,10 +6,11 @@ A manager for audio and subtitle preferences
 
 This addon provides an easy way to set your preferred audio streams and subtitle languages in Kodi.
 
-Regional and script variants can be selected for English (US/UK), French
-(Canada/France), Spanish (Latin America/Spain), Portuguese (Brazil/Portugal),
-and Chinese (Simplified/Traditional). Selection prefers an exact BCP-47 tag
-reported by Kodi, then recognizes common region/script labels in track names.
+Regional and script variants can be selected for all languages according to BCP47.
+Examples are English (US/UK), French (Canada/France), Spanish (Latin America/Spain),
+Portuguese (Brazil/Portugal), Chinese (Simplified/Traditional), and so on.
+Selection prefers an exact BCP-47 tag when reported by Kodi, then recognizes
+common region/script labels in track names.
 An exact variant ranks above an unlabelled track of the same language; an
 explicitly different variant does not match. Generic language preferences
 continue to match all their variants. Equally ranked tracks keep the current
@@ -46,7 +47,9 @@ Special Thanks
 
 - @SgtJalau for the complete feature to store specific/overriding preferences per Movie / TVshow
 
-- @Hugs11 for the complete support of regional and script languages variant (BCP47)
+- @Hugs11 for the initial support of regional and script languages variant (BCP47)
+
+- @claude&hyde for the full support of BCP47, new Regex sub filtering, Sub format priority list, and much more!
 
 ## Language codes (1.1.1Beta2)
 Everywhere a language code can be typed (custom preferences, Original audio list) you can use 2-letter (`en`, `ja`, `de`), 3-letter (`eng`, `jpn`, `ger` or `deu`) codes, or BCP47-style tags (`pt-BR`); they are all treated as the same language. Kodi 22 reports 2-letter codes for streams, older Kodi versions 3-letter ones - both are matched.
